@@ -16,7 +16,6 @@
       font-family: 'Georgia', serif;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
       background-color: #fff;
       color: #333;
       line-height: 1.6;
@@ -25,9 +24,21 @@
 
     .container {
       max-width: 700px;
-      width: 100%;
-      text-align: left;
-      margin-top: 50px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    img {
+      width: 150px; /* Adjust width as desired */
+      height: auto;
+      border-radius: 8px;
+      margin-right: 20px; /* Space between image and text */
+      align-self: flex-start;
+    }
+
+    .content {
+      max-width: 500px;
     }
 
     h1 {
@@ -57,13 +68,6 @@
       display: inline-block;
       margin-right: 10px;
       font-size: 1rem;
-    }
-
-    img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-bottom: 20px;
     }
 
     footer {
