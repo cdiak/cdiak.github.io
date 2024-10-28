@@ -3,9 +3,9 @@
 
 body {
   font-family: Garamond;
-  font-size: 18px;
+  font-size: 12px;
   line-height: 1.6em;
-  letter-spacing: .05em;
+  letter-spacing: .04em;
   -webkit-animation: fadein .5s; /* Safari, Chrome and Opera > 12.1 */
    -moz-animation: fadein .5s; /* Firefox < 16 */
     -ms-animation: fadein .5s; /* Internet Explorer */
@@ -48,7 +48,7 @@ body {
   margin-right: 3.5vw;
   text-align: right;
   width: 10em;
-  font-family: Avenir;
+  font-family: Garamond;
 }
 
 #menu .title a { 
