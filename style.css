@@ -1,6 +1,6 @@
 /* General styles */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Garamond', serif;
     line-height: 1.6;
     margin: 0;
     padding: 0;
@@ -8,6 +8,7 @@ body {
     justify-content: center;
     background-color: #f8f9fa;
 }
+
 
 #menu {
     position: fixed;
@@ -46,13 +47,15 @@ body {
 }
 
 #photo {
-    text-align: center;
+    float: left;
+    margin-right: 20px;
     margin-bottom: 20px;
+    width: 150px; /* Adjust this width as needed */
 }
 
 #photo img {
     border-radius: 8px;
-    max-width: 100%;
+    width: 100%; /* Makes the image fit within the 150px container */
     height: auto;
 }
 
