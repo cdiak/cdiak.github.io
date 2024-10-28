@@ -1,109 +1,22 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Google tag (gtag.js) -->
+  <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-RG58M47TX9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RG58M47TX9');
+  </script>
+  
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="const/style.css">
   <title>Christopher Diak</title>
-  <style>
-    /* Basic Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Georgia', serif;
-      background-color: #fff;
-      color: #333;
-      line-height: 1.6;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    #menu {
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    #menu .title a {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #333;
-      text-decoration: none;
-    }
-
-    #menu ul {
-      list-style: none;
-      display: flex;
-      gap: 15px;
-    }
-
-    #menu ul li a {
-      text-decoration: none;
-      color: #1a0dab;
-    }
-
-    #menu ul li a:hover {
-      text-decoration: underline;
-    }
-
-    #main {
-      display: flex;
-      max-width: 800px;
-      gap: 20px;
-    }
-
-    #photo img {
-      width: 150px;
-      height: auto;
-      border-radius: 8px;
-      margin-right: 20px;
-    }
-
-    #intropar {
-      max-width: 600px;
-      line-height: 1.4;
-    }
-
-    #intropar h2 {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
-    #intropar p {
-      font-size: 1rem;
-      margin-bottom: 10px;
-      text-align: justify;
-    }
-
-    #intropar a {
-      color: #1a0dab;
-      text-decoration: none;
-    }
-
-    #intropar a:hover {
-      text-decoration: underline;
-    }
-
-    .contact-info {
-      margin-top: 10px;
-      font-size: 1rem;
-    }
-
-    footer {
-      margin-top: 20px;
-      font-size: 0.9rem;
-      color: #666;
-    }
-  </style>
 </head>
-<body>
-  <!-- Navigation Menu -->
+
+<body> 
   <div id="menu">
     <span class="title"><a href="/">Christopher Diak</a></span>
     <ul>
@@ -111,11 +24,10 @@
       <li><a href="/portfolio">Portfolio</a></li>
     </ul>
   </div>
-
-  <!-- Main Content -->
-  <div id="main">
-    <div id="photo">
-      <img src="chris-diak.jpg" alt="Chris Diak">
+  
+  <div style="padding: 2em 0 0" id="main">
+    <div id="photo"> 
+      <img src="chris-diak.jpg" alt="Christopher Diak" height="300"> 
     </div>
     <div id="intropar">
       <h2>Hi</h2>
@@ -124,15 +36,14 @@
       <p>Previously, I was at Harvard, where I was a research associate at Harvard Business School and a teaching fellow at Harvard College working on the role of meaning and purpose in the workplace.</p>
       <p>While at Harvard, I received my M.Div. and was a member of the Joshua Greene Lab in the Department of Psychology. I also contributed to research projects at the Edmond and Lily Safra Center for Ethics, Berkman Klein Center for Internet and Society, and the Radcliffe Institute for Advanced Study.</p>
       <p>If you share any of these interests, I'd love to hear from you:</p>
-
+      
       <div class="contact-info">
         ✉️: christopherjdiak at gmail<br>
         <a href="https://x.com/ChristopherDiak" target="_blank" style="color:#1DA1F2">X</a>,
         <a href="https://linkedin.com/in/cdiak" target="_blank" style="color:#0072b1">LinkedIn</a>
       </div>
-
-      <p>You can also subscribe <a href="#" target="_blank">here</a> if you'd like to receive a biannual life update from me.</p>
     </div>
   </div>
+
 </body>
 </html>
