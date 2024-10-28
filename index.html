@@ -11,65 +11,85 @@
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: 'Georgia', serif;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
       background-color: #fff;
       color: #333;
       line-height: 1.6;
-      padding: 40px;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
     }
 
-    .container {
-      max-width: 700px;
+    #menu {
+      width: 100%;
+      max-width: 800px;
       display: flex;
-      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    #menu .title a {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+      text-decoration: none;
+    }
+
+    #menu ul {
+      list-style: none;
+      display: flex;
+      gap: 15px;
+    }
+
+    #menu ul li a {
+      text-decoration: none;
+      color: #1a0dab;
+    }
+
+    #menu ul li a:hover {
+      text-decoration: underline;
+    }
+
+    #main {
+      display: flex;
+      max-width: 800px;
+      padding-top: 20px;
       gap: 20px;
     }
 
-    img {
-      width: 130px; /* Slightly smaller, adjust as needed */
+    #photo img {
+      width: 150px;
       height: auto;
       border-radius: 8px;
-      margin-right: 20px; /* Space between image and text */
-      align-self: flex-start;
     }
 
-    .content {
+    #intropar {
       max-width: 500px;
-      line-height: 1.4;
     }
 
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 15px;
+    #intropar h2 {
+      font-size: 2rem;
+      margin-bottom: 10px;
     }
 
-    p {
+    #intropar p {
       font-size: 1rem;
       margin-bottom: 10px;
     }
 
-    a {
+    #intropar a {
       color: #1a0dab;
       text-decoration: none;
     }
 
-    a:hover {
+    #intropar a:hover {
       text-decoration: underline;
     }
 
-    .links {
+    .contact-info {
       margin-top: 10px;
-    }
-
-    .links a {
-      display: inline-block;
-      margin-right: 15px;
-      font-size: 1rem;
     }
 
     footer {
@@ -80,21 +100,37 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <img src="chris-diak.jpg" alt="Chris Diak">
-    <div class="content">
-      <h1>Hi</h1>
-      <p>I'm an Associate with The Chernik Group and researcher working on compositionality and cognitive architecture in large language models.</p>
-
-      <p>Previously at Harvard and currently working at Dartmouth College, I trained as a business ethicist at Harvard Business School, a scholar of religion at Harvard Divinity School, and was one of founding three model teachers at OpenAI.</p>   
-    <div class="links">
-      <a href="mailto:christopherjdiak@gmail.com">✉️ Email</a>
-      <a href="https://x.com/ChristopherDiak" target="_blank">X</a>
-      <a href="https://linkedin.com/in/cdiak" target="_blank">LinkedIn</a>
-    </div>
-    
-    <footer>
-    </footer>
+  <!-- Navigation Menu -->
+  <div id="menu">
+    <span class="title"><a href="/">Christopher Diak</a></span>
+    <ul>
+      <li><a href="/projects">Projects</a></li>
+      <li><a href="/portfolio">Portfolio</a></li>
+    </ul>
   </div>
+
+  <!-- Main Content -->
+  <div id="main">
+    <div id="photo">
+      <img src="chris-diak.jpg" alt="Chris Diak">
+    </div>
+    <div id="intropar">
+      <h2>Hi</h2>
+      <p>I'm an associate at The Chernik Group and a member of the Lab for Mind, Brain, and Computation at Dartmouth College.</p>
+      <p>I am interested in the history, philosophy, and science of consciousness and the cognitive science of conceptual structures.</p>
+      <p>Previously, I was at Harvard, where I was a research associate at Harvard Business School and a teaching fellow at Harvard College working on the role of meaning and purpose in the workplace."</p>
+      <p>While at Harvard, I received my M.Div. and was a member of the Joshua Greene Lab in the Department of Psychology. I also contributed to research projects at the Edmond and Lily Safra Center for Ethics, Berkman Klein Center for Internet and Society, and the Radcliffe Institute for Advanced Study.</p>
+      <p>If you share any of these interests, I'd love to hear from you:</p>
+
+      <div class="contact-info">
+        ✉️: christopherjdiak at gmail<br>
+        <a href="https://x.com/ChristopherDiak" target="_blank" style="color:#1DA1F2">X</a>,
+        <a href="https://linkedin.com/in/cdiak" target="_blank" style="color:#0072b1">LinkedIn</a>
+      </div>
+
+      <p>You can also subscribe <a href="#" target="_blank">here</a> if you'd like to receive a biannual life update from me.</p>
+    </div>
+  </div>
+
 </body>
 </html>
