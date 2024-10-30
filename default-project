@@ -1,0 +1,15 @@
+<div class="project">
+  <h3>Project Title</h3>
+  
+  <!-- Project Description -->
+  <p class="project-description">Brief description of the project. Explain what it’s about and any significant details you'd like to include.</p>
+
+  <!-- Links to PDF, Movie, etc. -->
+  <div class="project-links">
+    <p>
+      <a href="path/to/project.pdf" target="_blank">Read the PDF</a> |
+      <a href="https://link-to-movie-or-video.com" target="_blank">Watch the Movie</a> |
+      <a href="path/to/additional-resource.pdf" target="_blank">Related Resource</a>
+    </p>
+  </div>
+</div>
