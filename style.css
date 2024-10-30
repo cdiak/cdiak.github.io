@@ -156,3 +156,34 @@ h3, h4 {
     margin-top: 5vh;
   }
 }
+
+
+.project {
+  margin-bottom: 2em;
+  padding-left: 1em;
+  border-left: 4px solid #0864c7;
+}
+
+.project h3 {
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+  font-family: Garamond;
+  letter-spacing: 0.02em;
+}
+
+.project-description {
+  font-size: 1em;
+  color: #333;
+  line-height: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.project-links a {
+  font-size: 0.9em;
+  color: #0864c7;
+  text-decoration: none;
+}
+
+.project-links a:hover {
+  text-decoration: underline;
+}
