@@ -1,57 +1,31 @@
-window.addEventListener("DOMContentLoaded", function() {
-    let titleText = document.getElementById("title-text");
-    let titleLogo = document.getElementById("title-logo");
-    
-    if (!titleText || !titleLogo) {
-      console.error("Error: 'title-text' or 'title-logo' elements not found.");
-      return;
-    }
-    
-    // Get current page
-    const path = window.location.pathname;
-  
-    // 1) HOME PAGE (index.html) -> No fade. Keep text only.
-    if (path.endsWith("index.html") || path === "/" || path === "") {
-      titleText.style.opacity = "1";
-      titleLogo.style.opacity = "0";
+window.addEventListener("DOMContentLoaded", function () {
+  let titleText = document.getElementById("title-text");
+  let titleLogo = document.getElementById("title-logo");
 
-      setTimeout(() => {
-        titleText.style.opacity = "0";
-        titleLogo.style.opacity = "1";
-      }, 2750); // 2.75 second delay
-    }
-  
-    // 2) PROJECTS PAGE -> Show text for 1 second, then fade to logo.
-    else if (path.endsWith("projects.html")) {
-      // Start with text visible
-      titleText.style.opacity = "1";
-      titleLogo.style.opacity = "0";
-  
-      setTimeout(() => {
-        titleText.style.opacity = "0";
-        titleLogo.style.opacity = "1";
-      }, 1750); // 1.750 second delay
-    }
-  
-    // 3) PORTFOLIO PAGE -> Scroll-triggered fade.
-    else if (path.endsWith("portfolio.html")) {
-      // Check initial scroll position
-      if (window.scrollY > 50) {
-        titleText.style.opacity = "0";
-        titleLogo.style.opacity = "1";
-      } else {
-        titleText.style.opacity = "1";
-        titleLogo.style.opacity = "0";
-      }
-      // On scroll
-      window.addEventListener("scroll", function() {
-        if (window.scrollY > 50) {
-          titleText.style.opacity = "0";
-          titleLogo.style.opacity = "1";
-        } else {
-          titleText.style.opacity = "1";
-          titleLogo.style.opacity = "0";
-        }
-      });
-    }
+  if (!titleText || !titleLogo) {
+    console.error("Error: 'title-text' or 'title-logo' elements not found.");
+    return;
+  }
+
+  // Initially show text, hide logo
+  titleText.style.opacity = "1";
+  titleLogo.style.opacity = "0";
+
+  // After 2 seconds, fade to signature
+  setTimeout(() => {
+    titleText.style.opacity = "0";
+    titleLogo.style.opacity = "1";
+  }, 2000);
+
+  // Hover effect: Show text when hovering over the logo
+  titleLogo.addEventListener("mouseenter", () => {
+    titleText.style.opacity = "1";
+    titleLogo.style.opacity = "0";
   });
+
+  // When mouse leaves, show the signature again
+  titleLogo.addEventListener("mouseleave", () => {
+    titleText.style.opacity = "0";
+    titleLogo.style.opacity = "1";
+  });
+});
