@@ -42,6 +42,7 @@ body {
     to   { opacity: 1; }
 }
 
+/* Menu container remains as you have it */
 #menu {
   position: fixed;
   top: 3vh;
@@ -51,30 +52,45 @@ body {
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
-  transition: all 0.3s ease-in-out;
 }
 
+/* Title container for the overlapping elements */
 #title-container {
   position: relative;
-  display: flex;
-  align-items: center;
-  height: 40px; /* Adjust height as needed */
+  display: inline-block;
 }
 
+/* The anchor wraps both text and logo */
+#title-link {
+  display: block;
+  position: relative;
+}
+
+/* Both text and logo are absolutely positioned to overlap */
+#title-text,
+#title-logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Text styling */
 #title-text {
   font-size: 1.3em;
-  letter-spacing: .07em;
+  letter-spacing: 0.07em;
   color: black !important;
   text-decoration: none !important;
   font-weight: bold;
   transition: opacity 0.3s ease-in-out;
+  opacity: 1;  /* default visible */
 }
 
+/* Logo styling */
 #title-logo {
-  width: 100px; /* Adjust size as needed */
+  width: 70px; /* Adjust size as needed */
   height: auto;
-  opacity: 0;
   transition: opacity 0.3s ease-in-out;
+  opacity: 0; /* default hidden */
 }
 
 #menu ul {
