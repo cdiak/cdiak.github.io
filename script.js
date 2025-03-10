@@ -18,7 +18,7 @@ window.addEventListener("DOMContentLoaded", function() {
       setTimeout(() => {
         titleText.style.opacity = "0";
         titleLogo.style.opacity = "1";
-      }, 1750); // 1.750 second delay
+      }, 5000); // 5 second delay
     }
   
     // 2) PROJECTS PAGE -> Show text for 1 second, then fade to logo.
