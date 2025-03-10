@@ -42,56 +42,87 @@ body {
     to   { opacity: 1; }
 }
 
-/* Menu container remains as you have it */
-#menu {
-  position: fixed;
-  top: 3vh;
-  left: 3vw;
-  width: 94vw;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 1000;
-}
+/* Keep your existing CSS for fonts, body, etc. 
+   Just ensure these rules for the menu are present. */
 
-/* Title container for the overlapping elements */
-#title-container {
-  position: relative;
-  display: inline-block;
-}
-
-/* The anchor wraps both text and logo */
-#title-link {
-  display: block;
-  position: relative;
-}
-
-/* Both text and logo are absolutely positioned to overlap */
-#title-text,
-#title-logo {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-/* Text styling */
-#title-text {
-  font-size: 1.3em;
-  letter-spacing: 0.07em;
-  color: black !important;
-  text-decoration: none !important;
-  font-weight: bold;
-  transition: opacity 0.3s ease-in-out;
-  opacity: 1;  /* default visible */
-}
-
-/* Logo styling */
-#title-logo {
-  width: 70px; /* Adjust size as needed */
-  height: auto;
-  transition: opacity 0.3s ease-in-out;
-  opacity: 0; /* default hidden */
-}
+   #menu {
+    position: fixed;
+    top: 3vh;
+    left: 3vw;
+    width: 94vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000; /* ensures menu is on top */
+  }
+  
+  /* Container that holds both text and logo overlapped */
+  #title-container {
+    position: relative; 
+    display: inline-block;
+  }
+  
+  /* The link that wraps both the text and the image */
+  #title-link {
+    position: relative;
+    display: block;
+    text-decoration: none !important;
+    color: inherit; /* so it inherits black from #title-text */
+  }
+  
+  /* The text sits at top-left of container */
+  #title-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 1.3em;
+    letter-spacing: 0.07em;
+    color: black !important;
+    text-decoration: none !important;
+    font-weight: bold;
+    transition: opacity 0.3s ease-in-out;
+    opacity: 1; /* default: visible */
+  }
+  
+  /* The signature sits in the same position, but hidden initially */
+  #title-logo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 120px; /* adjust as needed */
+    height: auto;
+    opacity: 0;   /* default: hidden */
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  /* Menu list items, etc. */
+  #menu ul {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #menu li a {
+    text-decoration: none;
+    color: #0864c7;
+  }
+  
+  #menu li a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Example: Adjust for smaller screens */
+  @media (max-width: 800px) {
+    #menu {
+      top: 2vh;
+      left: 2vw;
+    }
+    #title-logo {
+      width: 90px; /* slightly smaller on mobile, if desired */
+    }
+  }
 
 #menu ul {
   display: flex;
