@@ -14,6 +14,11 @@ window.addEventListener("DOMContentLoaded", function() {
     if (path.endsWith("index.html") || path === "/" || path === "") {
       titleText.style.opacity = "1";
       titleLogo.style.opacity = "0";
+
+      setTimeout(() => {
+        titleText.style.opacity = "0";
+        titleLogo.style.opacity = "1";
+      }, 1750); // 1.750 second delay
     }
   
     // 2) PROJECTS PAGE -> Show text for 1 second, then fade to logo.
@@ -25,7 +30,7 @@ window.addEventListener("DOMContentLoaded", function() {
       setTimeout(() => {
         titleText.style.opacity = "0";
         titleLogo.style.opacity = "1";
-      }, 1000); // 1 second delay
+      }, 1750); // 1.750 second delay
     }
   
     // 3) PORTFOLIO PAGE -> Scroll-triggered fade.
