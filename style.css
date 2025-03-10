@@ -71,11 +71,10 @@ body {
 }
 
 #title-logo {
-  width: 50px; /* Adjust size as needed */
+  width: 100px; /* Adjust size as needed */
   height: auto;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
-  margin-left: 10px; /* Adds space between text and logo */
 }
 
 #menu ul {
