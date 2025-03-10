@@ -25,7 +25,7 @@ window.addEventListener("DOMContentLoaded", function() {
       setTimeout(() => {
         titleText.style.opacity = "0";
         titleLogo.style.opacity = "1";
-      }, 1000); // 1 second delay
+      }, 3000); // 3 second delay
     }
   
     // 3) PORTFOLIO PAGE -> Scroll-triggered fade.
