@@ -131,7 +131,6 @@ body {
 #main {
   margin-top: 20vh; /* pushes main content below fixed menu */
   margin-left: 20vw;
-  float: left;
   width: 65vw;
 }
 
