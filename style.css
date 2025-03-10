@@ -62,21 +62,22 @@ body {
   z-index: 1000; /* ensures menu is on top */
 }
 
-/* Container holding text & logo overlapped */
+/* Container holding both text and logo */
 #title-container {
-  position: relative; 
+  position: relative;
   display: inline-block;
+  white-space: nowrap;
 }
 
-/* The link that wraps both text and image */
+/* The link that wraps both the text and the image */
 #title-link {
   position: relative;
   display: block;
   text-decoration: none !important;
-  color: inherit; /* inherits black from #title-text */
+  color: inherit; /* Ensures black text */
 }
 
-/* The text sits at top-left of container (default visible) */
+/* Text (Chris Diak) - Initially visible */
 #title-text {
   position: absolute;
   top: 0;
@@ -87,18 +88,17 @@ body {
   text-decoration: none !important;
   font-weight: bold;
   transition: opacity 0.3s ease-in-out;
-  opacity: 1; 
-  white-space: nowrap; /* prevents stacking letters */
+  opacity: 1; /* Default: visible */
 }
 
-/* The signature sits in the same position, but hidden initially */
+/* Signature Logo (Initially Hidden) */
 #title-logo {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100px; /* adjust as needed */
+  width: 120px; /* Adjust size as needed */
   height: auto;
-  opacity: 0;   
+  opacity: 0;   /* Default: hidden */
   transition: opacity 0.3s ease-in-out;
 }
 
