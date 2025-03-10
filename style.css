@@ -64,8 +64,8 @@ body {
 #title-text {
   font-size: 1.3em;
   letter-spacing: .07em;
-  color: black;
-  text-decoration: none;
+  color: black !important;
+  text-decoration: none !important;
   font-weight: bold;
   transition: opacity 0.3s ease-in-out;
 }
