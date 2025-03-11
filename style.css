@@ -1,12 +1,7 @@
-/* --------------------------
-   FONT-FACE & BODY FADE-IN
---------------------------- */
-
 @font-face { 
   font-family: Garamond; 
   src: url('GaramondPP.ttf'); 
 }
-
 @font-face { 
   font-family: Avenir; 
   src: url('av.ttf'); 
@@ -16,17 +11,31 @@ body {
   font-family: Garamond;
   font-size: 16px;
   line-height: 1.6em;
-  letter-spacing: .04em;
-  /* Fade-in animation */
-  -webkit-animation: fadein .5s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein .5s;    /* Firefox < 16 */
-  -ms-animation: fadein .5s;     /* Internet Explorer */
-  -o-animation: fadein .5s;      /* Opera < 12.1 */
-  animation: fadein .5s;
+  letter-spacing: 0.04em;
+  -webkit-animation: fadein 0.5s;
+  -moz-animation: fadein 0.5s;
+  -ms-animation: fadein 0.5s;
+  -o-animation: fadein 0.5s;
+  animation: fadein 0.5s;
 }
 
-/* Keyframes for fadein */
 @keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@-moz-keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@-webkit-keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@-ms-keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@-o-keyframes fadein {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
@@ -34,7 +43,6 @@ body {
 /* --------------------------
    MENU & OVERLAPPING TEXT/LOGO
 --------------------------- */
-
 #menu {
   position: fixed;
   top: 3vh;
@@ -43,25 +51,23 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000; /* ensures menu is on top */
+  z-index: 1000;
 }
 
-/* Container holding both text and logo */
 #title-container {
   position: relative;
   display: inline-block;
   white-space: nowrap;
+  margin-right: 2em;
 }
 
-/* The link that wraps both the text and the image */
 #title-link {
   position: relative;
   display: block;
   text-decoration: none !important;
-  color: inherit; /* Ensures black text */
+  color: inherit;
 }
 
-/* Text (Chris Diak) - Initially visible */
 #title-text {
   position: absolute;
   top: 0;
@@ -72,21 +78,22 @@ body {
   text-decoration: none !important;
   font-weight: bold;
   transition: opacity 0.3s ease-in-out;
-  opacity: 1; /* Default: visible */
+  opacity: 1;
+  white-space: nowrap;
 }
 
-/* Signature Logo (Initially Hidden) */
 #title-logo {
   position: absolute;
   top: 0;
   left: 0;
-  width: 120px; /* Adjust size as needed */
+  width: 10vw;
+  max-width: 120px;
+  min-width: 60px;
   height: auto;
-  opacity: 0;   /* Default: hidden */
+  opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
 
-/* Nav list items (Projects, Portfolio) */
 #menu ul {
   display: flex;
   gap: 20px;
@@ -109,27 +116,17 @@ body {
 }
 
 /* --------------------------
-   MAIN CONTENT LAYOUT (Fixes Overlap Issue)
+   MAIN CONTENT LAYOUT
 --------------------------- */
-
 #main {
-  margin-top: 20vh; /* Pushes main content below fixed menu */
-  margin-left: 15vw; /* Moves content right to prevent logo overlap */
-  width: calc(100% - 20vw); /* Adjust width dynamically */
-}
-
-/* Prevents text/image from overlapping the logo */
-@media (max-width: 800px) {
-  #main {
-    margin-left: 18vw; /* Moves content further right on small screens */
-    width: calc(100% - 25vw);
-  }
+  margin-top: 20vh;
+  margin-left: 15vw;
+  width: calc(100% - 15vw);
 }
 
 /* --------------------------
    INTRO & IMAGE STYLES
 --------------------------- */
-
 #intropar {
   margin-left: 290px;
 }
@@ -149,39 +146,34 @@ body {
 /* --------------------------
    INDENTATION STYLES
 --------------------------- */
-
 .indent_1 {
   margin-left: 1vw;
-  margin-top: -.7em;
+  margin-top: -0.7em;
   border-left: 6px solid #6ECAFF;
-  padding: .3em 1em;
+  padding: 0.3em 1em;
 }
-
 .indent_2 {
   margin-left: 1vw;
-  margin-top: -.7em;
+  margin-top: -0.7em;
   border-left: 6px solid #90EE90;
-  padding: .3em 1em;
+  padding: 0.3em 1em;
 }
-
 .indent_3 {
   margin-left: 1vw;
-  margin-top: -.7em;
+  margin-top: -0.7em;
   border-left: 6px solid #ffc966;
-  padding: .3em 1em;
+  padding: 0.3em 1em;
 }
-
 .indent_4 {
   margin-left: 1vw;
-  margin-top: -.7em;
+  margin-top: -0.7em;
   border-left: 6px solid #ffabae;
-  padding: .3em 1em;
+  padding: 0.3em 1em;
 }
 
 /* --------------------------
    DEFAULT LINK & HEADINGS
 --------------------------- */
-
 a {
   color: #0864c7;
 }
@@ -193,53 +185,41 @@ h3, h4 {
 /* --------------------------
    RESPONSIVE MEDIA QUERIES
 --------------------------- */
-
 @media (max-width: 800px) {
-  /* Adjust menu layout on smaller screens */
   #menu {
     position: relative;
     top: 2vh;
     left: 2vw;
     flex-direction: column;
     align-items: flex-start;
-    width: auto; /* Removes forced 94vw width */
+    width: auto;
     margin-top: 5vh;
     margin-right: 1vw;
   }
-
-  /* Stack menu items vertically on small screens */
   #menu ul {
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
     margin-top: 10px;
   }
-
-  /* Prevents overlap of content & logo */
   #main {
     margin-top: 5vh;
     margin-left: 18vw;
-    width: calc(100% - 25vw);
+    width: calc(100% - 18vw);
   }
-
-  #title-container {
-    height: auto;
-  }
-
   #title-logo {
-    width: 90px; /* Slightly smaller signature on mobile */
+    width: 8vw;
+    max-width: 90px;
+    min-width: 50px;
   }
-
   #intropar {
     margin-left: 0px;
   }
-  
   #photo {
-    width: 100%; 
-    float: none; 
+    width: 100%;
+    float: none;
     padding: 2em;
   }
-  
   .home {
     margin-top: 5vh;
   }
@@ -248,33 +228,28 @@ h3, h4 {
 /* --------------------------
    PROJECT STYLES
 --------------------------- */
-
 .project {
   margin-bottom: 2em;
   padding-left: 1em;
   border-left: 4px solid #0864c7;
 }
-
 .project h3 {
   font-size: 1.2em;
   margin-bottom: 0.5em;
   font-family: Garamond;
   letter-spacing: 0.02em;
 }
-
 .project-description {
   font-size: 1em;
   color: #333;
   line-height: 1.5em;
   margin-bottom: 0.5em;
 }
-
 .project-links a {
   font-size: 0.9em;
   color: #0864c7;
   text-decoration: none;
 }
-
 .project-links a:hover {
   text-decoration: underline;
 }
