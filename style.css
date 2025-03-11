@@ -1,7 +1,12 @@
+/* --------------------------
+   FONT-FACE & BODY FADE-IN
+--------------------------- */
+
 @font-face { 
   font-family: Garamond; 
   src: url('GaramondPP.ttf'); 
 }
+
 @font-face { 
   font-family: Avenir; 
   src: url('av.ttf'); 
@@ -11,14 +16,16 @@ body {
   font-family: Garamond;
   font-size: 16px;
   line-height: 1.6em;
-  letter-spacing: 0.04em;
-  -webkit-animation: fadein 0.5s;
-  -moz-animation: fadein 0.5s;
-  -ms-animation: fadein 0.5s;
-  -o-animation: fadein 0.5s;
-  animation: fadein 0.5s;
+  letter-spacing: .04em;
+  /* Fade-in animation */
+  -webkit-animation: fadein .5s; /* Safari, Chrome and Opera > 12.1 */
+  -moz-animation: fadein .5s;    /* Firefox < 16 */
+  -ms-animation: fadein .5s;     /* Internet Explorer */
+  -o-animation: fadein .5s;      /* Opera < 12.1 */
+  animation: fadein .5s;
 }
 
+/* Keyframes for fadein */
 @keyframes fadein {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -43,6 +50,7 @@ body {
 /* --------------------------
    MENU & OVERLAPPING TEXT/LOGO
 --------------------------- */
+
 #menu {
   position: fixed;
   top: 3vh;
@@ -51,23 +59,25 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000;
+  z-index: 1000; /* ensures menu is on top */
 }
 
+/* Container holding both text and logo */
 #title-container {
   position: relative;
   display: inline-block;
   white-space: nowrap;
-  margin-right: 2em;
 }
 
+/* The link that wraps both the text and the image */
 #title-link {
   position: relative;
   display: block;
   text-decoration: none !important;
-  color: inherit;
+  color: inherit; /* Ensures black text */
 }
 
+/* Text (Chris Diak) - Initially visible */
 #title-text {
   position: absolute;
   top: 0;
@@ -78,22 +88,21 @@ body {
   text-decoration: none !important;
   font-weight: bold;
   transition: opacity 0.3s ease-in-out;
-  opacity: 1;
-  white-space: nowrap;
+  opacity: 1; /* Default: visible */
 }
 
+/* Signature Logo (Initially Hidden) */
 #title-logo {
   position: absolute;
   top: 0;
   left: 0;
-  width: 10vw;
-  max-width: 120px;
-  min-width: 60px;
+  width: 120px; /* Adjust size as needed */
   height: auto;
-  opacity: 0;
+  opacity: 0;   /* Default: hidden */
   transition: opacity 0.3s ease-in-out;
 }
 
+/* Nav list items (Projects, Portfolio) */
 #menu ul {
   display: flex;
   gap: 20px;
@@ -118,15 +127,13 @@ body {
 /* --------------------------
    MAIN CONTENT LAYOUT
 --------------------------- */
+
 #main {
-  margin-top: 20vh;
-  margin-left: 15vw;
-  width: calc(100% - 15vw);
+  margin-top: 20vh; /* pushes main content below fixed menu */
+  margin-left: 10vw;
+  width: 65vw;
 }
 
-/* --------------------------
-   INTRO & IMAGE STYLES
---------------------------- */
 #intropar {
   margin-left: 290px;
 }
@@ -143,41 +150,41 @@ body {
   color: #919191;
 }
 
-/* --------------------------
-   INDENTATION STYLES
---------------------------- */
+/* Indent styles with color-coded borders */
 .indent_1 {
   margin-left: 1vw;
-  margin-top: -0.7em;
+  margin-top: -.7em;
   border-left: 6px solid #6ECAFF;
-  padding: 0.3em 1em;
-}
-.indent_2 {
-  margin-left: 1vw;
-  margin-top: -0.7em;
-  border-left: 6px solid #90EE90;
-  padding: 0.3em 1em;
-}
-.indent_3 {
-  margin-left: 1vw;
-  margin-top: -0.7em;
-  border-left: 6px solid #ffc966;
-  padding: 0.3em 1em;
-}
-.indent_4 {
-  margin-left: 1vw;
-  margin-top: -0.7em;
-  border-left: 6px solid #ffabae;
-  padding: 0.3em 1em;
+  padding: .3em 1em;
 }
 
-/* --------------------------
-   DEFAULT LINK & HEADINGS
---------------------------- */
+.indent_2 {
+  margin-left: 1vw;
+  margin-top: -.7em;
+  border-left: 6px solid #90EE90;
+  padding: .3em 1em;
+}
+
+.indent_3 {
+  margin-left: 1vw;
+  margin-top: -.7em;
+  border-left: 6px solid #ffc966;
+  padding: .3em 1em;
+}
+
+.indent_4 {
+  margin-left: 1vw;
+  margin-top: -.7em;
+  border-left: 6px solid #ffabae;
+  padding: .3em 1em;
+}
+
+/* Default link color */
 a {
   color: #0864c7;
 }
 
+/* Headings */
 h3, h4 {
   margin-top: 0;
 }
@@ -185,71 +192,78 @@ h3, h4 {
 /* --------------------------
    RESPONSIVE MEDIA QUERIES
 --------------------------- */
+
 @media (max-width: 800px) {
+  /* Adjust menu on smaller screens */
   #menu {
     position: relative;
     top: 2vh;
     left: 2vw;
     flex-direction: column;
     align-items: flex-start;
-    width: auto;
+    width: auto; /* remove forced 94vw width */
     margin-top: 5vh;
     margin-right: 1vw;
   }
-  #menu ul {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-    margin-top: 10px;
-  }
-  #main {
-    margin-top: 5vh;
-    margin-left: 18vw;
-    width: calc(100% - 18vw);
+  #title-container {
+    height: auto;
   }
   #title-logo {
-    width: 8vw;
-    max-width: 90px;
-    min-width: 50px;
+    width: 90px; /* smaller signature on mobile */
   }
+  
+  /* Adjust main content */
+  #main {
+    margin-top: 5vh;
+    margin-left: 5vw;
+    width: 85vw;
+  }
+  
   #intropar {
     margin-left: 0px;
   }
+  
   #photo {
-    width: 100%;
-    float: none;
+    width: 100%; 
+    float: none; 
     padding: 2em;
   }
+  
   .home {
     margin-top: 5vh;
   }
 }
 
 /* --------------------------
-   PROJECT STYLES
+   OPTIONAL: PROJECT STYLES
 --------------------------- */
+
 .project {
   margin-bottom: 2em;
   padding-left: 1em;
   border-left: 4px solid #0864c7;
 }
+
 .project h3 {
   font-size: 1.2em;
   margin-bottom: 0.5em;
   font-family: Garamond;
   letter-spacing: 0.02em;
 }
+
 .project-description {
   font-size: 1em;
   color: #333;
   line-height: 1.5em;
   margin-bottom: 0.5em;
 }
+
 .project-links a {
   font-size: 0.9em;
   color: #0864c7;
   text-decoration: none;
 }
+
 .project-links a:hover {
   text-decoration: underline;
 }
