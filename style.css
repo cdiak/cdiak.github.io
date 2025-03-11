@@ -30,22 +30,6 @@ body {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-@-moz-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-webkit-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-ms-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-o-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
 
 /* --------------------------
    MENU & OVERLAPPING TEXT/LOGO
@@ -125,14 +109,26 @@ body {
 }
 
 /* --------------------------
-   MAIN CONTENT LAYOUT
+   MAIN CONTENT LAYOUT (Fixes Overlap Issue)
 --------------------------- */
 
 #main {
-  margin-top: 20vh; /* pushes main content below fixed menu */
-  margin-left: 10vw;
-  width: 65vw;
+  margin-top: 20vh; /* Pushes main content below fixed menu */
+  margin-left: 15vw; /* Moves content right to prevent logo overlap */
+  width: calc(100% - 20vw); /* Adjust width dynamically */
 }
+
+/* Prevents text/image from overlapping the logo */
+@media (max-width: 800px) {
+  #main {
+    margin-left: 18vw; /* Moves content further right on small screens */
+    width: calc(100% - 25vw);
+  }
+}
+
+/* --------------------------
+   INTRO & IMAGE STYLES
+--------------------------- */
 
 #intropar {
   margin-left: 290px;
@@ -150,7 +146,10 @@ body {
   color: #919191;
 }
 
-/* Indent styles with color-coded borders */
+/* --------------------------
+   INDENTATION STYLES
+--------------------------- */
+
 .indent_1 {
   margin-left: 1vw;
   margin-top: -.7em;
@@ -179,12 +178,14 @@ body {
   padding: .3em 1em;
 }
 
-/* Default link color */
+/* --------------------------
+   DEFAULT LINK & HEADINGS
+--------------------------- */
+
 a {
   color: #0864c7;
 }
 
-/* Headings */
 h3, h4 {
   margin-top: 0;
 }
@@ -194,31 +195,41 @@ h3, h4 {
 --------------------------- */
 
 @media (max-width: 800px) {
-  /* Adjust menu on smaller screens */
+  /* Adjust menu layout on smaller screens */
   #menu {
     position: relative;
     top: 2vh;
     left: 2vw;
     flex-direction: column;
     align-items: flex-start;
-    width: auto; /* remove forced 94vw width */
+    width: auto; /* Removes forced 94vw width */
     margin-top: 5vh;
     margin-right: 1vw;
   }
+
+  /* Stack menu items vertically on small screens */
+  #menu ul {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    margin-top: 10px;
+  }
+
+  /* Prevents overlap of content & logo */
+  #main {
+    margin-top: 5vh;
+    margin-left: 18vw;
+    width: calc(100% - 25vw);
+  }
+
   #title-container {
     height: auto;
   }
+
   #title-logo {
-    width: 90px; /* smaller signature on mobile */
+    width: 90px; /* Slightly smaller signature on mobile */
   }
-  
-  /* Adjust main content */
-  #main {
-    margin-top: 5vh;
-    margin-left: 5vw;
-    width: 85vw;
-  }
-  
+
   #intropar {
     margin-left: 0px;
   }
@@ -235,7 +246,7 @@ h3, h4 {
 }
 
 /* --------------------------
-   OPTIONAL: PROJECT STYLES
+   PROJECT STYLES
 --------------------------- */
 
 .project {
