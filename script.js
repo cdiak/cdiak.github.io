@@ -8,14 +8,8 @@ window.addEventListener("DOMContentLoaded", function () {
   }
 
   // Initially show text, hide logo
-  titleText.style.opacity = "1";
-  titleLogo.style.opacity = "0";
-
-  // After 2 seconds, fade to signature
-  setTimeout(() => {
-    titleText.style.opacity = "0";
-    titleLogo.style.opacity = "1";
-  }, 2000);
+  titleText.style.opacity = "0";
+  titleLogo.style.opacity = "1";
 
   // Hover effect: Show text when hovering over the logo
   titleLogo.addEventListener("mouseenter", () => {
