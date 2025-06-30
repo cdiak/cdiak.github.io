@@ -3,46 +3,30 @@
 --------------------------- */
 
 @font-face { 
-  font-family: Garamond; 
+  font-family: "Garamond"; 
   src: url('GaramondPP.ttf'); 
 }
 
 @font-face { 
-  font-family: Avenir; 
+  font-family: "Avenir"; 
   src: url('av.ttf'); 
 }
 
 body {
-  font-family: Garamond;
+  font-family: Garamond, serif;
   font-size: 16px;
   line-height: 1.6em;
   letter-spacing: .04em;
-  /* Fade-in animation */
-  -webkit-animation: fadein .5s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein .5s;    /* Firefox < 16 */
-  -ms-animation: fadein .5s;     /* Internet Explorer */
-  -o-animation: fadein .5s;      /* Opera < 12.1 */
-  animation: fadein .5s;
+  background-color: hsl(0, 0%, 100%);
+  color: hsl(0, 0%, 3.9%);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  animation: fadein 0.5s ease-in-out;
 }
 
-/* Keyframes for fadein */
 @keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-moz-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-webkit-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-ms-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-o-keyframes fadein {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
@@ -59,68 +43,62 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000; /* ensures menu is on top */
+  z-index: 1000;
+  background-color: hsl(0, 0%, 100%, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid hsl(0, 0%, 89.8%);
+  padding: 1em;
 }
 
-/* Container holding both text and logo */
 #title-container {
   position: relative;
   display: inline-block;
   white-space: nowrap;
 }
 
-/* The link that wraps both the text and the image */
 #title-link {
   position: relative;
   display: block;
   text-decoration: none !important;
-  color: inherit; /* Ensures black text */
+  color: inherit;
 }
 
-/* Text (Chris Diak) - Initially visible */
 #title-text {
-  position: absolute;
-  top: 0;
-  left: 0;
-  font-size: 1.3em;
-  letter-spacing: 0.07em;
-  color: black !important;
-  text-decoration: none !important;
+  font-size: 1.5em;
+  letter-spacing: 0.1em;
+  color: hsl(0, 0%, 3.9%) !important;
   font-weight: bold;
+  opacity: 1;
   transition: opacity 0.3s ease-in-out;
-  opacity: 1; /* Default: visible */
 }
 
-/* Signature Logo (Initially Hidden) */
 #title-logo {
   position: absolute;
   top: 0;
   left: 0;
-  width: 120px; /* Adjust size as needed */
+  width: 120px;
   height: auto;
-  opacity: 0;   /* Default: hidden */
+  opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
 
-/* Nav list items (Projects, Portfolio) */
 #menu ul {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-#menu li {
-  font-size: 1em;
-}
-
 #menu li a {
-  color: #0864c7;
+  color: hsl(173, 58%, 39%);
   text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
 #menu li a:hover {
+  color: hsl(12, 76%, 61%);
   text-decoration: underline;
 }
 
@@ -129,64 +107,58 @@ body {
 --------------------------- */
 
 #main {
-  margin-top: 20vh; /* pushes main content below fixed menu */
-  margin-left: 10vw;
-  width: 65vw;
+  margin-top: 25vh;
+  margin-left: auto;
+  margin-right: auto;
+  width: 60vw;
+  max-width: 800px;
+  font-family: Avenir, sans-serif;
+  font-size: 1rem;
 }
 
 #intropar {
-  margin-left: 290px;
+  margin-left: 0;
 }
 
 #photo {
-  width: 200px;
+  width: 220px;
   float: left;
-  padding: 2em;
+  margin-right: 2em;
+  margin-bottom: 2em;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .comment {
-  margin-top: 0;
-  font-size: 14px;
-  color: #919191;
+  font-size: 0.875em;
+  color: hsl(0, 0%, 45.1%);
 }
 
-/* Indent styles with color-coded borders */
-.indent_1 {
+.indent_1, .indent_2, .indent_3, .indent_4 {
   margin-left: 1vw;
   margin-top: -.7em;
-  border-left: 6px solid #6ECAFF;
   padding: .3em 1em;
+  border-left: 6px solid;
+  border-radius: 0.3rem;
+  background-color: hsl(0, 0%, 96.1%);
 }
 
-.indent_2 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #90EE90;
-  padding: .3em 1em;
-}
+.indent_1 { border-color: hsl(197, 100%, 74%); }
+.indent_2 { border-color: hsl(120, 73%, 75%); }
+.indent_3 { border-color: hsl(43, 74%, 66%); }
+.indent_4 { border-color: hsl(0, 76%, 80%); }
 
-.indent_3 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #ffc966;
-  padding: .3em 1em;
-}
-
-.indent_4 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #ffabae;
-  padding: .3em 1em;
-}
-
-/* Default link color */
 a {
-  color: #0864c7;
+  color: hsl(173, 58%, 39%);
 }
 
-/* Headings */
+a:hover {
+  color: hsl(27, 87%, 67%);
+}
+
 h3, h4 {
   margin-top: 0;
+  font-weight: 600;
 }
 
 /* --------------------------
@@ -194,43 +166,27 @@ h3, h4 {
 --------------------------- */
 
 @media (max-width: 800px) {
-  /* Adjust menu on smaller screens */
   #menu {
-    position: relative;
-    top: 2vh;
-    left: 2vw;
     flex-direction: column;
     align-items: flex-start;
-    width: auto; /* remove forced 94vw width */
+    width: auto;
     margin-top: 5vh;
-    margin-right: 1vw;
+    padding: 1em;
   }
-  #title-container {
-    height: auto;
-  }
+
   #title-logo {
-    width: 90px; /* smaller signature on mobile */
+    width: 90px;
   }
-  
-  /* Adjust main content */
+
   #main {
-    margin-top: 5vh;
-    margin-left: 5vw;
+    margin-top: 10vh;
     width: 85vw;
+    padding: 1em;
   }
-  
-  #intropar {
-    margin-left: 0px;
-  }
-  
+
   #photo {
-    width: 100%; 
-    float: none; 
-    padding: 2em;
-  }
-  
-  .home {
-    margin-top: 5vh;
+    width: 100%;
+    float: none;
   }
 }
 
@@ -241,29 +197,31 @@ h3, h4 {
 .project {
   margin-bottom: 2em;
   padding-left: 1em;
-  border-left: 4px solid #0864c7;
+  border-left: 4px solid hsl(0, 0%, 89.8%);
+  background-color: hsl(0, 0%, 96.1%);
+  border-radius: 0.5rem;
 }
 
 .project h3 {
   font-size: 1.2em;
   margin-bottom: 0.5em;
   font-family: Garamond;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
 }
 
 .project-description {
   font-size: 1em;
-  color: #333;
-  line-height: 1.5em;
+  color: hsl(0, 0%, 20%);
+  line-height: 1.6em;
   margin-bottom: 0.5em;
 }
 
 .project-links a {
   font-size: 0.9em;
-  color: #0864c7;
-  text-decoration: none;
+  color: hsl(173, 58%, 39%);
 }
 
 .project-links a:hover {
   text-decoration: underline;
+  color: hsl(12, 76%, 61%);
 }
