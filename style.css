@@ -1,110 +1,55 @@
-:root {
-  --vivid-background: #fffff8;
-  --vivid-foreground: #000;
-  --dull-background: #f0f0f0;
-  --dull-foreground: #666;
-  --accent: #2a623d;
-  --race-background: #8b0000;
-  --slowdown-background: #2a623d;
+/* --------------------------
+   FONT-FACE & BODY FADE-IN
+--------------------------- */
+
+@font-face { 
+  font-family: Garamond; 
+  src: url('GaramondPP.ttf'); 
 }
 
-:root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
-  --ring: 0 0% 3.9%;
-  --chart-1: 12 76% 61%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
-  --radius: 0.5rem;
-}
-
-@font-face {
-  font-family: "et-book";
-  src: local("et-book"), local("ETBook");
-  font-display: swap;
-}
-
-body, .font {
-  font-family: et-book, Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", Georgia, serif;
-}
-
-html {
-  font-size: 15px;
-  line-height: 1.5;
-  -webkit-text-size-adjust: 100%;
-  -moz-tab-size: 4;
-  tab-size: 4;
-  font-feature-settings: normal;
-  font-variation-settings: normal;
-  -webkit-tap-highlight-color: transparent;
+@font-face { 
+  font-family: Avenir; 
+  src: url('av.ttf'); 
 }
 
 body {
-  margin: 0;
-  line-height: inherit;
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  counter-reset: sidenote-counter;
-  counter-reset: katexEqnNo mmlEqnNo;
+  font-family: Garamond;
+  font-size: 16px;
+  line-height: 1.6em;
+  letter-spacing: .04em;
+  /* Fade-in animation */
+  -webkit-animation: fadein .5s; /* Safari, Chrome and Opera > 12.1 */
+  -moz-animation: fadein .5s;    /* Firefox < 16 */
+  -ms-animation: fadein .5s;     /* Internet Explorer */
+  -o-animation: fadein .5s;      /* Opera < 12.1 */
+  animation: fadein .5s;
 }
 
-body.antialiased {
-  -webkit-font-smoothing: subpixel-antialiased;
-}
-
-.antialiased {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.mb-16 {
-  margin-bottom: 4rem;
-}
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  border: 0 solid hsl(var(--border));
-  --tw-border-spacing-x: 0;
-  --tw-border-spacing-y: 0;
-  --tw-translate-x: 0;
-  --tw-translate-y: 0;
-  --tw-rotate: 0;
-  --tw-skew-x: 0;
-  --tw-skew-y: 0;
-  --tw-scale-x: 1;
-  --tw-scale-y: 1;
-  --tw-ring-inset: ;
-  --tw-ring-offset-width: 0px;
-  --tw-ring-offset-color: #fff;
-  --tw-ring-color: rgba(59, 130, 246, .5);
-  --tw-ring-offset-shadow: 0 0 #0000;
-  --tw-ring-shadow: 0 0 #0000;
-  --tw-shadow: 0 0 #0000;
-  --tw-shadow-colored: 0 0 #0000;
-}
-
+/* Keyframes for fadein */
 @keyframes fadein {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
+@-moz-keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@-webkit-keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@-ms-keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@-o-keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* --------------------------
+   MENU & OVERLAPPING TEXT/LOGO
+--------------------------- */
 
 #menu {
   position: fixed;
@@ -114,41 +59,50 @@ body.antialiased {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
-  background: hsl(var(--background) / 0.9);
-  border-bottom: 1px solid hsl(var(--border));
-  backdrop-filter: blur(8px);
-  z-index: 1000;
+  z-index: 1000; /* ensures menu is on top */
 }
 
+/* Container holding both text and logo */
 #title-container {
   position: relative;
   display: inline-block;
   white-space: nowrap;
 }
 
+/* The link that wraps both the text and the image */
 #title-link {
   position: relative;
   display: block;
-  text-decoration: none;
-  color: inherit;
+  text-decoration: none !important;
+  color: inherit; /* Ensures black text */
 }
 
+/* Text (Chris Diak) - Initially visible */
 #title-text {
-  font-size: 1.3rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 1.3em;
   letter-spacing: 0.07em;
-  font-weight: 700;
+  color: black !important;
+  text-decoration: none !important;
+  font-weight: bold;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 1; /* Default: visible */
 }
 
+/* Signature Logo (Initially Hidden) */
 #title-logo {
   position: absolute;
-  inset: 0;
-  width: 120px;
+  top: 0;
+  left: 0;
+  width: 120px; /* Adjust size as needed */
   height: auto;
-  opacity: 0;
-  transition: opacity .3s;
+  opacity: 0;   /* Default: hidden */
+  transition: opacity 0.3s ease-in-out;
 }
 
+/* Nav list items (Projects, Portfolio) */
 #menu ul {
   display: flex;
   gap: 20px;
@@ -157,20 +111,31 @@ body.antialiased {
   padding: 0;
 }
 
+#menu li {
+  font-size: 1em;
+}
+
 #menu li a {
-  color: hsl(var(--primary));
+  color: #0864c7;
   text-decoration: none;
-  font-weight: 500;
 }
 
 #menu li a:hover {
   text-decoration: underline;
-  color: hsl(var(--chart-1));
 }
 
+/* --------------------------
+   MAIN CONTENT LAYOUT
+--------------------------- */
+
 #main {
-  margin: 20vh auto 0 auto;
-  width: min(65vw, 800px);
+  margin-top: 20vh; /* pushes main content below fixed menu */
+  margin-left: 10vw;
+  width: 65vw;
+}
+
+#intropar {
+  margin-left: 290px;
 }
 
 #photo {
@@ -181,80 +146,124 @@ body.antialiased {
 
 .comment {
   margin-top: 0;
-  font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+  color: #919191;
 }
 
+/* Indent styles with color-coded borders */
 .indent_1 {
-  border-left: 6px solid hsl(var(--chart-2));
+  margin-left: 1vw;
+  margin-top: -.7em;
+  border-left: 6px solid #6ECAFF;
+  padding: .3em 1em;
 }
 
 .indent_2 {
-  border-left: 6px solid hsl(var(--chart-3));
+  margin-left: 1vw;
+  margin-top: -.7em;
+  border-left: 6px solid #90EE90;
+  padding: .3em 1em;
 }
 
 .indent_3 {
-  border-left: 6px solid hsl(var(--chart-4));
+  margin-left: 1vw;
+  margin-top: -.7em;
+  border-left: 6px solid #ffc966;
+  padding: .3em 1em;
 }
 
 .indent_4 {
-  border-left: 6px solid hsl(var(--chart-5));
-}
-
-.indent_1, .indent_2, .indent_3, .indent_4 {
   margin-left: 1vw;
   margin-top: -.7em;
+  border-left: 6px solid #ffabae;
   padding: .3em 1em;
-  background: hsl(var(--muted));
-  border-radius: 0 var(--radius) var(--radius) 0;
 }
 
+/* Default link color */
 a {
-  color: hsl(var(--primary));
+  color: #0864c7;
 }
 
-a:hover {
-  color: hsl(var(--chart-1));
-}
-
+/* Headings */
 h3, h4 {
   margin-top: 0;
-  font-weight: 700;
 }
 
+/* --------------------------
+   RESPONSIVE MEDIA QUERIES
+--------------------------- */
+
+@media (max-width: 800px) {
+  /* Adjust menu on smaller screens */
+  #menu {
+    position: relative;
+    top: 2vh;
+    left: 2vw;
+    flex-direction: column;
+    align-items: flex-start;
+    width: auto; /* remove forced 94vw width */
+    margin-top: 5vh;
+    margin-right: 1vw;
+  }
+  #title-container {
+    height: auto;
+  }
+  #title-logo {
+    width: 90px; /* smaller signature on mobile */
+  }
+  
+  /* Adjust main content */
+  #main {
+    margin-top: 5vh;
+    margin-left: 5vw;
+    width: 85vw;
+  }
+  
+  #intropar {
+    margin-left: 0px;
+  }
+  
+  #photo {
+    width: 100%; 
+    float: none; 
+    padding: 2em;
+  }
+  
+  .home {
+    margin-top: 5vh;
+  }
+}
+
+/* --------------------------
+   OPTIONAL: PROJECT STYLES
+--------------------------- */
+
 .project {
-  margin-bottom: 2rem;
-  padding-left: 1rem;
-  border-left: 4px solid hsl(var(--border));
-  background: hsl(var(--card));
-  border-radius: var(--radius);
-  box-shadow: 0 3px 6px rgba(0,0,0,.04);
+  margin-bottom: 2em;
+  padding-left: 1em;
+  border-left: 4px solid #0864c7;
 }
 
 .project h3 {
-  font-size: 1.2rem;
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+  font-family: Garamond;
+  letter-spacing: 0.02em;
+}
+
+.project-description {
+  font-size: 1em;
+  color: #333;
+  line-height: 1.5em;
   margin-bottom: 0.5em;
 }
 
-@media (max-width: 800px) {
-  #menu {
-    flex-direction: column;
-    align-items: flex-start;
-    width: auto;
-    top: 2vh;
-    left: 4vw;
-    padding: .8rem 0;
-  }
-  #title-logo {
-    width: 90px;
-  }
-  #main {
-    margin-top: 12vh;
-    width: 88vw;
-  }
-  #photo {
-    width: 100%;
-    float: none;
-    padding: 2em 0;
-  }
+.project-links a {
+  font-size: 0.9em;
+  color: #0864c7;
+  text-decoration: none;
+}
+
+.project-links a:hover {
+  text-decoration: underline;
 }
