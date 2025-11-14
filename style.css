@@ -1,6 +1,6 @@
-/* --------------------------
-   FONT-FACE & BODY FADE-IN
---------------------------- */
+/* ============================================================
+   FONT-FACE & GLOBAL TYPOGRAPHY (Resume Style)
+============================================================ */
 
 @font-face { 
   font-family: Garamond; 
@@ -12,44 +12,33 @@
   src: url('av.ttf'); 
 }
 
+/* Switch to Book Antiqua / Palatino to match résumé */
 body {
-  font-family: Garamond;
+  font-family: "Book Antiqua", Palatino, "Palatino Linotype", serif;
   font-size: 16px;
-  line-height: 1.6em;
-  letter-spacing: .04em;
+  line-height: 1.45;
+  letter-spacing: .02em;
+  margin: 0;
+  padding: 0;
+
   /* Fade-in animation */
-  -webkit-animation: fadein .5s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein .5s;    /* Firefox < 16 */
-  -ms-animation: fadein .5s;     /* Internet Explorer */
-  -o-animation: fadein .5s;      /* Opera < 12.1 */
+  -webkit-animation: fadein .5s;
+  -moz-animation: fadein .5s;
+  -ms-animation: fadein .5s;
+  -o-animation: fadein .5s;
   animation: fadein .5s;
 }
 
-/* Keyframes for fadein */
-@keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-moz-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-webkit-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-ms-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-o-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@-moz-keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@-webkit-keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@-ms-keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@-o-keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 
-/* --------------------------
-   MENU & OVERLAPPING TEXT/LOGO
---------------------------- */
+
+/* ============================================================
+   MENU & LOGO OVERLAY
+============================================================ */
 
 #menu {
   position: fixed;
@@ -59,25 +48,22 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000; /* ensures menu is on top */
+  z-index: 1000;
 }
 
-/* Container holding both text and logo */
 #title-container {
   position: relative;
   display: inline-block;
   white-space: nowrap;
 }
 
-/* The link that wraps both the text and the image */
 #title-link {
   position: relative;
   display: block;
   text-decoration: none !important;
-  color: inherit; /* Ensures black text */
+  color: inherit;
 }
 
-/* Text (Chris Diak) - Initially visible */
 #title-text {
   position: absolute;
   top: 0;
@@ -88,21 +74,19 @@ body {
   text-decoration: none !important;
   font-weight: bold;
   transition: opacity 0.3s ease-in-out;
-  opacity: 1; /* Default: visible */
+  opacity: 1;
 }
 
-/* Signature Logo (Initially Hidden) */
 #title-logo {
   position: absolute;
   top: 0;
   left: 0;
-  width: 120px; /* Adjust size as needed */
+  width: 120px;
   height: auto;
-  opacity: 0;   /* Default: hidden */
+  opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
 
-/* Nav list items (Projects, Portfolio) */
 #menu ul {
   display: flex;
   gap: 20px;
@@ -124,18 +108,21 @@ body {
   text-decoration: underline;
 }
 
-/* --------------------------
-   MAIN CONTENT LAYOUT
---------------------------- */
+
+/* ============================================================
+   MAIN CONTENT CONTAINER — Resume Column Width
+============================================================ */
 
 #main {
-  margin-top: 20vh; /* pushes main content below fixed menu */
-  margin-left: 10vw;
-  width: 65vw;
+  margin-top: 20vh;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 720px;  /* resume-style width */
+  padding: 0 20px;
 }
 
 #intropar {
-  margin-left: 290px;
+  margin-left: 290px; /* if needed for your photo */
 }
 
 #photo {
@@ -150,93 +137,144 @@ body {
   color: #919191;
 }
 
-/* Indent styles with color-coded borders */
-.indent_1 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #6ECAFF;
-  padding: .3em 1em;
+
+/* ============================================================
+   RESUME-STYLE SECTION GRID
+   Left column: section header (e.g., PUBLICATIONS)
+   Right column: content list aligned horizontally
+============================================================ */
+
+.section {
+  display: grid;
+  grid-template-columns: 220px 1fr; /* tune to match resume PDF */
+  grid-column-gap: 20px;
+  margin-bottom: 2.5em;
 }
 
-.indent_2 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #90EE90;
-  padding: .3em 1em;
+.section-title {
+  font-weight: bold;
+  font-size: 1.1em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 0.25em;
 }
 
-.indent_3 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #ffc966;
-  padding: .3em 1em;
+.section-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.indent_4 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #ffabae;
-  padding: .3em 1em;
+.section-items li {
+  margin-bottom: 0.25em;
+  padding-left: 1.2em;
+  text-indent: -1.2em; /* hanging indent like résumé lists */
 }
 
-/* Default link color */
-a {
+.section-items a {
   color: #0864c7;
+  text-decoration: none;
 }
 
-/* Headings */
+.section-items a:hover {
+  text-decoration: underline;
+}
+
+
+/* ============================================================
+   HEADINGS (match résumé appearance)
+============================================================ */
+
+h1, h2, h3 {
+  font-family: "Book Antiqua", Palatino, serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2em;
+  margin-bottom: 0.6em;
+}
+
 h3, h4 {
   margin-top: 0;
 }
 
-/* --------------------------
-   RESPONSIVE MEDIA QUERIES
---------------------------- */
+
+/* ============================================================
+   INDENT STYLES (retain your previous system)
+============================================================ */
+
+.indent_1,
+.indent_2,
+.indent_3,
+.indent_4 {
+  margin-left: 1vw;
+  margin-top: -.7em;
+  padding: .3em 1em;
+}
+
+.indent_1 { border-left: 6px solid #6ECAFF; }
+.indent_2 { border-left: 6px solid #90EE90; }
+.indent_3 { border-left: 6px solid #ffc966; }
+.indent_4 { border-left: 6px solid #ffabae; }
+
+
+/* ============================================================
+   DEFAULT LINK COLOR
+============================================================ */
+
+a { color: #0864c7; }
+
+
+/* ============================================================
+   RESPONSIVE (resume grid collapses to single column)
+============================================================ */
 
 @media (max-width: 800px) {
-  /* Adjust menu on smaller screens */
+  
   #menu {
     position: relative;
     top: 2vh;
     left: 2vw;
     flex-direction: column;
     align-items: flex-start;
-    width: auto; /* remove forced 94vw width */
+    width: auto;
     margin-top: 5vh;
     margin-right: 1vw;
   }
-  #title-container {
-    height: auto;
-  }
+
   #title-logo {
-    width: 90px; /* smaller signature on mobile */
+    width: 90px;
   }
-  
-  /* Adjust main content */
+
   #main {
     margin-top: 5vh;
-    margin-left: 5vw;
-    width: 85vw;
+    max-width: 85vw;
   }
-  
+
   #intropar {
     margin-left: 0px;
   }
-  
+
   #photo {
     width: 100%; 
     float: none; 
     padding: 2em;
   }
-  
-  .home {
-    margin-top: 5vh;
+
+  /* Resume section collapses to 1 column */
+  .section {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    margin-bottom: .5em;
   }
 }
 
-/* --------------------------
-   OPTIONAL: PROJECT STYLES
---------------------------- */
+
+/* ============================================================
+   PROJECT STYLES (preserved)
+============================================================ */
 
 .project {
   margin-bottom: 2em;
@@ -247,7 +285,7 @@ h3, h4 {
 .project h3 {
   font-size: 1.2em;
   margin-bottom: 0.5em;
-  font-family: Garamond;
+  font-family: "Book Antiqua", Palatino, serif;
   letter-spacing: 0.02em;
 }
 
