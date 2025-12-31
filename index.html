@@ -1,63 +1,954 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <!-- Google tag (gtag.js) -->
-  <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-RG58M47TX9"></script>
+
+  <!-- Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RG58M47TX9"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-RG58M47TX9');
   </script>
-  
-  <meta charset="utf-8">
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <title>Chris Diak</title>
+
+  <title>Christopher J. Diak, MDiv</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
-<body> 
-  <div id="menu">
-    <div id="title-container">
-      <!-- Wrap text and signature in one anchor so BOTH link to home -->
-      <a href="/" id="title-link">
-        <span id="title-text">Chris Diak</span>
-        <img src="signature.png" id="title-logo" alt="Chris Diak">
-      </a>
-    </div>
-    <ul>
-      <li><a href="projects.html">Projects</a></li>
-      <li><a href="portfolio.html">Portfolio</a></li>
-    </ul>
-  </div>
-  
-  <div style="padding: 2em 0 0" id="main">
-    <div id="photo"> 
-      <img src="chris-diak.jpg" alt="Chris Diak" height="300"> 
-    </div>
-    <div id="intropar">
-      <h3>about</h3>
-      <p></p>
-      <p>
-        I am a cognitive scientist studying compositionality and the architecture of large language models in the Lab for Mind, Brain, and Computation at Dartmouth College.
-      </p>
-      <p>
-        Previously, I was at Harvard, where I was a research associate at Harvard Business School specializing in business ethics. While at Harvard, I received my M.Div. and was a member of the Joshua Greene Lab.
-      </p>
-      <p>
-        I was a first-generation college student at Middlebury College and trained as a research scientist in laboratories at Harvard Medical School and the Center for Cognitive Neuroscience at the University of Pennsylvania.
-      </p>
-      <p>
-        Beyond my academic research, I enjoy working with large language models and previously did work as a model teacher for OpenAI.
-      </p>
-      <div class="contact-info">
-        You can reach me at: christopher dot j dot diak at dartmouth dot edu and find me on 
-        <a href="https://linkedin.com/in/cdiak" target="_blank" style="color:#1DA1F2">LinkedIn</a>,
-        <a href="https://substack.com/@christopherdiak" target="_blank" style="color:#1DA1F2">Substack</a>, and
-        <a href="https://x.com/ChristopherDiak" target="_blank" style="color:#1DA1F2">X</a>.
+<body>
+
+  <!-- =====================================================
+       INVISIBLE STICKY MENU BAR
+  ====================================================== -->
+  <header id="menu-bar">
+    <div class="menu-inner">
+
+      <div id="title-container">
+        <a href="/" id="title-link" aria-label="Home">
+          <span id="title-text">Chris Diak</span>
+          <img src="signature.png" id="title-logo" alt="Chris Diak">
+        </a>
       </div>
+
+      <nav aria-label="Site">
+        <a href="#portfolio">Portfolio</a>
+        <!-- theme toggle injected here by script.js -->
+      </nav>
+
     </div>
-  </div>
+  </header>
+
+  <!-- =====================================================
+       PAGE CONTENT
+  ====================================================== -->
+  <main class="page">
+
+    <img
+      src="chris-diak.jpg"
+      alt="Chris Diak"
+      class="portrait"
+    />
+
+    <!-- INTRO -->
+    <section id="intro">
+      <h1>Christopher J. Diak, MDiv</h1>
+      <h4>About Me</h4>
+
+      <p>
+        I am a researcher, educator, and designer working in the
+        <a href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">
+          Lab for Mind, Brain, and Computation
+        </a>
+        at Dartmouth College.
+      </p>
+
+      <p>
+        Drawing on literature from cognitive science, organizational behavior, and deep reinforcement learning,
+        my research studies how mental representations are composed and the limits of reasoning, executive function,
+        and working memory under capacity constraints. I often wonder:
+        "How do the strategies we use to think shape what can be thought?"
+      </p>
+
+      <p>
+        Previously, I was an associate with
+        <a href="https://chernikgroup.com/" target="_blank" rel="noreferrer">The Chernik Group</a>
+        specializing in executive functioning, metacognition, and habit formation.
+      </p>
+
+      <p>
+        As a student at Middlebury and Harvard, I was fortunate to work with some of the world's great laboratories
+        in biology, neuroscience, psychology, and artificial intelligence:
+      </p>
+
+      <ul>
+        <li><a href="https://rapoport.hms.harvard.edu/" target="_blank" rel="noreferrer">Rapoport Laboratory</a>, Harvard Medical School</li>
+        <li><a href="https://neuroaesthetics.med.upenn.edu/chatlab.html" target="_blank" rel="noreferrer">ChatLab</a>, Center for Cognitive Neuroscience, University of Pennsylvania</li>
+        <li><a href="https://www.joshua-greene.net/lab" target="_blank" rel="noreferrer">Joshua Greene Laboratory</a>, Harvard University</li>
+        <li>Model Behavior Team at <a href="https://www.openai.com" target="_blank" rel="noreferrer">OpenAI</a></li>
+      </ul>
+
+      <p>
+        While at Harvard, I worked for five years as a program manager for
+        <a href="https://www.harbus.org/post/are-you-living-the-life-you-are-meant-to-1" target="_blank" rel="noreferrer">The Spiritual Lives of Leaders</a>
+        and
+        <a href="https://www.linkedin.com/groups/8663529/" target="_blank" rel="noreferrer">The Forum for Growth &amp; Innovation</a>
+        at Harvard Business School, and as a research associate in the General Management and Finance Units.
+      </p>
+
+      <p>
+        I grew up on a sheep farm in Grafton, Vermont, as the eldest son of artisans
+        <a href="https://www.dyakcraft.com/our-story" target="_blank" rel="noreferrer">Tom</a> and
+        <a href="https://www.lindadiakquilts.com/" target="_blank" rel="noreferrer">Linda Diak</a>, and was the first member of my family to go to college.
+        My wife, <a href="https://www.rachelaurora.com/" target="_blank" rel="noreferrer">Rachel Aurora</a>,
+        is a studio artist working in paint, ceramics, and herbal medicines.
+      </p>
+
+      <p>
+        I hold an MDiv from Harvard Divinity School and a BA from Middlebury College.
+      </p>
+    </section>
+
+    <!-- =====================================================
+        PORTFOLIO (REPO VIEW) — ARTIFACT-FIRST
+        Goal: show the things.
+        Institutions are metadata (data-origin / data-tag) for styling and taste.
+    ====================================================== -->
+    <section id="portfolio">
+      <h2>Portfolio</h2>
+
+      <section class="folder depth-0" data-folder>
+        <h5><button class="folder-label">portfolio/</button></h5>
+
+        <div class="folder-content">
+
+          <!-- =====================================================
+              research/
+          ====================================================== -->
+          <section class="folder depth-1" data-folder>
+            <h5><button class="folder-label">research/</button></h5>
+
+            <div class="folder-content">
+
+              <!-- cases/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">cases/</button></h5>
+
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63522" target="_blank" rel="noreferrer">
+                        Ethical Analysis: Honesty and Self-Interest (HBS Publishing, 2023)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63822" target="_blank" rel="noreferrer">
+                        Economic Analysis: The Hidden Costs of Layoffs and Managing Staff Reductions (HBS Publishing, 2023)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63273" target="_blank" rel="noreferrer">
+                        The Role of ESG in Investment Strategy (HBS Publishing, 2022)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=62339" target="_blank" rel="noreferrer">
+                        Corporate Responses to the War in Ukraine: Nestlé (HBS Publishing, 2022)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=62125" target="_blank" rel="noreferrer">
+                        Legal Analysis: Bribery and Corruption (HBS Publishing, 2022)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=61599" target="_blank" rel="noreferrer">
+                        Ethical Analysis: Well-Being and Rights (HBS Publishing, 2022)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=62865" target="_blank" rel="noreferrer">
+                        Rooted in Roxbury: Race and Equity in the Boston Cannabis Industry (HBS Publishing, 2023)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63152" target="_blank" rel="noreferrer">
+                        Managing Pain in the Midst of an Opioid Epidemic (HBS Publishing, 2022)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                </div>
+              </section>
+
+              <!-- publications/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">publications/</button></h5>
+
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="Springer" data-tag="springer">
+                    <h5><button class="file-label">book-chapter.springer.2025.link</button></h5>
+                    <div class="file-content">
+                      <p>Springer book chapter (2025). Link forthcoming.</p>
+                    </div>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Radcliffe Institute × Harvard Law School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="http://frontiersin.org/articles/10.3389/fsufs.2022.983398/full" target="_blank" rel="noreferrer">
+                        Policy Pathways for Perennial Agriculture (Scott et al., 2022)
+                      </a>
+                    </button></h5>
+                    <div class="file-content">
+                      <p>
+                        In the Spring of 2021, I took Food Law and Policy at Harvard Law School and partnered with a team of lawyers, policymakers, and consultants to help them develop their Radcliffe Institute workshop into this paper, researching the oligopsony structure of first-handler agricultural markets.
+                      </p>
+                    </div>
+                  </section>
+
+                </div>
+              </section>
+
+              <!-- posters/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">posters/</button></h5>
+
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="Joshua Greene Laboratory" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/presentation/d/13X8xXwQZdn7PFDeh3I9I723fIJGdsMoyotY7mEvP9ac/edit?usp=sharing" target="_blank" rel="noreferrer">
+                        Auditory Compositional Cognition (Joshua Greene Laboratory, Dec 17, 2020)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Rapoport Laboratory" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/presentation/d/0B8Rq-WknD7znRkdzYXhzU011WDQ/edit?usp=sharing&ouid=115403073159516519139&resourcekey=0-QW7HCnWRhCYztQ3WszLchw&rtpof=true&sd=true" target="_blank" rel="noreferrer">
+                        Protein Engineering in the Ubiquitin Proteasome System (Rapoport Laboratory, Apr 21, 2017)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Center for Cognitive Neuroscience" data-tag="upenn">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/presentation/d/1Ix0DjkwXkBMejfJzMAefRH7acB_4ZJy3LtAPpwAloco/edit?usp=sharing" target="_blank" rel="noreferrer">
+                        Metaphor as Metamorphosis of the Mental Lexicon (Center for Cognitive Neuroscience, Aug 23, 2017)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Middlebury College" data-tag="middlebury">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/presentation/d/1DIXna_3GXRhIA9hLtRerGsXTSJjpbkJJSwvuAH-dews/edit?usp=sharing" target="_blank" rel="noreferrer">
+                        Form and Content: Dualism and Nondualism in the Study of Concepts (Middlebury College, Apr 20, 2018)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                </div>
+              </section>
+
+              <!-- methods/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">methods/</button></h5>
+                <div class="folder-content">
+                  <section class="file depth-3" data-origin="Dartmouth College" data-tag="dartmouth">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/document/d/1AwEiIFhFIY8yoZu0_Cic1uC3yspFYWsiCWjQkbkOmbU/edit?usp=sharing"
+                         target="_blank" rel="noreferrer">
+                        research-objectives.doc
+                      </a>
+                    </button></h5>
+                  </section>
+                </div>
+              </section>
+
+            </div>
+          </section>
+
+          <!-- =====================================================
+              software/
+          ====================================================== -->
+          <section class="folder depth-1" data-folder>
+            <h5><button class="folder-label">software/</button></h5>
+
+            <div class="folder-content">
+
+              <!-- product-demos/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">product-demos/</button></h5>
+
+                <div class="folder-content">
+
+                  <div class="file-content">
+                    <p>
+                      Two interactive product prototypes that also function as research instruments: one explores time, place, and meaning through a dynamic “vibe field,” and the other explores predictive, symbolic interfaces for reflection and decision-making.
+                    </p>
+                  </div>
+
+                  <section class="folder depth-3" data-folder data-origin="Independent" data-tag="product">
+                    <h5>
+                      <button class="folder-label">
+                        <a href="https://aligning.app" target="_blank" rel="noreferrer">alignment/</a>
+                      </button>
+                    </h5>
+
+                    <div class="folder-content">
+                      <div class="file-content">
+                        <p>
+                          An interactive system for exploring time, place, and meaning through a dynamic “vibe field.”
+                          Designed as both a product experience and a research instrument for studying how people interpret complex signals.
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="folder depth-3" data-folder data-origin="Independent" data-tag="product">
+                    <h5>
+                      <button class="folder-label">
+                        <a href="https://twinkle.ml" target="_blank" rel="noreferrer">twinkle-ml/</a>
+                      </button>
+                    </h5>
+
+                    <div class="folder-content">
+                      <div class="file-content">
+                        <p>
+                          A predictive astrology engine and interactive prototype exploring how symbolic models can support reflection and decision-making.
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+
+                </div>
+              </section>
+
+              <!-- research-tools/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">research-tools/</button></h5>
+
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="Dartmouth College" data-tag="colab">
+                    <h5><button class="file-label">
+                      <a href="https://colab.research.google.com/drive/1V00YtGdmmGRV-DyFCkGO_-bNy55Hfckm#scrollTo=DXE02Itl7qjD"
+                         target="_blank" rel="noreferrer">
+                        rds-visualization.colab.link
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Dartmouth College" data-tag="colab">
+                    <h5>
+                      <button class="file-label">
+                        <a href="https://colab.research.google.com/drive/1UuEyahJUxTsZ76bkh6bKyO_3RLGifzr_?usp=sharing"
+                           target="_blank" rel="noreferrer">
+                          logit-lens.colab.link
+                        </a>
+                      </button>
+                    </h5>
+                  </section>
+
+                </div>
+              </section>
+
+              <!-- repositories/ (consolidated) -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">repositories/</button></h5>
+
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="GitHub" data-tag="github">
+                    <h5><button class="file-label">
+                      <a href="https://github.com/cdiak/local-whisper" target="_blank" rel="noreferrer">
+                        local-whisper
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="GitHub" data-tag="github">
+                    <h5><button class="file-label">
+                      <a href="https://github.com/cdiak/intro-to-programming" target="_blank" rel="noreferrer">
+                        intro-to-programming (Java, Python, LISP)
+                      </a>
+                    </button></h5>
+                  </section>
+
+                </div>
+              </section>
+
+              <!-- chats/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">chats/</button></h5>
+                <div class="folder-content">
+                  <section class="file depth-3" data-tag="chatgpt">
+                    <h5><button class="file-label">chatgpt-links/</button></h5>
+                    <div class="file-content">
+                      <p>Links to specific ChatGPT chats (forthcoming).</p>
+                    </div>
+                  </section>
+                </div>
+              </section>
+
+              <!-- demos/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">demos/</button></h5>
+                <div class="folder-content">
+                  <section class="file depth-3">
+                    <h5><button class="file-label">product-demos.video</button></h5>
+                    <div class="file-content">
+                      <p>Demo videos for products and tools (forthcoming).</p>
+                    </div>
+                  </section>
+                </div>
+              </section>
+
+            </div>
+          </section>
+
+          <!-- =====================================================
+              writing/
+          ====================================================== -->
+          <section class="folder depth-1" data-folder>
+            <h5><button class="folder-label">writing/</button></h5>
+
+            <div class="folder-content">
+
+              <!-- substack/ (direct link) -->
+              <section class="file depth-2" data-origin="Independent" data-tag="writing">
+                <h5><button class="file-label">
+                  <a href="https://tm4m.net/" target="_blank" rel="noreferrer">
+                    substack/
+                  </a>
+                </button></h5>
+              </section>
+
+              <!-- academic-essays/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">academic-essays/</button></h5>
+
+                <div class="folder-content">
+
+                  <section class="folder depth-3" data-folder>
+                    <h5><button class="folder-label">essay-archive/</button></h5>
+
+                    <div class="folder-content">
+
+                      <section class="file depth-4" data-origin="Harvard Business School" data-tag="harvard">
+                        <h5><button class="file-label">
+                          <a href="https://drive.google.com/file/d/1XDOyXFIqiXrkY5jZ3_k43V8UyBIm6efh/view?usp=sharing" target="_blank" rel="noreferrer">
+                            Modeling the Capitalist's Dilemma Using Multiple RL Systems (HBS, May 2021)
+                          </a>
+                        </button></h5>
+                      </section>
+
+                      <section class="file depth-4" data-origin="Middlebury College" data-tag="middlebury">
+                        <h5><button class="file-label">
+                          <a href="https://drive.google.com/file/d/1_K2BUgRDf6EIh6nahiYdxSpLpZQceWNK/view?usp=sharing" target="_blank" rel="noreferrer">
+                            Transcendental Grammar: Chomsky and Bhartṛhari in Dialogue (Honors Thesis, May 11, 2019)
+                          </a>
+                        </button></h5>
+                      </section>
+
+                      <section class="file depth-4" data-origin="Harvard Divinity School" data-tag="harvard">
+                        <h5><button class="file-label">
+                          <a href="https://drive.google.com/file/d/1C6RhpurhtEwVzEmhNBJbdHxO0qF6SjJf/view?usp=sharing" target="_blank" rel="noreferrer">
+                            Is kaivalyam a state of samadhi? (Yoga Sutras, May 10, 2024)
+                          </a>
+                        </button></h5>
+                      </section>
+
+                      <section class="file depth-4" data-origin="Middlebury College" data-tag="middlebury">
+                        <h5><button class="file-label">
+                          <a href="https://drive.google.com/file/d/1hDDRSaJlDZccJnLGPBtefHnVJKp6GSss/view?usp=sharing" target="_blank" rel="noreferrer">
+                            Form and Content: Dualism and Nondualism in the Study of Concepts (Fall 2017)
+                          </a>
+                        </button></h5>
+                      </section>
+
+                    </div>
+                  </section>
+
+                </div>
+              </section>
+
+              <!-- google-docs/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">google-docs/</button></h5>
+                <div class="folder-content">
+                  <section class="file depth-3" data-tag="doc">
+                    <h5><button class="file-label">selected-docs/</button></h5>
+                    <div class="file-content">
+                      <p>Links to specific Google Docs (beyond notebooks) (forthcoming).</p>
+                    </div>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/document/d/1b7_R9o_h2F0O4TUopwps-XhgJQ6Pwa3FHutTT0tjOAM/edit?usp=sharing"
+                         target="_blank" rel="noreferrer">
+                        sql-translator-for-eta-database.doc
+                      </a>
+                    </button></h5>
+                  </section>
+                </div>
+              </section>
+
+              <!-- notebooks/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">notebooks/</button></h5>
+
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="Middlebury College" data-tag="middlebury">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/document/d/1PSXBU1Zrq6xTupULBSANysaMaV9Dm4DBUoEfuH7D3oU/edit?usp=sharing"
+                         target="_blank" rel="noreferrer">
+                        women-and-the-sacred.doc
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Middlebury College" data-tag="middlebury">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/document/d/14y9nH-RU_UV0fo6bhS2Wm6qXTBTfbv7LVvFRew2wP9Y/edit?usp=sharing"
+                         target="_blank" rel="noreferrer">
+                        concepts-the-stuff-of-thought.doc
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Middlebury College" data-tag="middlebury">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/document/d/1yYW8tWpBnzeRq4A58vbuZHzxX1-56AZK/edit?usp=sharing&ouid=115403073159516519139&rtpof=true&sd=true"
+                         target="_blank" rel="noreferrer">
+                        philosophy-of-mind.doc
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Middlebury College" data-tag="middlebury">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/document/d/1UC9lUUJirCZ66WErpn_FORltwn9ECCfUf0iqQWPWpqI/edit?usp=sharing"
+                         target="_blank" rel="noreferrer">
+                        self-and-subjectivity.doc
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Middlebury College" data-tag="middlebury">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/document/d/1XxATL-AEDCxg-8ODUnXz20KYOdKFJiFCVpIiNWelg84/edit?usp=sharing"
+                         target="_blank" rel="noreferrer">
+                        philosophy-of-religion-and-formal-semantics.doc
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Middlebury College" data-tag="middlebury">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/document/d/1sw2cUWL257GyIi27Xa6IdWG9A7w4YL7ZQD9nNRmGjCE/edit?usp=sharing"
+                         target="_blank" rel="noreferrer">
+                        mindfulness-and-psychology.doc
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Middlebury College" data-tag="middlebury">
+                    <h5><button class="file-label">
+                      <a href="https://docs.google.com/document/d/1AY4V4IfpYhaUESgpZGRSSt4HyQVwk_vexHlkJlG4uVs/edit?usp=sharing"
+                         target="_blank" rel="noreferrer">
+                        behavioral-and-systems-neuroscience.doc
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="College" data-tag="notebook">
+                    <h5><button class="file-label">other-class-notebooks/</button></h5>
+                    <div class="file-content">
+                      <p>Additional notebooks from college classes (forthcoming).</p>
+                    </div>
+                  </section>
+
+                </div>
+              </section>
+
+            </div>
+          </section>
+
+          <!-- =====================================================
+              design/
+          ====================================================== -->
+          <section class="folder depth-1" data-folder>
+            <h5><button class="folder-label">design/</button></h5>
+
+            <div class="folder-content">
+
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">websites/</button></h5>
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="Wayback Machine" data-tag="wayback">
+                    <h5><button class="file-label">
+                      <a href="https://web.archive.org/web/20230329215209/http://www.hbsforum.org/" target="_blank" rel="noreferrer">
+                        hbsforum.org (archived)
+                      </a>
+                    </button></h5>
+                    <div class="file-content">
+                      <p>The Forum for Growth &amp; Innovation (archived site).</p>
+                    </div>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Wayback Machine" data-tag="wayback">
+                    <h5><button class="file-label">
+                      <a href="https://web.archive.org/web/20210108143506/https://www.hbs.edu/forum-for-growth-and-innovation/resources/Pages/default.aspx"
+                         target="_blank" rel="noreferrer">
+                        hbs.edu forum resources page (archived)
+                      </a>
+                    </button></h5>
+                    <div class="file-content">
+                      <p>Redesigned research &amp; resources page (archived).</p>
+                    </div>
+                  </section>
+
+                  <section class="file depth-3">
+                    <h5><button class="file-label">other-websites/</button></h5>
+                    <div class="file-content">
+                      <p>Other websites designed (forthcoming).</p>
+                    </div>
+                  </section>
+
+                </div>
+              </section>
+
+            </div>
+          </section>
+
+          <!-- =====================================================
+              media/
+          ====================================================== -->
+          <section class="folder depth-1" data-folder>
+            <h5><button class="folder-label">media/</button></h5>
+
+            <div class="folder-content">
+
+              <!-- podcasts/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">podcasts/</button></h5>
+
+                <div class="folder-content">
+
+                  <section class="folder depth-3" data-folder data-origin="Harvard Business School" data-tag="harvard">
+                    <h5><button class="folder-label">the-disruptive-voice/</button></h5>
+
+                    <div class="folder-content">
+                      <div class="file-content">
+                        <p>
+                          I was Managing Editor of the podcast from 2019–2020 (Ep. 35–71). I hosted five episodes on education, strategy, and new markets.
+                        </p>
+                      </div>
+
+                      <!-- Edited episodes -->
+                      <section class="folder depth-4" data-folder>
+                        <h5><button class="folder-label">edited-episodes/</button></h5>
+                        <div class="folder-content">
+                          <section class="file depth-5">
+                            <h5><button class="file-label">
+                              <a href="https://thedisruptivevoice.libsyn.com/why-do-people-hire-religion" target="_blank" rel="noreferrer">
+                                ep-35.why-do-people-hire-religion
+                              </a>
+                            </button></h5>
+                            <div class="file-content">
+                              <p>Edited episodes span 35–71 (representative link shown here).</p>
+                            </div>
+                          </section>
+
+                          <section class="file depth-5">
+                            <h5><button class="file-label">episodes-36-71.edited</button></h5>
+                            <div class="file-content">
+                              <p>Edited episode links (36–71) forthcoming.</p>
+                            </div>
+                          </section>
+                        </div>
+                      </section>
+
+                      <!-- Hosted episodes -->
+                      <section class="folder depth-4" data-folder>
+                        <h5><button class="folder-label">hosted-episodes/</button></h5>
+
+                        <div class="folder-content">
+                          <section class="file depth-5">
+                            <h5><button class="file-label">
+                              <a href="https://thedisruptivevoice.libsyn.com/choosing-college-bob-moesta-and-michael-horn-on-why-we-hire-education"
+                                 target="_blank" rel="noreferrer">
+                                ep-44.choosing-college
+                              </a>
+                            </button></h5>
+                          </section>
+
+                          <section class="file depth-5">
+                            <h5><button class="file-label">
+                              <a href="https://thedisruptivevoice.libsyn.com/disruption-and-the-democratization-of-k-12-education-a-conversation-with-thomas-arnett"
+                                 target="_blank" rel="noreferrer">
+                                ep-49.democratization-of-k-12-education
+                              </a>
+                            </button></h5>
+                          </section>
+
+                          <section class="file depth-5">
+                            <h5><button class="file-label">
+                              <a href="https://thedisruptivevoice.libsyn.com/62-covid-19-and-the-educators-dilemma-a-conversation-with-michael-horn"
+                                 target="_blank" rel="noreferrer">
+                                ep-62.covid-19-and-the-educators-dilemma
+                              </a>
+                            </button></h5>
+                          </section>
+
+                          <section class="file depth-5">
+                            <h5><button class="file-label">
+                              <a href="https://thedisruptivevoice.libsyn.com/64-your-best-friends-voice-amelia-lin-16-founder-and-ceo-of-saga"
+                                 target="_blank" rel="noreferrer">
+                                ep-64.your-best-friends-voice
+                              </a>
+                            </button></h5>
+                          </section>
+
+                          <section class="file depth-5">
+                            <h5><button class="file-label">
+                              <a href="https://thedisruptivevoice.libsyn.com/71-leading-the-artling-through-the-covid-19-crisis-a-conversation-with-talenia-phua-gajardo"
+                                 target="_blank" rel="noreferrer">
+                                ep-71.leading-the-artling-through-covid
+                              </a>
+                            </button></h5>
+                          </section>
+                        </div>
+                      </section>
+
+                    </div>
+                  </section>
+
+                </div>
+              </section>
+
+              <!-- video/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">video/</button></h5>
+
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="Middlebury College" data-tag="middlebury">
+                    <h5><button class="file-label">
+                      <a href="https://vimeo.com/273354833" target="_blank" rel="noreferrer">
+                        exploring-the-spiritual-at-middlebury.vimeo
+                      </a>
+                    </button></h5>
+                    <div class="file-content">
+                      <p>Interview appearance.</p>
+                    </div>
+                  </section>
+
+                  <section class="file depth-3" data-origin="High School" data-tag="film">
+                    <h5><button class="file-label">
+                      <a href="https://www.youtube.com/watch?v=FR2GbcPWbzA" target="_blank" rel="noreferrer">
+                        majnun.short-film.youtube
+                      </a>
+                    </button></h5>
+                    <div class="file-content">
+                      <p>Short film (writer/director/editor/producer).</p>
+                    </div>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Business School" data-tag="video">
+                    <h5><button class="file-label">
+                      <a href="https://www.youtube.com/watch?v=XI0Zayk_irU" target="_blank" rel="noreferrer">
+                        spiritual-lives-of-leaders.2025-26.youtube
+                      </a>
+                    </button></h5>
+                    <div class="file-content">
+                      <p>Program video (2025–26).</p>
+                    </div>
+                  </section>
+
+                  <section class="file depth-3" data-tag="demo">
+                    <h5><button class="file-label">deepsheep-and-plugins.demos/</button></h5>
+                    <div class="file-content">
+                      <p>Demo videos for DeepSheep and other plugins (forthcoming).</p>
+                    </div>
+                  </section>
+
+                </div>
+              </section>
+
+              <!-- audio/ -->
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">audio/</button></h5>
+
+                <div class="folder-content">
+                  <section class="file depth-3" data-tag="music">
+                    <h5><button class="file-label">
+                      <a href="https://suno.com/playlist/b09d65c7-08f3-4145-ab4f-539e2fe98694"
+                         target="_blank" rel="noreferrer">
+                        ftx-the-musical/
+                      </a>
+                    </button></h5>
+                  </section>
+                </div>
+              </section>
+
+            </div>
+          </section>
+
+          <!-- =====================================================
+              context/
+          ====================================================== -->
+          <section class="folder depth-1" data-folder>
+            <h5><button class="folder-label">context/</button></h5>
+
+            <div class="folder-content">
+
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">organizations/</button></h5>
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="Dartmouth College" data-tag="dartmouth">
+                    <h5><button class="file-label">
+                      <a href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">
+                        lab-for-mind-brain-and-computation.link
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="The Chernik Group" data-tag="chernik">
+                    <h5><button class="file-label">
+                      <a href="https://chernikgroup.com/" target="_blank" rel="noreferrer">
+                        the-chernik-group.link
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="OpenAI" data-tag="openai">
+                    <h5><button class="file-label">
+                      <a href="https://www.openai.com" target="_blank" rel="noreferrer">
+                        openai.link
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard Medical School" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://rapoport.hms.harvard.edu/" target="_blank" rel="noreferrer">
+                        rapoport-laboratory.link
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="University of Pennsylvania" data-tag="upenn">
+                    <h5><button class="file-label">
+                      <a href="https://neuroaesthetics.med.upenn.edu/chatlab.html" target="_blank" rel="noreferrer">
+                        chatlab.link
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Harvard University" data-tag="harvard">
+                    <h5><button class="file-label">
+                      <a href="https://www.joshua-greene.net/lab" target="_blank" rel="noreferrer">
+                        joshua-greene-lab.link
+                      </a>
+                    </button></h5>
+                  </section>
+
+                </div>
+              </section>
+
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">archives/</button></h5>
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-origin="Wayback Machine" data-tag="wayback">
+                    <h5><button class="file-label">
+                      <a href="https://web.archive.org/web/20231118054111/https://openai.com/careers/model-teacher-contract"
+                         target="_blank" rel="noreferrer">
+                        openai-model-teacher-contract.archived
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-origin="Wayback Machine" data-tag="wayback">
+                    <h5><button class="file-label">
+                      <a href="https://web.archive.org/web/20230202105958/https://projects.iq.harvard.edu/spiritual-lives-of-leaders"
+                         target="_blank" rel="noreferrer">
+                        spiritual-lives-of-leaders.archived
+                      </a>
+                    </button></h5>
+                  </section>
+
+                </div>
+              </section>
+
+              <section class="folder depth-2" data-folder>
+                <h5><button class="folder-label">links/</button></h5>
+                <div class="folder-content">
+
+                  <section class="file depth-3" data-tag="linkedin">
+                    <h5><button class="file-label">
+                      <a href="https://www.linkedin.com/in/cdiak" target="_blank" rel="noreferrer">
+                        linkedin.profile.link
+                      </a>
+                    </button></h5>
+                  </section>
+
+                  <section class="file depth-3" data-tag="contact">
+                    <h5><button class="file-label">contact/</button></h5>
+                    <div class="file-content">
+                      <p>christopher (dot) diak (at) alumni (dot) harvard (dot) edu.</p>
+                    </div>
+                  </section>
+
+                </div>
+              </section>
+
+            </div>
+          </section>
+
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+  <!-- =====================================================
+       FOOTER
+  ====================================================== -->
+  <footer>
+    <small>© Chris Diak. This archive is a living document.</small>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
