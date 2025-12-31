@@ -1,269 +1,693 @@
-/* --------------------------
-   FONT-FACE & BODY FADE-IN
---------------------------- */
+/* ============================================================
+   FONT DECLARATIONS
+============================================================ */
 
-@font-face { 
-  font-family: Garamond; 
-  src: url('GaramondPP.ttf'); 
+@font-face {
+  font-family: 'Geogrotesque';
+  src: url('fonts/geogrotesque-300.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
 }
 
-@font-face { 
-  font-family: Avenir; 
-  src: url('av.ttf'); 
+@font-face {
+  font-family: 'Geogrotesque';
+  src: url('fonts/geogrotesque-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geogrotesque';
+  src: url('fonts/geogrotesque-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  src: url('fonts/merriweather-var.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================
+   THEME SYSTEM & PALETTE
+============================================================ */
+
+:root {
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --muted: #6e6e6e;
+  
+  /* --- SEMANTIC BRAND PALETTE --- */
+  --brand-harvard:      #A51C30;
+  --brand-dartmouth:    #12312b;
+  --brand-chernik:      #567482;
+  --brand-penn:         #011F5B;
+  --brand-openai:       #660066;
+  --brand-greene:       #ba6100;
+  --brand-rapoport:     #3b9f01;
+  --brand-middlebury:   #0D395F;
+  --brand-interlochen:  #76bee5;
+  --brand-compass:      #770909;
+  
+  /* Personal Additions */
+  --brand-tom:          #630cb8;
+  --brand-linda:        #7e6ed4;
+
+  /* Default Accent */
+  --accent: var(--brand-chernik);
+
+  /* Codebox / Tree Variables */
+  --code-bg: #f9f9f9;
+  --code-text: #2c2c2c;
+  --tree-line: #b0b0b0;
+
+  /* --- PORTFOLIO SECTION COLORS (ROYGBIV, bespoke) --- */
+  --port-red:    hsl(356, 72%, 52%);  /* portfolio/ */
+  --port-orange: hsl(28, 82%, 50%);   /* research/ */
+  --port-yellow: hsl(46, 78%, 48%);   /* software/ */
+  --port-green:  hsl(142, 52%, 44%);  /* writing/ */
+  --port-blue:   hsl(210, 68%, 52%);  /* design/ */
+  --port-violet: hsl(268, 60%, 58%);  /* media/ */
+  --port-indigo: hsl(248, 44%, 56%);  /* context/ */
+
+  /* Typography Variables */
+  --font-geo: "Geogrotesque", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Merriweather", Georgia, "Times New Roman", serif;
+}
+
+[data-theme="dark"] {
+  --bg: #050505;
+  --text: #e0e0e0;
+  --muted: #888888;
+  
+  /* --- DARK MODE ADJUSTMENTS --- */
+  --brand-harvard:      #ff4d6d;
+  --brand-dartmouth:    #4a8a7b;
+  --brand-penn:         #4d8aff;
+  --brand-middlebury:   #4d94ff;
+  --brand-compass:      #ff4d4d;
+  --brand-openai:       #d94dd9;
+  --brand-chernik:      #8aaebf;
+  --brand-rapoport:     #5ce615;
+  
+  --brand-tom:          #9e5cff;
+  --brand-linda:        #a394ff;
+
+  --accent: var(--brand-interlochen);
+
+  /* Codebox Variables */
+  --code-bg: #111111;
+  --code-text: #cccccc;
+  --tree-line: #444444;
+
+  /* --- PORTFOLIO SECTION COLORS (dark-mode tuned) --- */
+  --port-red:    hsl(356, 86%, 64%);
+  --port-orange: hsl(28, 92%, 62%);
+  --port-yellow: hsl(46, 92%, 62%);
+  --port-green:  hsl(142, 62%, 56%);
+  --port-blue:   hsl(210, 82%, 66%);
+  --port-violet: hsl(268, 72%, 72%);
+  --port-indigo: hsl(248, 58%, 70%);
+}
+
+/* ============================================================
+   BASE / RESET
+============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: Garamond;
-  font-size: 16px;
-  line-height: 1.6em;
-  letter-spacing: .04em;
-  /* Fade-in animation */
-  -webkit-animation: fadein .5s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein .5s;    /* Firefox < 16 */
-  -ms-animation: fadein .5s;     /* Internet Explorer */
-  -o-animation: fadein .5s;      /* Opera < 12.1 */
-  animation: fadein .5s;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Keyframes for fadein */
-@keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-moz-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-webkit-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-ms-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-o-keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+/* ============================================================
+   MENU BAR (FIXED HEADER)
+============================================================ */
+
+#menu-bar {
+  /* Pinned to the glass. Never moves. */
+  position: fixed; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  z-index: 1000;
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--bg) 98%, transparent);
 }
 
-/* --------------------------
-   MENU & OVERLAPPING TEXT/LOGO
---------------------------- */
-
-#menu {
-  position: fixed;
-  top: 3vh;
-  left: 3vw;
-  width: 94vw;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 1000; /* ensures menu is on top */
+.menu-inner {
+  width: 100%;
+  padding: 1.5rem 4rem 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  pointer-events: auto;
+  align-items: start;
 }
 
-/* Container holding both text and logo */
 #title-container {
   position: relative;
-  display: inline-block;
-  white-space: nowrap;
+  height: 40px;
+  width: 160px;
+  margin-left: -2rem;
+  display: flex;
+  align-items: center;
 }
 
-/* The link that wraps both the text and the image */
-#title-link {
-  position: relative;
-  display: block;
-  text-decoration: none !important;
-  color: inherit; /* Ensures black text */
-}
-
-/* Text (Chris Diak) - Initially visible */
-#title-text {
-  position: absolute;
-  top: 0;
-  left: 0;
-  font-size: 1.3em;
-  letter-spacing: 0.07em;
-  color: black !important;
-  text-decoration: none !important;
-  font-weight: bold;
-  transition: opacity 0.3s ease-in-out;
-  opacity: 1; /* Default: visible */
-}
-
-/* Signature Logo (Initially Hidden) */
+#title-text,
 #title-logo {
   position: absolute;
-  top: 0;
   left: 0;
-  width: 120px; /* Adjust size as needed */
-  height: auto;
-  opacity: 0;   /* Default: hidden */
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.25s ease;
 }
 
-/* Nav list items (Projects, Portfolio) */
-#menu ul {
+#title-text {
+  font-family: var(--font-geo);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  font-size: 2rem;
+  opacity: 0;
+  color: var(--text);
+}
+
+#title-logo {
+  width: 140px;
+  opacity: 1;
+}
+
+[data-theme="dark"] #title-logo {
+  filter: invert(1);
+}
+
+#menu-bar nav {
   display: flex;
-  gap: 20px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  gap: 1.5rem;
+  align-items: center;
+  justify-self: end;
+  font-family: var(--font-geo);
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-top: 3rem;
+  margin-right: -2rem;
 }
 
-#menu li {
-  font-size: 1em;
-}
-
-#menu li a {
-  color: #0864c7;
+#menu-bar nav a {
+  color: var(--text);
   text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
 }
 
-#menu li a:hover {
-  text-decoration: underline;
+#menu-bar nav a:hover {
+  border-bottom-color: var(--accent);
 }
 
-/* --------------------------
-   MAIN CONTENT LAYOUT
---------------------------- */
-
-#main {
-  margin-top: 20vh; /* pushes main content below fixed menu */
-  margin-left: 10vw;
-  width: 65vw;
+#theme-toggle {
+  all: unset;
+  cursor: pointer;
+  padding: 4px;
+}
+#theme-toggle:hover {
+  color: var(--accent);
 }
 
-#intropar {
-  margin-left: 290px;
+/* ============================================================
+   PAGE LAYOUT & TYPOGRAPHY
+============================================================ */
+
+.page {
+  /* --- THE INVISIBLE WALL (DESKTOP) --- */
+  /* Keeps content to the right of the Portrait + Signature */
+  margin-left: 340px; 
+  
+  /* Pushes text down so it clears the fixed header initially */
+  padding-top: 140px; 
+  
+  padding-right: 4rem; 
+  max-width: 65rem;   
+  position: relative;
+  z-index: 1;
 }
 
-#photo {
-  width: 200px;
-  float: left;
-  padding: 2em;
+.portrait {
+  position: fixed;
+  left: 2vw;
+  top: 18vh;
+
+  width: 260px;
+  height: 260px;
+
+  border-radius: 50%;
+  object-fit: cover;
+
+  filter: grayscale(100%) contrast(1.1);
+  opacity: 0.9;
+
+  transition: filter 0.35s ease, opacity 0.35s ease;
+  pointer-events: auto;
+  z-index: 0;
+}
+
+.portrait:hover {
+  filter: grayscale(0%) contrast(1);
+  opacity: 1;
+}
+
+
+#intro {
+  margin-top: -4.25rem;
+  margin-bottom: 0rem;
+  position: relative;
+  z-index: 2;
+}
+
+h2 {
+  font-family: var(--font-geo);
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+h4 {
+  font-family: var(--font-geo);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+
+p {
+  max-width: 42rem;
+  margin-bottom: 1.25rem;
+}
+
+ul {
+  max-width: 42rem;
+}
+
+/* --- UNIVERSAL LINK STYLING --- */
+
+a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--muted);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+a:hover {
+  border-bottom-color: transparent;
+  color: var(--accent); /* Fallback */
+}
+
+/* --- AUTOMATIC SEMANTIC REVEAL (HOVER ONLY) --- */
+
+/* Harvard semantic group */
+a[href*="harvard"]:hover,
+a[href*="rapoport"]:hover,
+a[href*="forum"]:hover,
+a[href*="harbus"]:hover,
+a[href*="divinity"]:hover,
+.color-harvard:hover { 
+  color: var(--brand-harvard) !important; 
+  border-color: var(--brand-harvard); 
+}
+
+/* Dartmouth */
+a[href*="dartmouth"]:hover, a[href*="mindbrain"]:hover, .color-dartmouth:hover { 
+  color: var(--brand-dartmouth) !important; 
+  border-color: var(--brand-dartmouth); 
+}
+
+/* Chernik / Wife */
+a[href*="chernik"]:hover, .color-chernik:hover { 
+  color: var(--brand-chernik) !important; 
+  border-color: var(--brand-chernik); 
+}
+
+/* Penn */
+a[href*="upenn"]:hover, a[href*="chatlab"]:hover, .color-penn:hover { 
+  color: var(--brand-penn) !important; 
+  border-color: var(--brand-penn); 
+}
+
+/* OpenAI */
+a[href*="openai"]:hover, .color-openai:hover { 
+  color: var(--brand-openai) !important; 
+  border-color: var(--brand-openai); 
+}
+
+/* Greene Lab */
+a[href*="greene"]:hover, .color-greene:hover { 
+  color: var(--brand-greene) !important; 
+  border-color: var(--brand-greene); 
+}
+
+/* Middlebury */
+a[href*="middlebury"]:hover, a[href*="rachelaurora"]:hover, .color-middlebury:hover { 
+  color: var(--brand-middlebury) !important; 
+  border-color: var(--brand-middlebury); 
+}
+
+/* Interlochen */
+a[href*="interlochen"]:hover, .color-interlochen:hover { 
+  color: var(--brand-interlochen) !important; 
+  border-color: var(--brand-interlochen); 
+}
+
+/* Tom */
+a[href*="dyakcraft"]:hover, .color-tom:hover { 
+  color: var(--brand-tom) !important; 
+  border-color: var(--brand-tom); 
+}
+
+/* Linda */
+a[href*="lindadiak"]:hover, .color-linda:hover { 
+  color: var(--brand-linda) !important; 
+  border-color: var(--brand-linda); 
+}
+
+/* Compass */
+a[href*="compass"]:hover, .color-compass:hover { 
+  color: var(--brand-compass) !important; 
+  border-color: var(--brand-compass); 
+}
+
+
+/* ============================================================
+   PORTFOLIO (THE STRUCTURED TREE)
+============================================================ */
+
+#portfolio {
+  background: var(--code-bg);
+  padding: 3rem;
+  border-radius: 8px;
+  margin-bottom: 4rem;
+  font-family: var(--font-geo);
+  color: var(--code-text);
+  font-size: 18px; 
+  line-height: 1.5;
+  overflow-x: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+#portfolio h2 {
+  font-family: var(--font-geo);
+  margin-top: 0;
+  border-bottom: 1px solid var(--tree-line);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+  font-size: 1.75rem;
+}
+
+/* ============================================================
+   PORTFOLIO COLOR SYSTEM (TOP-LEVEL + PROGRESSIVE SHADES)
+   - Colors the main headers and progressively shades their descendants
+   - Keeps leaf files readable (neutral), but gives them tasteful hover color
+============================================================ */
+
+/* Ensure label-contained links inherit label color inside the tree */
+#portfolio .folder-label a,
+#portfolio .file-label a {
+  color: inherit;
+  border-bottom: 0;
+}
+#portfolio .folder-label a:hover,
+#portfolio .file-label a:hover {
+  color: inherit !important;
+}
+
+/* Root folder label: portfolio/ */
+#portfolio .depth-0 > h5 > .folder-label { 
+  color: var(--port-red);
+  font-weight: 650;
+}
+
+/* Assign each top-level section a base hue (by order). */
+#portfolio .depth-0 > .folder-content > .folder.depth-1:nth-of-type(1) { --section-color: var(--port-orange); } /* research/ */
+#portfolio .depth-0 > .folder-content > .folder.depth-1:nth-of-type(2) { --section-color: var(--port-yellow); } /* software/ */
+#portfolio .depth-0 > .folder-content > .folder.depth-1:nth-of-type(3) { --section-color: var(--port-green);  } /* writing/ */
+#portfolio .depth-0 > .folder-content > .folder.depth-1:nth-of-type(4) { --section-color: var(--port-blue);   } /* design/ */
+#portfolio .depth-0 > .folder-content > .folder.depth-1:nth-of-type(5) { --section-color: var(--port-violet); } /* media/ */
+#portfolio .depth-0 > .folder-content > .folder.depth-1:nth-of-type(6) { --section-color: var(--port-indigo); } /* context/ */
+
+/* Apply section color to the depth-1 label */
+#portfolio .depth-0 > .folder-content > .folder.depth-1 > h5 > .folder-label {
+  color: var(--section-color, var(--code-text));
+  font-weight: 650;
+}
+#portfolio .depth-0 > .folder-content > .folder.depth-1 > h5 > .folder-label:hover {
+  color: var(--section-color, var(--accent));
+}
+
+/* Progressive shades by depth: deeper = more neutral (less saturated). */
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-2 { --level-color: color-mix(in oklab, var(--section-color) 88%, var(--code-text)); }
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-3 { --level-color: color-mix(in oklab, var(--section-color) 78%, var(--code-text)); }
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-4 { --level-color: color-mix(in oklab, var(--section-color) 68%, var(--code-text)); }
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-5 { --level-color: color-mix(in oklab, var(--section-color) 58%, var(--code-text)); }
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-6 { --level-color: color-mix(in oklab, var(--section-color) 50%, var(--code-text)); }
+
+/* Apply progressive shades to folder labels at depth 2+ */
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-2 > h5 > .folder-label,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-3 > h5 > .folder-label,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-4 > h5 > .folder-label,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-5 > h5 > .folder-label,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-6 > h5 > .folder-label {
+  color: var(--level-color, var(--code-text));
+}
+
+/* Subtle section-aware hover for files (keeps the tree readable). */
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file-label:hover {
+  color: color-mix(in oklab, var(--section-color) 72%, var(--code-text));
+}
+
+/* Tint connector lines within each section, using the appropriate level shade */
+#portfolio .depth-0 > .folder-content > .folder.depth-1::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1::after {
+  background-color: color-mix(in oklab, var(--section-color, var(--tree-line)), var(--tree-line) 35%);
+}
+
+/* depth-2 connectors */
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-2::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-2::after,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-2::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-2::after {
+  background-color: color-mix(in oklab, var(--level-color, var(--tree-line)), var(--tree-line) 55%);
+}
+
+/* depth-3 connectors */
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-3::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-3::after,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-3::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-3::after {
+  background-color: color-mix(in oklab, var(--level-color, var(--tree-line)), var(--tree-line) 62%);
+}
+
+/* depth-4+ connectors (slightly more neutral) */
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-4::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-4::after,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-4::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-4::after,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-5::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-5::after,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-5::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-5::after,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-6::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .folder.depth-6::after,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-6::before,
+#portfolio .depth-0 > .folder-content > .folder.depth-1 .file.depth-6::after {
+  background-color: color-mix(in oklab, var(--level-color, var(--tree-line)), var(--tree-line) 70%);
+}
+
+/* ============================================================
+   TREE LOGIC
+============================================================ */
+
+.folder-content,
+.file-content {
+  margin-left: 28px;
+  display: none;
+}
+
+.folder-content.open,
+.file-content.open {
+  display: block;
+}
+
+.folder,
+.file {
+  position: relative;
+}
+
+.folder-content > .folder::before,
+.folder-content > .file::before {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--tree-line);
+}
+
+.folder-content > .folder::after,
+.folder-content > .file::after {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 14px;
+  width: 20px;
+  height: 1px;
+  background-color: var(--tree-line);
+}
+
+.folder-content > .folder:last-child::before,
+.folder-content > .file:last-child::before {
+  height: 15px;
+  bottom: auto;
+}
+
+/* LABELS & TYPOGRAPHY */
+
+.folder-label,
+.file-label {
+  all: unset;
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  transition: color 0.2s ease, background 0.15s ease;
+  color: var(--code-text);
+}
+
+.folder-label:hover,
+.file-label:hover {
+  background: rgba(0,0,0,0.04);
+}
+[data-theme="dark"] .folder-label:hover, 
+[data-theme="dark"] .file-label:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.folder > h5,
+.file > h5 {
+  margin: 0;
+  padding: 3px 0;
+  font-size: inherit;
+  font-weight: normal;
+}
+
+/* CONTENT */
+
+.file-content {
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-weight: 300;
+  padding-left: 0;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.file-content p {
+  margin: 0;
+  max-width: 100%;
 }
 
 .comment {
-  margin-top: 0;
-  font-size: 14px;
-  color: #919191;
+  font-style: italic;
+  opacity: 0.7;
 }
 
-/* Indent styles with color-coded borders */
-.indent_1 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #6ECAFF;
-  padding: .3em 1em;
+.depth-0::before,
+.depth-0::after {
+  display: none !important;
 }
 
-.indent_2 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #90EE90;
-  padding: .3em 1em;
+@keyframes treeExpand {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.indent_3 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #ffc966;
-  padding: .3em 1em;
+.folder-content.open,
+.file-content.open {
+  animation: treeExpand 0.2s ease-out;
 }
 
-.indent_4 {
-  margin-left: 1vw;
-  margin-top: -.7em;
-  border-left: 6px solid #ffabae;
-  padding: .3em 1em;
+/* ============================================================
+   FOOTER
+============================================================ */
+footer {
+  margin: 4rem auto 2rem;
+  text-align: center;
+  font-family: var(--font-geo);
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
-/* Default link color */
-a {
-  color: #0864c7;
-}
-
-/* Headings */
-h3, h4 {
-  margin-top: 0;
-}
-
-/* --------------------------
-   RESPONSIVE MEDIA QUERIES
---------------------------- */
-
-@media (max-width: 800px) {
-  /* Adjust menu on smaller screens */
-  #menu {
-    position: relative;
-    top: 2vh;
-    left: 2vw;
-    flex-direction: column;
-    align-items: flex-start;
-    width: auto; /* remove forced 94vw width */
-    margin-top: 5vh;
-    margin-right: 1vw;
-  }
-  #title-container {
-    height: auto;
-  }
-  #title-logo {
-    width: 90px; /* smaller signature on mobile */
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 900px) {
+  /* HIDE PORTRAIT (User requested behavior for small screens) */
+  .portrait { display: none; }
+  
+  .menu-inner {
+    padding: 1rem 1.5rem;
+    grid-template-columns: 1fr auto;
   }
   
-  /* Adjust main content */
-  #main {
-    margin-top: 5vh;
-    margin-left: 5vw;
-    width: 85vw;
+  #title-container { margin-left: 0; }
+  #menu-bar nav { margin-right: 0; margin-top: 0; }
+
+  /* --- MODIFIED MOBILE LAYOUT --- */
+  .page { 
+    /* WE KEEP THE INVISIBLE WALL FOR THE SIGNATURE 
+       Instead of resetting to 0 auto, we reduce it to ~170px 
+       to ensure text clears the signature. */
+    margin-left: 170px;
+    
+    padding-top: 120px; 
+    padding-right: 2rem;
   }
   
-  #intropar {
-    margin-left: 0px;
+  #portfolio {
+    padding: 1.5rem;
+    font-size: 16px; 
   }
   
-  #photo {
-    width: 100%; 
-    float: none; 
-    padding: 2em;
+  h2 { font-size: 1.75rem; }
+}
+
+/* --- OPTIONAL: EXTRA SMALL SCREENS (Phones) --- 
+   If the screen is truly too narrow (< 600px), 170px margin 
+   might break the layout. We force a stack here. */
+@media (max-width: 600px) {
+  .page {
+    margin-left: 1.5rem; /* Reset wall for phones */
+    padding-top: 160px; /* Push down further to clear signature vertically */
+    padding-right: 1.5rem;
   }
-  
-  .home {
-    margin-top: 5vh;
-  }
-}
-
-/* --------------------------
-   OPTIONAL: PROJECT STYLES
---------------------------- */
-
-.project {
-  margin-bottom: 2em;
-  padding-left: 1em;
-  border-left: 4px solid #0864c7;
-}
-
-.project h3 {
-  font-size: 1.2em;
-  margin-bottom: 0.5em;
-  font-family: Garamond;
-  letter-spacing: 0.02em;
-}
-
-.project-description {
-  font-size: 1em;
-  color: #333;
-  line-height: 1.5em;
-  margin-bottom: 0.5em;
-}
-
-.project-links a {
-  font-size: 0.9em;
-  color: #0864c7;
-  text-decoration: none;
-}
-
-.project-links a:hover {
-  text-decoration: underline;
 }
