@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xAI | Deep Research Epistemics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        :root {
+            --accent: #0ea5e9;
+            --bg: #0a0a0a;
+            --text: #e6e9f0;
+            --card: #111111;
+            --border: #1f1f1f;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warn: #f59e0b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ── */
+        #header {
+            height: 52px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        #logo { font-weight: 700; font-size: 1.15em; color: var(--accent); letter-spacing: -0.4px; }
+        .btn {
+            padding: 6px 14px; border-radius: 5px; border: 1px solid var(--border);
+            background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82em;
+            transition: all 0.15s;
+        }
+        .btn:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .btn-primary:hover { background: #0284c7; }
+        .header-spacer { flex: 1; }
+        .header-badge {
+            font-size: 0.75em; padding: 3px 10px; border-radius: 99px;
+            background: rgba(14,165,233,0.15); color: var(--accent);
+        }
+
+        /* ── Main layout ── */
+        #main { display: flex; flex: 1; overflow: hidden; }
+
+        /* ── PDF pane ── */
+        #pdf-pane {
+            flex: 1.2; display: flex; flex-direction: column;
+            border-right: 1px solid var(--border); min-width: 0;
+        }
+        #pdf-toolbar {
+            padding: 8px 16px; background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px; font-size: 0.85em;
+        }
+        #pdf-toolbar .spacer { flex: 1; }
+        #pdf-scroll {
+            flex: 1; overflow: auto; background: #1a1a1a; position: relative;
+        }
+        #pdf-wrapper {
+            position: relative; display: inline-block; margin: 16px auto;
+        }
+        #pdf-scroll { text-align: center; }
+        #pdf-canvas {
+            display: none; background: white;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.5);
+        }
+        #link-overlay {
+            position: absolute; top: 0; left: 0;
+            pointer-events: auto; z-index: 20;
+        }
+        .pdf-link-hit {
+            position: absolute; border: 2px solid transparent; cursor: pointer;
+            transition: all 0.15s; border-radius: 2px;
+            pointer-events: auto;
+        }
+        .pdf-link-hit:hover {
+            border-color: var(--accent);
+            background: rgba(14,165,233,0.12);
+            box-shadow: 0 0 0 2px rgba(14,165,233,0.3);
+        }
+
+        /* Drop zone */
+        #drop-zone {
+            padding: 80px 40px; text-align: center;
+            border: 2px dashed var(--border); border-radius: 10px;
+            margin: 60px auto; max-width: 440px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        #drop-zone:hover { border-color: var(--accent); background: rgba(14,165,233,0.04); }
+        #drop-zone p:first-child { font-size: 1.05em; margin-bottom: 8px; }
+        #drop-zone p:last-child { font-size: 0.8em; color: #666; }
+
+        /* ── Audit pane ── */
+        #audit-pane {
+            min-width: 440px; flex: 0.9; display: flex; flex-direction: column;
+            border-right: 1px solid var(--border); background: var(--card);
+            overflow-y: auto;
+        }
+        .tab-bar { display: flex; border-bottom: 1px solid var(--border); }
+        .tab {
+            padding: 10px 0; cursor: pointer; flex: 1; text-align: center;
+            font-size: 0.85em; border-bottom: 2px solid transparent;
+            transition: all 0.15s; color: #888;
+        }
+        .tab.active { border-bottom-color: var(--accent); color: var(--accent); }
+        .tab:hover { color: var(--text); }
+        .panel { flex: 1; overflow: auto; padding: 16px; }
+        .panel h3 { font-size: 0.9em; margin-bottom: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Claim card */
+        .claim-card {
+            background: #1a1a1a; border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; margin-bottom: 14px;
+        }
+        #claim-text { font-size: 0.9em; line-height: 1.55; margin-bottom: 10px; }
+        #citation-info { font-size: 0.8em; color: #888; margin-bottom: 12px; }
+        #citation-info a { color: var(--accent); text-decoration: none; }
+        #citation-info a:hover { text-decoration: underline; }
+        #provenance-section h4 { font-size: 0.8em; color: #888; margin-bottom: 6px; }
+        #provenance-matches { font-size: 0.8em; max-height: 120px; overflow: auto; color: #aaa; }
+        .verdict-row { 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 14px; 
+            justify-content: flex-end; /* Pushes buttons all the way to the right */
+        }
+        .verdict-btn {
+            padding: 8px 20px; border-radius: 6px; font-weight: 600;
+            cursor: pointer; font-size: 0.85em; border: none; transition: all 0.15s;
+            min-width: 110px;
+        }
+        .verdict-btn.yes { background: var(--success); color: #fff; }
+        .verdict-btn.yes:hover { background: #16a34a; }
+        .verdict-btn.no { background: var(--danger); color: #fff; }
+        .verdict-btn.no:hover { background: #dc2626; }
+        #audit-notes {
+            width: 100%; height: 70px; margin-top: 10px;
+            background: #222; color: var(--text); border: 1px solid var(--border);
+            border-radius: 6px; padding: 8px; font-size: 0.82em; resize: vertical;
+        }
+
+        /* Trace table */
+        #filter-input {
+            width: 100%; padding: 7px 10px; background: #1a1a1a;
+            border: 1px solid var(--border); color: var(--text);
+            border-radius: 5px; font-size: 0.85em; margin-bottom: 10px;
+        }
+        .trace-table { width: 100%; border-collapse: collapse; font-size: 0.82em; }
+        .trace-table th {
+            padding: 8px 6px; border-bottom: 1px solid var(--border);
+            text-align: left; color: #888; font-weight: 600;
+        }
+        .trace-table td {
+            padding: 7px 6px; border-bottom: 1px solid #1a1a1a;
+            cursor: pointer; transition: background 0.1s;
+        }
+        .trace-table tr:hover td { background: rgba(14,165,233,0.06); }
+        .trace-table tr.selected td { background: rgba(14,165,233,0.12); }
+        .v-verified { color: var(--success); }
+        .v-unverified { color: var(--danger); }
+        .v-pending { color: #888; }
+
+        /* ── Source pane ── */
+        #source-pane {
+            flex: 1; display: flex; flex-direction: column;
+            background: var(--card); min-width: 0;
+        }
+        #source-toolbar {
+            padding: 8px 16px; background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px; font-size: 0.85em;
+        }
+        #source-toolbar .spacer { flex: 1; }
+        #source-url-display {
+            flex: 1; font-size: 0.8em; color: #888; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        #source-content {
+            flex: 1; position: relative; overflow: hidden;
+        }
+        #source-iframe {
+            width: 100%; height: 100%; border: none; background: #fff;
+        }
+        #source-placeholder {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 100%; color: #555; text-align: center;
+            padding: 40px;
+        }
+        #source-placeholder .icon { font-size: 2.5em; margin-bottom: 12px; opacity: 0.4; }
+        #source-fallback {
+            display: none; flex-direction: column; align-items: center;
+            justify-content: center; height: 100%; padding: 40px; text-align: center;
+        }
+        #source-fallback .fallback-url {
+            font-size: 0.85em; color: var(--accent); word-break: break-all;
+            margin: 16px 0; max-width: 90%;
+        }
+
+        /* ── Light theme ── */
+        body.light { --bg: #f4f5f7; --text: #1e293b; --card: #fff; --border: #e2e8f0; }
+        body.light #pdf-scroll { background: #e8eaed; }
+        body.light .claim-card { background: #f8f9fc; }
+        body.light #audit-notes { background: #f1f5f9; color: #1e293b; }
+        body.light #filter-input { background: #f1f5f9; }
+        body.light .trace-table tr:hover td { background: rgba(14,165,233,0.08); }
+    </style>
+</head>
+<body>
+
+<div id="header">
+    <div id="logo">xAI | Deep Research Epistemics</div>
+    <span class="header-badge" id="claim-count-badge">0 claims</span>
+    <div class="header-spacer"></div>
+    <button class="btn btn-primary" onclick="document.getElementById('pdf-upload').click()">Upload PDF</button>
+    <button class="btn" onclick="saveSession()">💾 Save</button>
+    <button class="btn" onclick="showSummary()">📊 Summary</button>
+    <button class="btn" onclick="document.body.classList.toggle('light')">🌗</button>
+    <input type="file" id="pdf-upload" accept=".pdf" style="display:none" onchange="handlePDF(event)">
+</div>
+
+<div id="main">
+
+    <!-- PDF Viewer (left) -->
+    <div id="pdf-pane">
+        <div id="pdf-toolbar">
+            <span id="pdf-title" style="color:#888">No PDF loaded</span>
+            <div class="spacer"></div>
+            <span id="page-info">—</span>
+            <button class="btn" onclick="fitPDF()">Fit</button>
+            <button class="btn" onclick="goPage(-1)">◀</button>
+            <button class="btn" onclick="goPage(+1)">▶</button>
+        </div>
+        <div id="pdf-scroll">
+            <div id="drop-zone" onclick="document.getElementById('pdf-upload').click()">
+                <p>Drop a PDF here or click to upload</p>
+                <p>Supports reports with hyperlinked citations</p>
+            </div>
+            <div id="pdf-wrapper">
+                <canvas id="pdf-canvas"></canvas>
+                <div id="link-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Source Viewer (middle) -->
+    <div id="source-pane">
+        <div id="source-toolbar">
+            <span>Source View</span>
+            <span id="source-url-display"></span>
+            <div class="spacer"></div>
+            <button class="btn" id="open-tab-btn" onclick="openInNewTab()" style="display:none">Open in Tab ↗</button>
+        </div>
+        <div id="source-content">
+            <div id="source-placeholder">
+                <div class="icon">🔗</div>
+                <div>Click a citation link in the PDF<br>to load the source here.</div>
+            </div>
+            <iframe id="source-iframe" style="display:none"></iframe>
+            <div id="source-fallback">
+                <div style="font-size:1.5em; margin-bottom:12px;">🚫</div>
+                <div style="margin-bottom:8px; color:#aaa;">This site blocks embedded viewing.</div>
+                <div class="fallback-url" id="fallback-url-text"></div>
+                <button class="btn btn-primary" onclick="openInNewTab()" style="margin-top:16px; padding:10px 24px;">
+                    Open in New Tab ↗
+                </button>
+                <div style="margin-top:20px; font-size:0.78em; color:#666;">
+                    Tip: press <kbd style="background:#333;padding:2px 6px;border-radius:3px;">T</kbd> to quickly open in a new tab
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Annotate Panel (right) -->
+    <div id="audit-pane">
+        <div id="annotate-panel" class="panel">
+            <h3>Annotate</h3>
+            <div class="claim-card">
+                <div id="claim-text">Click a citation link in the PDF to begin annotation.</div>
+                <div id="citation-info"></div>
+                <div id="provenance-section">
+                    <h4>Source Matches</h4>
+                    <div id="provenance-matches"></div>
+                </div>
+                <div class="verdict-row">
+                    <button class="verdict-btn yes" onclick="setVerdict(true)">✅ Verified</button>
+                    <button class="verdict-btn no" onclick="setVerdict(false)">❌ Incorrect</button>
+                </div>
+                <textarea id="audit-notes" placeholder="Notes…"></textarea>
+            </div>
+        </div>
+
+        <!-- Trace table below annotate section -->
+        <div style="padding: 0 16px 16px; border-top: 1px solid var(--border); background: #1a1a1a;">
+            <h3 style="font-size:0.9em; margin: 12px 0 8px 0; color:#888;">Citation Annotations</h3>
+            <input type="text" id="filter-input" placeholder="Filter citations… ( / )" onkeyup="filterTable()" style="width:100%; margin-bottom:8px; background:#222; color:white;">
+            <table class="trace-table">
+                <thead><tr><th>Citation URL</th><th>Verdict</th><th>Pg</th></tr></thead>
+                <tbody id="trace-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ── State ──
+let pdfDoc = null, currentPage = 1;
+let claimsData = [], currentClaimIdx = -1;
+let auditSession = {};
+let currentSourceUrl = '';
+let currentScale = 1.2; // Default scale - "Fit" button will adjust this
+let seenLinks = new Set(); // Prevents double-counting when flipping pages
+
+// Stats for informing 1-7 informational rating
+let sessionStats = {
+  totalCitations: 0,
+  verified: 0,
+  incorrect: {
+    factual: 0,     // Factual Inaccuracy / Hallucination
+    reasoning: 0,   // Reasoning/Logic
+    omission: 0,    // Omission
+    scoping: 0      // Scoping
+  }
+};
+
+// Proxy for bypassing X-Frame-Options. Replace with your own in production.
+const PROXY_BASE = 'https://api.allorigins.win/raw?url=';
+
+// Sites known to block iframes even through proxies (JS-based checks)
+const UNPROXYABLE = [
+    'scholar.google', 'drive.google', 'docs.google',
+];
+
+function isUnproxyable(url) {
+    return UNPROXYABLE.some(d => url.includes(d));
+}
+
+// ── PDF Loading ──
+async function handlePDF(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('pdf-title').textContent = file.name;
+    
+    // Reset stats for new PDF
+    sessionStats = {
+      totalCitations: 0,
+      verified: 0,
+      incorrect: { factual: 0, reasoning: 0, omission: 0, scoping: 0 }
+    };
+    seenLinks = new Set();
+    
+    const buf = await file.arrayBuffer();
+    pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+    
+    // Scan ALL pages once to count unique citations upfront
+    await scanAllCitations();
+    
+    document.getElementById('drop-zone').style.display = 'none';
+    document.getElementById('pdf-canvas').style.display = 'block';
+    renderPage(1);
+}
+
+async function scanAllCitations() {
+    sessionStats.totalCitations = 0;
+    seenLinks = new Set();
+    
+    for (let i = 1; i <= pdfDoc.numPages; i++) {
+        const page = await pdfDoc.getPage(i);
+        const annots = await page.getAnnotations();
+        const links = annots.filter(a => a.subtype === 'Link' && a.url);
+        
+        links.forEach(ann => {
+            if (ann.url && !seenLinks.has(ann.url)) {
+                seenLinks.add(ann.url);
+                sessionStats.totalCitations++;
+            }
+        });
+    }
+    
+    document.getElementById('claim-count-badge').textContent = sessionStats.totalCitations + ' citations';
+    console.log(`Scanned ${pdfDoc.numPages} pages — found ${sessionStats.totalCitations} unique citations`);
+}
+
+async function renderPage(num) {
+    currentPage = num;
+    const page = await pdfDoc.getPage(num);
+    const vp = page.getViewport({ scale: currentScale });
+    const canvas = document.getElementById('pdf-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = vp.width;
+    canvas.height = vp.height;
+
+    // Size the overlay to match the canvas exactly
+    const overlay = document.getElementById('link-overlay');
+    overlay.style.width = vp.width + 'px';
+    overlay.style.height = vp.height + 'px';
+    overlay.innerHTML = '';
+
+    document.getElementById('page-info').textContent =
+        `${num} / ${pdfDoc.numPages}`;
+
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+    // ── Place link hit-targets ──
+    const annots = await page.getAnnotations();
+    const links = annots.filter(a => a.subtype === 'Link' && a.url);
+
+    links.forEach(ann => {
+        // ann.rect = [x1, y1, x2, y2] in PDF coordinates (origin bottom-left)
+        const [x1, y1, x2, y2] = ann.rect;
+
+        // Transform to canvas/screen coordinates (origin top-left)
+        const left   = x1 * currentScale;
+        const top    = vp.height - y2 * currentScale;   // flip Y
+        const width  = (x2 - x1) * currentScale;
+        const height = (y2 - y1) * currentScale;
+
+        const el = document.createElement('div');
+        el.className = 'pdf-link-hit';
+        el.style.left   = left + 'px';
+        el.style.top    = top + 'px';
+        el.style.width  = width + 'px';
+        el.style.height = height + 'px';
+        el.title = ann.url;
+        el.addEventListener('click', () => onCitationClick(ann.url, num));
+        overlay.appendChild(el);
+        
+        // Count each unique link only once
+        if (!seenLinks.has(ann.url)) {
+            seenLinks.add(ann.url);
+            sessionStats.totalCitations++;
+        }
+    });
+    
+    // Update badge with citation count
+    document.getElementById('claim-count-badge').textContent = sessionStats.totalCitations + ' citations';
+}
+
+function goPage(delta) {
+    if (!pdfDoc) return;
+    const next = currentPage + delta;
+    if (next >= 1 && next <= pdfDoc.numPages) renderPage(next);
+}
+
+function fitPDF() {
+    if (!pdfDoc) return;
+    
+    const scrollContainer = document.getElementById('pdf-scroll');
+    const pageNum = currentPage || 1;
+    
+    pdfDoc.getPage(pageNum).then(page => {
+        const viewport = page.getViewport({scale: 1.0});
+        // Fit to width with some padding
+        currentScale = (scrollContainer.clientWidth - 80) / viewport.width;
+        // Clamp scale to reasonable values
+        currentScale = Math.max(0.5, Math.min(currentScale, 3.0));
+        
+        console.log(`Fitting PDF to frame with scale: ${currentScale.toFixed(2)}`);
+        renderPage(currentPage);
+    });
+}
+
+// ── Citation click → load source ──
+function onCitationClick(url, pageNum) {
+    currentSourceUrl = url;
+    loadSource(url);
+
+    let claim = claimsData.find(c => c.url === url);
+    if (!claim) {
+        claim = {
+            id: 'citation-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+            text: url.length > 60 ? url.substring(0, 57) + '...' : url,
+            page: pageNum,
+            url: url,
+            citations: [{ url, label: url.split('/').pop() || url }],
+            verdict: null,
+            provenance: [],
+            verification: null,
+            claim_type: 'citation'
+        };
+        claimsData.push(claim);
+        renderTraceTable();
+    }
+
+    const idx = claimsData.findIndex(c => c.url === url);
+    if (idx >= 0) selectClaim(idx);
+}
+
+function loadSource(url) {
+    currentSourceUrl = url;
+    const iframe = document.getElementById('source-iframe');
+    const placeholder = document.getElementById('source-placeholder');
+    const fallback = document.getElementById('source-fallback');
+    const urlDisplay = document.getElementById('source-url-display');
+    const openBtn = document.getElementById('open-tab-btn');
+
+    urlDisplay.textContent = url;
+    openBtn.style.display = 'inline-block';
+    placeholder.style.display = 'none';
+    fallback.style.display = 'none';
+    iframe.style.display = 'block';
+
+    if (isUnproxyable(url)) {
+        showFallback(url);
+        return;
+    }
+
+    // Strategy: try direct load first. If the site allows framing (many do,
+    // including Stanford Encyclopedia, Wikipedia, PhilArchive, etc.), this
+    // works perfectly and preserves relative URLs, CSS, and JS.
+    //
+    // If direct load fails (X-Frame-Options / CSP), we detect it and retry
+    // through the CORS proxy. If the proxy also fails, show the fallback UI.
+
+    clearTimeout(iframe._fallbackTimer);
+    iframe._proxyAttempted = false;
+
+    iframe.onload = function() {
+        // onload fires even for blocked frames (they load an error page or blank).
+        // We check if we can access the content — if we can and it's non-trivial,
+        // the direct load worked. If we get a cross-origin exception, it loaded
+        // something (possibly the real page via the proxy), so leave it alone.
+        // If it's blank/trivial and we haven't tried the proxy yet, escalate.
+        try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const html = doc && doc.documentElement ? doc.documentElement.innerHTML : '';
+            if (html.length > 100) {
+                // Direct load succeeded — content is accessible
+                return;
+            }
+            // Blank or near-empty — likely blocked by X-Frame-Options
+            if (!iframe._proxyAttempted) {
+                tryProxy(url);
+            } else {
+                showFallback(url);
+            }
+        } catch (e) {
+            // Cross-origin exception: content loaded but from a different origin.
+            // This means the page DID load in the iframe (browser rendered it),
+            // but we can't inspect it. This is the SUCCESS case for direct loads
+            // of cross-origin pages that allow framing. Leave it alone.
+        }
+    };
+
+    iframe.onerror = function() {
+        if (!iframe._proxyAttempted) {
+            tryProxy(url);
+        } else {
+            showFallback(url);
+        }
+    };
+
+    // Direct load
+    iframe.src = url;
+
+    // Safety net: if nothing happens after 4s (no onload, no onerror), try proxy
+    iframe._fallbackTimer = setTimeout(() => {
+        // Check if iframe is still showing about:blank or empty
+        try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const html = doc && doc.documentElement ? doc.documentElement.innerHTML : '';
+            if (html.length < 100 && !iframe._proxyAttempted) {
+                tryProxy(url);
+            }
+        } catch (e) {
+            // Cross-origin = loaded fine, leave it
+        }
+    }, 4000);
+}
+
+function tryProxy(url) {
+    const iframe = document.getElementById('source-iframe');
+    iframe._proxyAttempted = true;
+    const proxied = PROXY_BASE + encodeURIComponent(url);
+    iframe.src = proxied;
+
+    // Give the proxy attempt 5s before falling back
+    clearTimeout(iframe._fallbackTimer);
+    iframe._fallbackTimer = setTimeout(() => {
+        try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const html = doc && doc.documentElement ? doc.documentElement.innerHTML : '';
+            if (html.length < 100) {
+                showFallback(url);
+            }
+        } catch (e) {
+            // Cross-origin from proxy = it loaded something, leave it
+        }
+    }, 5000);
+}
+
+function showFallback(url) {
+    document.getElementById('source-iframe').style.display = 'none';
+    const fb = document.getElementById('source-fallback');
+    fb.style.display = 'flex';
+    document.getElementById('fallback-url-text').textContent = url;
+}
+
+function openInNewTab() {
+    if (currentSourceUrl) window.open(currentSourceUrl, '_blank');
+}
+
+
+
+// ── Audit panel ──
+function selectClaim(idx) {
+    currentClaimIdx = idx;
+    const c = claimsData[idx];
+    if (!c) return;
+
+    document.getElementById('claim-text').textContent = c.text || c.url || 'Untitled citation';
+
+    const info = document.getElementById('citation-info');
+    const citations = Array.isArray(c.citations) ? c.citations : [];
+
+    if (citations.length) {
+        info.innerHTML = citations.map(ci =>
+            `<div style="margin:3px 0">
+                🔗 <a href="#" onclick="loadSource(${JSON.stringify(ci.url)}); return false;">
+                    ${ci.label || (ci.url ? ci.url.split('/').pop() : 'link')}
+                </a>
+            </div>`
+        ).join('') + `<div style="margin-top:6px">Page ${c.page ?? '—'}${c.claim_type ? ` · Type: ${c.claim_type}` : ''}</div>`;
+    } else if (c.url) {
+        info.innerHTML = `
+            <div style="margin:3px 0">
+                🔗 <a href="#" onclick="loadSource(${JSON.stringify(c.url)}); return false;">
+                    ${c.url}
+                </a>
+            </div>
+            <div style="margin-top:6px">Page ${c.page ?? '—'}</div>
+        `;
+    } else {
+        info.textContent = `Page ${c.page ?? '—'}`;
+    }
+
+    const prov = document.getElementById('provenance-matches');
+    if (c.verification && c.verification.best_passage) {
+        prov.textContent = c.verification.best_passage;
+    } else if (Array.isArray(c.provenance) && c.provenance.length) {
+        prov.innerHTML = c.provenance
+            .map(p => `<div style="padding:3px 0;border-bottom:1px solid #222">${p}</div>`)
+            .join('');
+    } else {
+        prov.textContent = 'No automated matches. Click the source link to verify manually.';
+    }
+
+    const saved = auditSession[c.id];
+    document.getElementById('audit-notes').value = saved ? saved.notes : '';
+
+    highlightTableRow(idx);
+
+    const urlToLoad = c.url || (citations[0] && citations[0].url);
+    if (urlToLoad) loadSource(urlToLoad);
+}
+
+function setVerdict(isCorrect) {
+    if (currentClaimIdx < 0) {
+        alert("Select a claim first (click a citation link or a row in the trace table)");
+        return;
+    }
+    const c = claimsData[currentClaimIdx];
+    let subcategory = null;
+    
+    if (!isCorrect) {
+        const choice = prompt("Incorrect subcategory:\n1. Factual Inaccuracy/Hallucination\n2. Reasoning/Logic\n3. Omission\n4. Scoping\n\nEnter number (1-4):", "1");
+        if (choice) {
+            const map = {1: 'factual', 2: 'reasoning', 3: 'omission', 4: 'scoping'};
+            subcategory = map[parseInt(choice)] || 'factual';
+            sessionStats.incorrect[subcategory]++;
+        }
+    } else {
+        sessionStats.verified++;
+    }
+    
+    c.verdict = isCorrect ? 'verified' : 'unverified';
+    c.subcategory = subcategory;
+    
+    auditSession[c.id || `citation-${Date.now()}`] = {
+        verdict: c.verdict,
+        subcategory: subcategory,
+        notes: document.getElementById('audit-notes').value,
+        timestamp: new Date().toISOString(),
+    };
+    
+    renderTraceTable();
+    highlightTableRow(currentClaimIdx);
+    
+    // Visual feedback
+    showFeedback(isCorrect ? '✅ Verified & saved' : `❌ Incorrect (${subcategory || 'general'})`);
+    
+    // Auto-advance to next claim
+    if (currentClaimIdx < claimsData.length - 1) {
+        selectClaim(currentClaimIdx + 1);
+    }
+}
+
+function showFeedback(msg) {
+    const feedback = document.createElement('div');
+    feedback.style.position = 'fixed';
+    feedback.style.bottom = '30px';
+    feedback.style.right = '30px';
+    feedback.style.background = '#111';
+    feedback.style.color = '#0ea5e9';
+    feedback.style.padding = '12px 24px';
+    feedback.style.borderRadius = '6px';
+    feedback.style.border = '1px solid #0ea5e9';
+    feedback.style.zIndex = '1000';
+    feedback.style.opacity = '0.95';
+    feedback.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+    feedback.textContent = msg;
+    document.body.appendChild(feedback);
+    
+    setTimeout(() => {
+        feedback.style.transition = 'opacity 0.5s';
+        feedback.style.opacity = '0';
+        setTimeout(() => feedback.remove(), 500);
+    }, 1800);
+}
+
+function showSummary() {
+    const total = sessionStats.totalCitations || 0;
+    const verified = sessionStats.verified || 0;
+    const incorrectTotal = Object.values(sessionStats.incorrect || {}).reduce((a, b) => a + b, 0);
+    const verifiedPct = total > 0 ? Math.round((verified / total) * 100) : 0;
+    
+    let summary = `The model cited ${verified}/${total} claims correctly (${verifiedPct}%). `;
+    
+    if (incorrectTotal > 0) {
+        summary += `${incorrectTotal} claim${incorrectTotal > 1 ? 's' : ''} had errors: `;
+        const subs = [];
+        if (sessionStats.incorrect.factual) subs.push(`${sessionStats.incorrect.factual} [Factual Inaccuracy/Hallucination]`);
+        if (sessionStats.incorrect.reasoning) subs.push(`${sessionStats.incorrect.reasoning} [Reasoning/Logic]`);
+        if (sessionStats.incorrect.omission) subs.push(`${sessionStats.incorrect.omission} [Omission]`);
+        if (sessionStats.incorrect.scoping) subs.push(`${sessionStats.incorrect.scoping} [Scoping]`);
+        summary += subs.join(', ') + '.';
+    } else {
+        summary += 'No errors detected.';
+    }
+    
+    summary += '\n\nCopy this into your 1-7 informational rating comments.';
+    
+    alert(summary);
+    console.log('Generated summary for tutor:', summary);
+}
+
+// ── Trace table ──
+function renderTraceTable() {
+    const tbody = document.getElementById('trace-tbody');
+    tbody.innerHTML = '';
+    claimsData.forEach((c, i) => {
+        const tr = document.createElement('tr');
+        tr.dataset.idx = i;
+        tr.style.cursor = 'pointer';
+        const vClass = c.verdict === 'verified' ? 'v-verified' :
+                       c.verdict === 'unverified' ? 'v-unverified' : 'v-pending';
+        const vText = c.verdict === 'verified' ? '✅' :
+                      c.verdict === 'unverified' ? '❌' :
+                      c.verdict === 'needs_review' ? '👁' : '·';
+        const urlDisplay = c.url || (c.citations && c.citations[0] && c.citations[0].url) || 'No URL';
+        tr.innerHTML = `
+            <td style="max-width:280px; overflow:hidden; text-overflow:ellipsis;">${urlDisplay}</td>
+            <td class="${vClass}" style="text-align:center">${vText}</td>
+            <td style="text-align:center">${c.page}</td>`;
+        tbody.appendChild(tr);
+    });
+    
+    // Event delegation for reliable row clicks
+    tbody.onclick = (e) => {
+        const tr = e.target.closest('tr');
+        if (tr && tr.dataset.idx !== undefined) {
+            selectClaim(parseInt(tr.dataset.idx));
+        }
+    };
+}
+
+function highlightTableRow(idx) {
+    document.querySelectorAll('.trace-table tr').forEach(tr => tr.classList.remove('selected'));
+    const row = document.querySelector(`.trace-table tr[data-idx="${idx}"]`);
+    if (row) { row.classList.add('selected'); row.scrollIntoView({ block: 'nearest' }); }
+}
+
+function filterTable() {
+    const q = document.getElementById('filter-input').value.toLowerCase();
+    document.querySelectorAll('#trace-tbody tr').forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+
+function switchTab(idx) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+    document.getElementById('audit-panel').style.display = idx === 0 ? '' : 'none';
+    document.getElementById('table-panel').style.display = idx === 1 ? '' : 'none';
+}
+
+// ── Save / Export ──
+function saveSession() {
+    const data = {
+        claims: claimsData,
+        audits: auditSession,
+        timestamp: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `audit-session-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === '/') { document.getElementById('filter-input').focus(); e.preventDefault(); }
+    if (e.key === 't' || e.key === 'T') openInNewTab();
+    if (e.key === 'ArrowDown' && currentClaimIdx < claimsData.length - 1) {
+        selectClaim(currentClaimIdx + 1); e.preventDefault();
+    }
+    if (e.key === 'ArrowUp' && currentClaimIdx > 0) {
+        selectClaim(currentClaimIdx - 1); e.preventDefault();
+    }
+    if (e.key === 'ArrowLeft') goPage(-1);
+    if (e.key === 'ArrowRight') goPage(+1);
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') { saveSession(); e.preventDefault(); }
+});
+
+// ── Drag & drop ──
+document.getElementById('pdf-scroll').addEventListener('dragover', e => {
+    e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
+});
+document.getElementById('pdf-scroll').addEventListener('drop', async e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === 'application/pdf') {
+        document.getElementById('pdf-title').textContent = file.name;
+        const buf = await file.arrayBuffer();
+        pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+        document.getElementById('drop-zone').style.display = 'none';
+        document.getElementById('pdf-canvas').style.display = 'block';
+        renderPage(1);
+    }
+});
+</script>
+</body>
+</html>
