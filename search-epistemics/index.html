@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>xAI | Search Epistemics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root {
+    --grok-blue: #63b3ed;
+    --accent: #0ea5e9;
+    --bg: #f8f9fc;
+    --text: #0f172a;
+    --card: #ffffff;
+    --border: #e2e8f0;
+  }
+  body.light { --bg: #f8f9fc; --text: #0f172a; --card: #ffffff; --border: #e2e8f0; }
+  body.dark {
+    --bg: #000000;
+    --text: #e6e9f0;
+    --card: #0a0a0a;
+    --border: #1f1f1f;
+  }
+  body.dark .user .message-content {
+    background:#111111;
+    border-color:#222222;
+  }
+  body.dark .assistant .message-content {
+    background:#0a0a0a;
+    border-color:#222222;
+  }
+  body {margin:0;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden;transition:background .3s,color .3s;}
+  #header {height:60px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0;box-shadow:0 1px 0 rgba(0,0,0,0.05);}
+  #logo {font-weight:700;font-size:1.35em;color:var(--accent);letter-spacing:-0.5px;}
+  #upload-btn {background:var(--accent);color:#fff;font-weight:600;padding:9px 22px;border-radius:999px;border:none;cursor:pointer;transition:all .2s;font-size:0.95em;}
+  #upload-btn:hover {background:#0284c8;transform:scale(1.04);}
+  #about-btn, #instructions-btn, #theme-btn {background:transparent;border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:999px;cursor:pointer;transition:all .2s;font-size:0.95em;}
+  #about-btn:hover, #instructions-btn:hover, #theme-btn:hover {border-color:var(--accent);color:var(--accent);}
+  .copy-md-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all .2s;
+    font-size: 0.82em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .copy-md-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(14,165,233,0.05);
+  }
+  .copy-md-btn.copied {
+    background: #22c55e;
+    color: white;
+    border-color: #22c55e;
+  }
+  .audit-pill {
+    transition: all 0.2s;
+  }
+  .audit-pill.editing {
+    border-left: 4px solid var(--accent);
+    background: rgba(14,165,233,0.08);
+  }
+  .snippet.selected {
+    border-left: 4px solid var(--accent);
+    background: rgba(14,165,233,0.08);
+    padding-left: 12px;
+    margin-left: -12px;
+  }
+  #body {display:flex;flex:1;overflow:hidden;}
+  #sidebar {width:260px;background:var(--card);border-right:1px solid var(--border);padding:20px;overflow-y:auto;flex-shrink:0;}
+  #sidebar h3 {margin:0 0 16px 0;font-size:0.9em;color:#64748b;font-weight:500;letter-spacing:0.5px;}
+  .conv-item {padding:12px 16px;border-radius:6px;margin-bottom:4px;cursor:pointer;transition:all .2s;font-size:0.94em;line-height:1.4;}
+  body.light .conv-item:hover { background: #f1f5f9; color: var(--text); }
+  body.dark .conv-item:hover { background: #1f1f1f; color: var(--text); }
+  .conv-item.active {
+    background: rgba(14,165,233,0.08);
+    border-left: 4px solid var(--accent);
+    padding-left: 12px;
+    margin-left: -4px;
+    font-weight: 500;
+  }
+  body.dark .conv-item.active {
+    background: rgba(14,165,233,0.12);
+  }
+
+  #chat-area {flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+  #chat {flex:1;padding:24px 32px;overflow-y:auto;}
+  .message {margin-bottom:40px;line-height:1.7;max-width:78%;}
+  .user {margin-left:auto; text-align:right;}
+  .assistant {margin-right:auto; text-align:left;}
+  .message-content {
+    padding:18px 24px;
+    border-radius:20px;
+    max-width:100%;
+    box-shadow:0 1px 3px rgba(0,0,0,0.06);
+  }
+  .user .message-content {
+    background:#f8f9fc;
+    border:1px solid #e2e8f0;
+  }
+  .assistant .message-content {
+    background:#f1f5f9;
+    border:1px solid #e2e8f0;
+  }
+  #right {width:380px;background:var(--card);border-left:1px solid var(--border);padding:20px;overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;}
+  #right h3 {margin:0 0 16px;font-size:0.9em;color:#64748b;font-weight:500;}
+  #analytics {width:280px;background:var(--card);border-left:1px solid var(--border);padding:20px;overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;}
+  #analytics h3 {margin:0 0 16px;font-size:0.9em;color:#64748b;font-weight:500;}
+  .analytics-metric {margin-bottom:16px;padding:12px;background:var(--bg);border-radius:8px;}
+  .analytics-label {font-size:0.82em;color:#64748b;margin-bottom:4px;}
+  .analytics-value {font-size:1.3em;font-weight:600;color:var(--text);}
+  .analytics-bar {height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px;}
+  .analytics-bar-fill {height:100%;background:var(--accent);transition:width 0.3s;}
+  .analytics-breakdown {font-size:0.85em;color:#64748b;margin-top:12px;}
+  .analytics-breakdown-item {display:flex;justify-content:space-between;padding:4px 8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s, color .2s;border-radius:4px;}
+  .analytics-breakdown-item:hover {background:rgba(14,165,233,0.08);}
+  .analytics-breakdown-item:last-child {border-bottom:none;}
+  .analytics-breakdown-item:active {background:rgba(14,165,233,0.15);}
+  .analytics-breakdown-item.active {
+    background: rgba(15, 23, 42, 0.1) !important;
+    border-left: 3px solid var(--accent);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+    transform: scale(0.985);
+    font-weight: 500;
+  }
+  body.dark .analytics-breakdown-item.active {
+    background: rgba(148, 163, 184, 0.15) !important;
+    color: #e6e9f0;
+  }
+  .snippet {margin-bottom:24px;padding:0;cursor:pointer;transition:all .2s;font-size:0.93em;line-height:1.55;border-bottom:1px solid var(--border);padding-bottom:24px;}
+  .snippet:last-child {border-bottom:none;padding-bottom:0;}
+  .snippet:hover {opacity:0.8;}
+  .snippet.reviewed {
+    opacity: 0.75;
+    border-left: 4px solid #22c55e;
+    background: rgba(34, 197, 94, 0.05);
+  }
+  .snippet.reviewed .url { color: #22c55e; }
+  .url {font-size:0.82em;color:#64748b;word-break:break-all;display:block;margin-bottom:8px;}
+  .score {display:inline-block;background:var(--accent);color:#fff;font-size:0.82em;padding:2px 9px;border-radius:999px;font-weight:600;margin-right:8px;}
+  .highlight {transition:all .15s;}
+  .conv-item.completed {
+    text-decoration: line-through;
+    color: #64748b;
+    opacity: 0.85;
+  }
+  .conv-item.completed::after {
+    content: " ✓";
+    color: #22c55e;
+    margin-left: 4px;
+  }
+  
+  /* Table handling in messages (prevents overflow) */
+  .message table {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+    border-collapse: collapse;
+    margin: 12px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  
+  .message th, .message td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    font-size: 0.88em;
+    text-align: left;
+    white-space: nowrap;
+  }
+  
+  .message th {
+    background: var(--bg);
+    font-weight: 600;
+  }
+  
+  .message tr:nth-child(even) {
+    background: rgba(0,0,0,0.02);
+  }
+  
+  /* Grayscale highlights for snippet pills (default state) */
+  .snippet .highlight {background:#e2e8f0;color:#475569;opacity:0.7;font-weight:normal;}
+  .snippet .highlight-2 {background:#e2e8f0;color:#475569;}
+  .snippet .highlight-3 {background:#cbd5e1;color:#334155;}
+  .snippet .highlight-4 {background:#94a3b8;color:#1e2937;}
+  .snippet .highlight-5 {background:#64748b;color:#0f172a;font-weight:500;}
+  .snippet .highlight-6 {background:#475569;color:white;font-weight:600;}
+  .snippet .highlight-7plus {background:#334155;color:white;font-weight:700;}
+
+  /* Colored highlights when snippet is hovered or active */
+  .snippet:hover .highlight,
+  .snippet.active .highlight,
+  .snippet:hover .highlight-2,
+  .snippet.active .highlight-2 {background:#fef3c7;color:#854d0e;opacity:1;}
+  
+  .snippet:hover .highlight-3,
+  .snippet.active .highlight-3 {background:#fef08c;color:#713f12;opacity:1;}
+  
+  .snippet:hover .highlight-4,
+  .snippet.active .highlight-4 {background:#fde047;color:#713f12;font-weight:600;opacity:1;}
+  
+  .snippet:hover .highlight-5,
+  .snippet.active .highlight-5 {background:#fcd34d;color:#713f12;font-weight:700;opacity:1;}
+  
+  .snippet:hover .highlight-6,
+  .snippet.active .highlight-6 {background:#fbbf24;color:#713f12;font-weight:700;opacity:1;}
+  
+  .snippet:hover .highlight-7plus,
+  .snippet.active .highlight-7plus {background:#f59e0b;color:#fff;font-weight:800;opacity:1;}
+
+  /* Default greyscale for response highlights (unless specific analytic is active) */
+  .highlight {
+    background:#e2e8f0;
+    color:#475569;
+    opacity:0.85;
+    font-weight:normal;
+    padding:1px 3px;
+    border-radius:2px;
+    transition: all 0.2s;
+  }
+
+  .highlight.selected {
+    text-decoration: underline 2px;
+    text-underline-offset: 3px;
+    background: #fef3c7;
+    cursor: pointer;
+  }
+
+  /* Analytic-specific colored highlights (extra dimension of info) - used when analytic selected */
+  .highlight-analytic-verbatim {background:#eab308;color:#713f12;font-weight:600;opacity:1;}
+  .highlight-analytic-gaps {background:#f59e0b;color:#854d0e;font-weight:600;opacity:1;}
+  .highlight-analytic-paraphrases {background:#22c55e;color:#14532d;font-weight:500;opacity:1;}
+  .highlight-analytic-attributable {background:#b91c1c;color:#fff;font-weight:600;opacity:1;}
+  .highlight-analytic-unique-ngrams {background:#eab308;color:#713f12;font-weight:600;opacity:1;}
+
+  /* Ensure analytic colors apply inside snippet pills (overrides .snippet greyscale defaults) */
+  .snippet .highlight-analytic-verbatim {background:#eab308;color:#713f12;font-weight:600;opacity:0.95;}
+  .snippet .highlight-analytic-gaps {background:#f59e0b;color:#854d0e;font-weight:600;opacity:0.95;}
+  .snippet .highlight-analytic-paraphrases {background:#22c55e;color:#14532d;font-weight:500;opacity:0.95;}
+  .snippet .highlight-analytic-attributable {background:#b91c1c;color:#fff;font-weight:600;opacity:0.95;}
+  .snippet .highlight-analytic-unique-ngrams {background:#eab308;color:#713f12;font-weight:600;opacity:0.95;}
+
+  /* Fallback length-based for response when no analytic (overridable by analytic classes) */
+  .highlight-2, .highlight-3, .highlight-4, .highlight-5, .highlight-6, .highlight-7plus {
+    background:#fef3c7;
+    color:#854d0e;
+  }
+
+  /* Minimal, out-of-the-way scrollbars (thin thumb, invisible track) for all panels + light/dark */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 20px;
+  }
+  body.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+  }
+  #snippetsContainer::-webkit-scrollbar,
+  #analytics::-webkit-scrollbar,
+  #chat::-webkit-scrollbar,
+  .analytics-breakdown::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  #modal {display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;}
+  #modal-content {background:var(--card);width:660px;border-radius:20px;padding:32px;color:var(--text);max-height:92vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,0.2);}
+  #modal-close {float:right;cursor:pointer;font-size:2em;color:#64748b;}
+</style>
+</head>
+<body class="dark">
+
+<div id="header">
+  <div id="logo">xAI | Search Epistemics</div>
+  <div style="margin-left:auto;display:flex;gap:12px;">
+    <button id="upload-btn" onclick="document.getElementById('fileInput').click()">Upload</button>
+    <input type="file" id="fileInput" accept=".zip,.xlsx,.json" style="display:none;">
+    <button id="about-btn" onclick="showAbout()">About</button>
+    <button id="instructions-btn" onclick="showInstructions()">Instructions</button>
+    <button id="theme-btn" onclick="toggleTheme()">☀️</button>
+  </div>
+</div>
+
+<div id="body">
+  <div id="sidebar">
+    <h3>Conversations</h3>
+    <div id="convList"></div>
+  </div>
+  <div id="chat-area">
+    <div id="chat">
+      <div id="chatContainer"></div>
+    </div>
+  </div>
+  <div id="right">
+    <h3>Search Tool Snippets</h3>
+    <div id="snippetsContainer"></div>
+  </div>
+  <div id="analytics">
+    <h3>Epistemic Audit</h3>
+    <div id="analyticsContainer"></div>
+  </div>
+</div>
+
+<!-- About Modal -->
+<div id="modal">
+  <div id="modal-content">
+    <span id="modal-close" onclick="hideAbout()">×</span>
+    <h2 style="margin-top:0;color:var(--accent);">About Epistemic Tracer</h2>
+    <p><strong>What this tool does:</strong> Traces how search snippets shape Grok’s answers using n-gram provenance from the engine + query-aware boosting. The Attribution Analytics panel shows influence metrics and unique n-grams. Built for xAI epistemic rigor.</p>
+    <h3>How to use</h3>
+    <ol>
+      <li>Double-click <code>Process_Grok_Export.command</code> (recommended) or upload <code>search_epistemics.xlsx</code></li>
+      <li>Click any conversation in the left sidebar</li>
+      <li>Review influence ranking (right), highlighted matches, and the Epistemic Audit panel (far right) to add structured annotations</li>
+    </ol>
+    <button onclick="hideAbout()" style="margin-top:24px;background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:999px;cursor:pointer;width:100%;font-weight:600;">Got it — let’s trace</button>
+  </div>
+</div>
+
+<!-- Instructions Modal -->
+<div id="instructions-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+  <div id="instructions-content" style="background:var(--card);width:660px;border-radius:20px;padding:32px;color:var(--text);max-height:92vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+    <span onclick="hideInstructions()" style="float:right;cursor:pointer;font-size:2em;color:#64748b;">×</span>
+    <h2 style="margin-top:0;color:var(--accent);">Search Epistemics Instructions</h2>
+    
+    <h3>Attribution &amp; Provenance</h3>
+    <p>This dimension checks whether claims are properly linked to sources.</p>
+    <ul>
+      <li><strong>Correct Attribution</strong>: The claim is accurately supported by the cited source.</li>
+      <li><strong>Misattribution</strong>: The source is cited but does not actually support the claim.</li>
+      <li><strong>Nonattribution</strong>: The claim is taken from a source but not cited.</li>
+      <li><strong>Synthesized without citation</strong>: The response blends multiple sources without proper attribution.</li>
+    </ul>
+
+    <h3>Structural Copying</h3>
+    <p>This checks for copying of the source's organization or curation choices (beyond simple n-grams).</p>
+    <ul>
+      <li><strong>No structural copying</strong>: The response does not mirror the source's organization.</li>
+      <li><strong>List ordering copied</strong>: The response copies the sequence of items from a list in the source.</li>
+      <li><strong>Quote selection copied</strong>: The response selects and orders quotes the same way as the source.</li>
+      <li><strong>Overall structure/organization copied</strong>: The response follows the source's logical flow or section structure.</li>
+    </ul>
+
+    <h3>Completeness Signaling</h3>
+    <p>This is about whether the response is transparent about how much of the source it is using vs implying it is giving the full picture.</p>
+    <ul>
+      <li><strong>Explicitly signals completeness</strong>: The response clearly says it is giving the full picture from the source.</li>
+      <li><strong>Signals incompleteness/abridgement</strong>: The response notes that it is summarizing or omitting parts.</li>
+      <li><strong>Implies completeness (risky)</strong>: The response presents a summary as if it is the complete version without any caveat.</li>
+      <li><strong>Undisclosed omission</strong>: The response leaves out important context without telling the user.</li>
+    </ul>
+
+    <h3>Verification &amp; Risk</h3>
+    <p>This is about whether the model actually checked the source before making a claim, and what risks that introduces.</p>
+    <ul>
+      <li><strong>Claim verified before attribution</strong>: The model correctly checked the source and only attributed what was actually there.</li>
+      <li><strong>Unverified claim attributed</strong>: The model attributed a claim to the source that wasn't actually supported.</li>
+      <li><strong>Uncertainty properly flagged</strong>: The response appropriately expresses uncertainty or inability to verify.</li>
+      <li><strong>Hallucination risk</strong>: The response is at risk of inventing or distorting information and attributing it to the source.</li>
+    </ul>
+
+    <button onclick="hideInstructions()" style="margin-top:24px;background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:999px;cursor:pointer;width:100%;font-weight:600;">Got it</button>
+  </div>
+</div>
+
+<script>
+// ====================== GLOBAL VARS ======================
+let allConversations = [];
+let currentXlsxData = null;
+let currentSnippetsData = null;
+let currentSearchesData = null;
+let currentAnalyticsData = [];
+let currentProvenanceMatches = [];
+let currentGaps = [];
+let currentSnippets = [];
+let activeSnippets = new Set();
+let activeAnalyticsMetrics = new Set();
+let originalHTML = "";
+let responseWordCount = 0;
+let avgSnippetWordCount = 0;
+let currentAnalyticType = null;
+let currentMarkdown = "";
+
+// === ANNOTATION SESSION STATE ===
+let currentSessionAudits = {};  // conversation_id -> {snippetKey -> auditObject} with reviewed flag support
+let currentXlsxFilename = "search_epistemics.xlsx";
+let currentAuditor = "Epistemic Tutor";
+let selectedNgramText = "";
+let currentConvId = "";
+let currentFormState = {};
+let selectedNgrams = new Set();
+let editingAuditIndex = -1;
+let currentSelectedSnippetIndex = -1;
+
+// Reviewed/completion helpers for UX
+function isSnippetReviewed(convId, idx) {
+  const key = String(idx || 0);
+  const audit = (currentSessionAudits[convId] || {})[key];
+  return !!audit && (audit.reviewed === true || Object.keys(audit.judgments || {}).length > 0);
+}
+
+// Analytic color mapping - ties provenance metrics to highlight colors (greyscale default otherwise)
+const ANALYTIC_COLORS = {
+  'verbatim': '#eab308',
+  'gaps': '#f59e0b',
+  'paraphrases': '#22c55e',
+  'attributable': '#b91c1c',
+  'unique-ngrams': '#ef4444',
+  'top-snippet': '#ef4444'  // for snippet-specific
+};
+
+// Helper to get analytic class name from metric
+function getAnalyticHighlightClass(metric) {
+  if (!metric) return '';
+  return `highlight-analytic-${metric}`;
+}
+
+// ====================== THEME ======================
+let isDark = true;
+function toggleTheme() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  document.getElementById('theme-btn').textContent = isDark ? '☀️' : '🌙';
+}
+
+// ====================== FILE UPLOAD ======================
+// Fundamental Diagram: [ZIP or XLSX file] -> [type detector + parser] -> [structured data for tracer]
+// Uses Four Friends: Functions for tab building, For loops over conversations, If-then for field mapping
+document.getElementById('fileInput').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const isZip = file.name.toLowerCase().endsWith('.zip');
+  const isJson = file.name.toLowerCase().endsWith('.json');
+  const isXlsx = file.name.toLowerCase().endsWith('.xlsx');
+
+  if (isJson) {
+    // Direct JSON upload from unzipped ttl folder - simplest for users
+    console.log('📄 Processing direct JSON file...');
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (parsed.conversations && parsed.conversations.length > 0) {
+          const {convRows, searchRows, sourceRows} = buildTabsFromJson(parsed);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(convRows), "Conversations");
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(searchRows), "Individual_Searches");
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sourceRows), "Individual_Sources");
+          const xlsxBuffer = XLSX.write(wb, {bookType: "xlsx", type: "array"});
+          const wbParsed = XLSX.read(xlsxBuffer, {type: "array"});
+          const convSheet = XLSX.utils.sheet_to_json(wbParsed.Sheets["Conversations"] || wbParsed.Sheets[0]);
+          const searchSheet = XLSX.utils.sheet_to_json(wbParsed.Sheets["Individual_Searches"] || wbParsed.Sheets[1]);
+          const srcSheet = XLSX.utils.sheet_to_json(wbParsed.Sheets["Individual_Sources"] || wbParsed.Sheets[2]);
+          const analyticsSheet = XLSX.utils.sheet_to_json(wbParsed.Sheets["Attribution_Analytics"] || wbParsed.Sheets[3] || []);
+          currentXlsxData = convSheet;
+          currentSearchesData = searchSheet;
+          currentSnippetsData = srcSheet;
+          currentAnalyticsData = analyticsSheet;
+          finishLoadingData(false);
+          console.log(`✅ Loaded ${convSheet.length} conversations from direct JSON`);
+        } else {
+          alert('This JSON does not contain conversations data. Please upload the main prod-grok-backend.json from your unzipped export.');
+        }
+      } catch (err) {
+        alert('Could not parse JSON: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    return;
+  }
+
+  if (isZip) {
+    // New pipeline for Grok ZIP export -> 3-tab XLSX
+    console.log('🚀 Processing Grok ZIP export using data transformation pipeline...');
+    try {
+      const zip = await JSZip.loadAsync(file);
+      let mainData = null;
+      for (let filename in zip.files) {
+        const entry = zip.files[filename];
+        if (filename.toLowerCase().endsWith('.json') && !entry.dir) {
+          // Handle large JSON files (Grok exports can be 14MB+). Modern browsers can parse ~15MB JSON fine.
+          // Prioritize files with "grok" or "backend" in name for efficiency
+          const isPreferred = filename.toLowerCase().includes('grok') || filename.toLowerCase().includes('backend');
+          const size = entry._data ? (entry._data.uncompressedSize || entry._data.compressedSize || 0) : 0;
+          console.log(`Found JSON: ${filename} (${Math.round(size/1024/1024)}MB)`);
+          if (size > 50 * 1024 * 1024) {
+            console.log(`Skipping oversized JSON (>50MB): ${filename}`);
+            continue;
+          }
+          try {
+            console.log(`Attempting to load ${filename} (${Math.round(size/1024/1024)}MB)...`);
+            // Use blob + FileReader as more reliable path for large files (avoids JSZip string limits)
+            const blob = await entry.async('blob');
+            const content = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsText(blob);
+            });
+            const parsed = JSON.parse(content);
+            if (parsed.conversations && parsed.conversations.length > 0) {
+              mainData = parsed;
+              console.log(`✅ Found valid export JSON: ${filename} with ${parsed.conversations.length} conversations`);
+              break;
+            } else if (isPreferred) {
+              console.log(`Preferred file ${filename} had no conversations array, continuing search...`);
+            }
+          } catch (parseErr) {
+            console.warn(`Could not parse ${filename} (${parseErr.message})`);
+            if (parseErr.message.includes('32767') || parseErr.message.includes('length') || parseErr.message.includes('string')) {
+              console.error('❌ Browser hit string limit on large file. This is a known browser limitation. Use the Python script (1 command) for large exports.');
+            }
+          }
+        }
+      }
+      if (!mainData) {
+        alert('No valid Grok conversations JSON found in ZIP (browser limit on large files). Run generate_search_epistemics.py to create XLSX, then upload that.');
+        return;
+      }
+      const {convRows, searchRows, sourceRows} = buildTabsFromJson(mainData);
+      // Generate XLSX in memory
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(convRows), "Conversations");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(searchRows), "Individual_Searches");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sourceRows), "Individual_Sources");
+      const xlsxBuffer = XLSX.write(wb, {bookType: "xlsx", type: "array"});
+      // Feed to existing XLSX parser for consistency
+      const wbParsed = XLSX.read(xlsxBuffer, {type: "array"});
+      const convSheet = XLSX.utils.sheet_to_json(wbParsed.Sheets["Conversations"] || wbParsed.Sheets[0]);
+      const searchSheet = XLSX.utils.sheet_to_json(wbParsed.Sheets["Individual_Searches"] || wbParsed.Sheets[1]);
+      const srcSheet = XLSX.utils.sheet_to_json(wbParsed.Sheets["Individual_Sources"] || wbParsed.Sheets[2]);
+      const analyticsSheet = XLSX.utils.sheet_to_json(wbParsed.Sheets["Attribution_Analytics"] || wbParsed.Sheets[3] || []);
+      currentXlsxData = convSheet;
+      currentSearchesData = searchSheet;
+      currentSnippetsData = srcSheet;
+      currentAnalyticsData = analyticsSheet;
+    } catch (err) {
+      console.error('ZIP processing error:', err);
+      alert('Error processing ZIP: ' + err.message + '. Falling back to XLSX upload.');
+      return;
+    }
+  } else {
+    // Existing XLSX path (async)
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const wb = XLSX.read(new Uint8Array(ev.target.result), {type: "array"});
+      const convSheet = XLSX.utils.sheet_to_json(wb.Sheets["Conversations"] || wb.Sheets[0]);
+      const searchSheet = XLSX.utils.sheet_to_json(wb.Sheets["Individual_Searches"] || wb.Sheets[1]);
+      const srcSheet = XLSX.utils.sheet_to_json(wb.Sheets["Individual_Sources"] || wb.Sheets[2]);
+      const analyticsSheet = XLSX.utils.sheet_to_json(wb.Sheets["Attribution_Analytics"] || wb.Sheets[3] || []);
+      currentXlsxData = convSheet;
+      currentSearchesData = searchSheet;
+      currentSnippetsData = srcSheet;
+      currentAnalyticsData = analyticsSheet;
+      // Common post-processing for XLSX
+      finishLoadingData(false);
+    };
+    reader.readAsArrayBuffer(file);
+    return;
+  }
+
+  // Common post-processing for ZIP (sync path)
+  finishLoadingData(true);
+});
+
+// Helper to avoid code duplication (Four Friends: Function for shared transformation)
+function finishLoadingData(isZip) {
+  if (!currentXlsxData) return;
+  currentXlsxData.sort((a, b) => new Date(b.Capture_Date || 0) - new Date(a.Capture_Date || 0));
+  allConversations = currentXlsxData;
+  renderSidebar();
+  if (allConversations.length) loadConversation(allConversations[0].Conversation_ID);
+  console.log(`✅ Loaded ${allConversations.length} conversations from ${isZip ? 'ZIP' : 'XLSX'}`);
+}
+
+// ====================== DATA PIPELINE HELPERS (ZIP -> 3 TABS) ======================
+// Fundamental Diagram: [JSON export] -> [tab builders] -> [exact column rows]
+function buildTabsFromJson(data) {
+  const conversations = data.conversations || [];
+  const convRows = [];
+  const searchRows = [];
+  const sourceRows = [];
+
+  conversations.forEach((conv, convIdx) => {
+    const meta = conv.conversation || conv;
+    const convId = meta.id || `conv-${convIdx}`;
+    const title = meta.title || "Untitled";
+    const createTime = meta.create_time || meta.created_at || "";
+    let captureDate = "";
+    if (createTime) {
+      captureDate = createTime.substring(0, 16).replace('T', ' ');
+    }
+
+    const responses = conv.responses || [];
+    // Improved extraction using sender field (human vs ASSISTANT) - Fundamental Diagram: [responses] -> [filter by sender] -> [user query + assistant text]
+    let userQuery = "";
+    let fullResponseText = "";
+    responses.forEach(respItem => {
+      const r = respItem.response || respItem;
+      const sender = (r.sender || "").toString().toLowerCase();
+      const msg = r.message || r.text || r.content || "";
+      if (sender.includes("human") || sender.includes("user") || !userQuery) {
+        if (!userQuery) userQuery = msg;  // First human message is the original query
+      } else if (msg && (sender.includes("assistant") || sender === "")) {
+        fullResponseText += (fullResponseText ? "\n\n" : "") + msg;
+      }
+    });
+    if (!userQuery) {
+      userQuery = (responses[0] && (responses[0].response || responses[0]).message) || "";
+    }
+
+    // Build searches and sources (simplified from build_spreadsheet_v3.py) - now with accurate totalSources
+    // Four Friends: For loops over responses and results, If-then for field extraction
+    let totalSources = 0;
+    responses.forEach((respItem, rIdx) => {
+      const inner = respItem.response || respItem;
+      const webResults = inner.web_search_results || inner.sources || [];
+      totalSources += webResults.length;
+      const responseText = inner.message || inner.text || "";
+
+      searchRows.push({
+        Conversation_ID: convId,
+        Title: title,
+        Original_User_Query: userQuery,
+        Exact_Search_Query: inner.query || "extracted-from-ui",
+        Response_Text: responseText,
+        Response_ID: inner._id || inner.id || "",
+        Has_Advanced_Operators: false,
+        Num_Results_Requested: webResults.length,
+        Response_Length: responseText.length,
+        Response_Turn: rIdx + 1,
+        Search_Order: rIdx + 1,
+        Tool_Type: webResults.length > 0 ? "web" : "none"
+      });
+
+      webResults.forEach((result, rank) => {
+        const url = result.url || result.link || "";
+        const domain = url ? url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : "";
+        const snippet = result.preview || result.description || result.snippet || "";
+        sourceRows.push({
+          Conversation_ID: convId,
+          Title: title,
+          Response_Turn: rIdx + 1,
+          Result_Rank: rank + 1,
+          Source_Title: result.title || "",
+          Source_URL: url,
+          Domain: domain,
+          Frequency: 1,
+          Snippet: snippet.substring(0, 400)
+        });
+      });
+    });
+
+    // Build Conversations tab row (now with accurate totalSources and cleaned Response_Text)
+    const numResponses = responses.length;
+    convRows.push({
+      Conversation_ID: convId,
+      Title: title,
+      Capture_Date: captureDate,
+      Original_User_Query: userQuery,
+      Num_Responses: numResponses,
+      Response_Text: fullResponseText,
+      Response_Length: fullResponseText.length || userQuery.length,
+      Total_Sources: totalSources,
+      Query_Word_Count: getWordCount(userQuery),
+      Is_Interrogative: userQuery.includes('?') || /^(what|how|why|who|when|where)/i.test(userQuery),
+      Has_Operators: /["'()[\]{}|&!+]/g.test(userQuery),
+      Query_Type: userQuery.includes('?') ? "Question" : "Statement"
+    });
+  });
+
+  return {convRows, searchRows, sourceRows};
+}
+
+function renderSidebar() {
+  const list = document.getElementById("convList");
+  list.innerHTML = allConversations.map(c => {
+    const convId = String(c.Conversation_ID);
+    const isActive = convId === String(currentConvId);
+    
+    // New logic: only complete if ALL snippets are reviewed/checked OR user manually marked via snippet checkboxes
+    const convSnippets = currentSnippetsData ? 
+      currentSnippetsData.filter(r => String(r.Conversation_ID) === convId) : [];
+    const totalSnippets = convSnippets.length;
+    const reviewedSnippets = Object.keys(currentSessionAudits[convId] || {})
+      .filter(k => isSnippetReviewed(convId, parseInt(k) || k)).length;
+    const isCompleted = totalSnippets > 0 && reviewedSnippets >= totalSnippets;
+    
+    const completedClass = isCompleted ? 'completed' : '';
+    return `
+    <div class="conv-item ${isActive ? 'active' : ''} ${completedClass}" onclick="loadConversation('${c.Conversation_ID}')">
+      ${c.Title || c.Original_User_Query?.substring(0, 65) + "..." || "Untitled"}
+    </div>
+  `;
+  }).join("");
+}
+
+// ====================== WORD HELPERS ======================
+function getWords(text) {
+  return text.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+}
+function getWordCount(text) {
+  return getWords(text).length;
+}
+function getNgrams(text, n) {
+  const words = getWords(text);
+  const grams = [];
+  for (let i = 0; i <= words.length - n; i++) {
+    grams.push(words.slice(i, i + n).join(' '));
+  }
+  return grams;
+}
+
+
+
+
+
+
+
+// ====================== INFLUENCE CALC ======================
+// Legacy function maintained for compatibility - delegates to enhanced version
+function calculateInfluence(snippetText, responseText) {
+  return calculateEnhancedInfluence(snippetText, responseText, "");
+}
+
+// New enhanced influence calculation following our Four Friends methodology
+// Fundamental Diagram: [snippet, response, query] -> [multi-factor scorer] -> [weighted score]
+function calculateEnhancedInfluence(snippetText, responseText, queryText = "") {
+  // Friend 1: Variables - store our working data
+  const snippetWords = getWords(snippetText);
+  const snippetLen = snippetWords.length;
+  const responseWords = getWordCount(responseText);
+  const queryWords = getWords(queryText);
+
+  // Friend 2: If-then - guard clause for empty input
+  if (snippetLen === 0) return {matchedWords: 0, percent: 0};
+
+  // Friend 3: For loops + Friend 4: Functions - calculate base matches
+  let matchedWordInstances = 0;
+  for (let len = 7; len >= 2; len--) {
+    const grams = getNgrams(snippetText, len);
+    grams.forEach(gram => {
+      const regex = new RegExp(`\\b(${gram.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, "gi");
+      let match;
+      while ((match = regex.exec(responseText)) !== null) {
+        matchedWordInstances += len;
+      }
+    });
+  }
+
+  // Friend 2: If-then + Friend 1: Variables - query term boosting
+  let boostMultiplier = 1.0;
+  if (queryText && queryWords.length > 0) {
+    const queryTermsInSnippet = queryWords.filter(word =>
+      snippetWords.includes(word)
+    ).length;
+    const queryTermsInResponse = queryWords.filter(word =>
+      getWords(responseText).includes(word)
+    ).length;
+
+    if (queryTermsInSnippet > 0 && queryTermsInResponse > 0) {
+      boostMultiplier = 1.5; // Boost terms that connect query -> snippet -> response
+    }
+  }
+
+  // Calculate base score
+  const rawProportion = responseWords ? matchedWordInstances / responseWords : 0;
+  let score = rawProportion * (avgSnippetWordCount / Math.max(snippetLen, 1)) * boostMultiplier;
+
+  return {
+    matchedWords: matchedWordInstances,
+    percent: Math.min(100, Math.round(score * 100))
+  };
+}
+
+// ====================== LOAD CONVERSATION ======================
+// Fundamental Diagram: [conversation ID] -> [data extractor] -> [structured data + ranked snippets]
+function loadConversation(id) {
+  const conv = allConversations.find(c => String(c.Conversation_ID) === String(id));
+  if (!conv) return;
+
+  // Clean and simple: extract data and render
+  const queryText = conv.Original_User_Query || "";
+  const clean = (conv.Response_Text || "").replace(/<grok:render[^>]*>/gi, "");
+  const mdHTML = marked.parse(clean);
+  currentMarkdown = clean;
+
+  const convId = String(id);
+  currentConvId = convId;
+  renderSidebar();  // Refresh sidebar to show active highlight
+  const numSources = currentSnippetsData ? currentSnippetsData.filter(r => String(r.Conversation_ID) === convId).length : 0;
+  const numSearches = currentSearchesData ? Math.max(0, currentSearchesData.filter(r => String(r.Conversation_ID) === convId).length - 1) : 0;
+
+  document.getElementById("chat").innerHTML = `
+    <div class="message user" style="text-align:right">
+      <div class="message-content" style="background:var(--card);border:1px solid var(--border);display:inline-block;text-align:left">
+        <strong>You:</strong> ${queryText}
+      </div>
+    </div>
+    <div class="message assistant">
+      <div id="responseText">${mdHTML}</div>
+      <div style="margin-top:16px;font-size:0.85em;color:#64748b;">
+        ${numSources} sources across ${numSearches} searches
+      </div>
+      <div style="margin-top:12px;">
+        <button onclick="copyResponseMarkdown()" class="copy-md-btn">
+          Copy Markdown
+        </button>
+      </div>
+    </div>
+  `;
+  originalHTML = document.getElementById("responseText").innerHTML;
+
+  // Make highlights clickable for audit selection
+  setTimeout(() => {
+    const responseEl = document.getElementById("responseText");
+    if (responseEl) {
+      responseEl.addEventListener("click", (e) => {
+        if (e.target.classList.contains("highlight")) {
+          const text = e.target.textContent.trim();
+          selectedNgrams.add(text);
+          selectedNgramText = text;
+          reapplySelectedNgrams();
+          console.log("Selected n-gram for audit (all instances): " + text);
+        }
+      });
+    }
+  }, 100);
+
+  const rawSnippets = currentSnippetsData.filter(r => String(r.Conversation_ID) === String(id))
+    .map(r => ({url: r.Source_URL || "", text: r.Snippet || ""}));
+
+  const snippetLengths = rawSnippets.map(s => getWordCount(s.text));
+  avgSnippetWordCount = snippetLengths.length ? snippetLengths.reduce((a,b)=>a+b,0) / snippetLengths.length : 30;
+  responseWordCount = getWordCount(clean);
+
+  currentSnippets = rawSnippets.map(s => {
+    const stats = calculateEnhancedInfluence(s.text, clean, queryText);
+    return {...s, percent: stats.percent, matchedWords: stats.matchedWords};
+  }).sort((a,b) => b.percent - a.percent);
+
+  renderSnippets();
+  activeSnippets.clear();
+  activeAnalyticsMetrics.clear();  // Reset analytics active states on conv change
+  currentAnalyticType = null;
+  currentProvenanceMatches = [];
+  currentGaps = [];
+  renderAuditPanel(convId);
+  refreshHighlights();  // Friend 2: If-then - enforce clean idle state (no default highlights)
+}
+
+// Friend 4: Function - normalizes scores and ranks snippets
+// Fundamental Diagram: [scored snippets] -> [normalizer] -> [final ranked list]
+function normalizeAndRank(scoredSnippets) {
+  if (scoredSnippets.length === 0) return [];
+
+  // Friend 1: Variables - calculate total influence for normalization
+  const totalInfluence = scoredSnippets.reduce((sum, s) => sum + s.percent, 0);
+
+  // Friend 2: If-then - handle edge case where all scores are zero
+  if (totalInfluence === 0) {
+    return scoredSnippets.map((s, index) => ({
+      ...s,
+      percent: Math.round(100 / scoredSnippets.length)
+    })).sort((a, b) => b.percent - a.percent);
+  }
+
+  // Friend 4: Functions + Friend 2: If-then - normalize using softmax-like approach
+  const normalizedSnippets = scoredSnippets.map(s => {
+    const normalizedPercent = totalInfluence > 0
+      ? Math.round((s.percent / totalInfluence) * 100)
+      : 0;
+    return {
+      ...s,
+      percent: Math.min(100, Math.max(0, normalizedPercent))
+    };
+  });
+
+  // Friend 3: For loops would be used here if we needed custom sorting logic,
+  // but JavaScript's built-in sort is sufficient
+  return normalizedSnippets.sort((a, b) => b.percent - a.percent);
+}
+
+function markSnippetReviewed(convId, idx, noAuditNeeded = true) {
+  if (!convId) return;
+  if (!currentSessionAudits[convId]) currentSessionAudits[convId] = {};
+  const key = String(idx);
+  const existing = currentSessionAudits[convId][key] || {};
+  
+  // Lookup full snippet details for better display in audit list
+  let snippetUrl = '';
+  let snippetText = '';
+  if (currentSnippets && currentSnippets[idx]) {
+    snippetUrl = currentSnippets[idx].url || '';
+    snippetText = (currentSnippets[idx].text || '').substring(0, 100);
+  }
+  
+  currentSessionAudits[convId][key] = {
+    ...existing,
+    reviewed: true,
+    no_audit_needed: noAuditNeeded,
+    timestamp: new Date().toISOString(),
+    auditor: currentAuditor || "Epistemic Tutor",
+    snippet_index: idx,
+    snippet_url: snippetUrl || existing.snippet_url || '',
+    snippet_text: snippetText || existing.snippet_text || '',
+    judgments: existing.judgments || {},
+    notes: existing.notes || (noAuditNeeded ? "No audit characteristics found / explicitly reviewed" : "Audited with form")
+  };
+  
+  saveSessionToLocalStorage();
+  renderSnippets();
+  if (currentConvId === convId) {
+    renderAuditPanel(convId);
+    renderSidebar();
+  }
+  console.log(`Snippet ${idx} marked reviewed (no-audit=${noAuditNeeded}) in ${convId}`);
+}
+
+function renderSnippets() {
+  const container = document.getElementById("snippetsContainer");
+  const convId = currentConvId;
+
+  container.innerHTML = currentSnippets.map((snippetData, i) => {
+    const snippetText = snippetData.text || "";
+    const isReviewed = isSnippetReviewed(convId, i);
+    const reviewStatus = isReviewed ? '✓' : '☐';
+
+    // Get n-grams that would match in the response for this snippet
+    const matchingNgrams = [];
+    for (let len = 7; len >= 2; len--) {
+      const grams = getNgrams(snippetText, len);
+      grams.forEach(gram => {
+        if (originalHTML.toLowerCase().includes(gram.toLowerCase())) {
+          matchingNgrams.push(gram);
+        }
+      });
+    }
+
+    // Highlight the snippet text with matching n-grams (respect analytic color if active)
+    const highlightedSnippetText = highlightTextWithNgrams(snippetText, matchingNgrams, currentAnalyticType);
+
+    return `
+      <div class="snippet ${activeSnippets.has(i) ? 'active' : ''} ${currentSelectedSnippetIndex === i ? 'selected' : ''} ${isReviewed ? 'reviewed' : ''}" data-index="${i}">
+        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:4px;">
+          <a href="${snippetData.url}" target="_blank" rel="noopener noreferrer" class="url" style="text-decoration:underline;color:var(--accent);cursor:pointer;flex:1;">${snippetData.url}</a>
+          <span onclick="event.stopImmediatePropagation(); markSnippetReviewed('${convId}', ${i}, true);" 
+                style="cursor:pointer; font-size:1.1em; padding:2px 6px; color:${isReviewed ? '#22c55e' : '#64748b'}; user-select:none;">
+            ${reviewStatus}
+          </span>
+        </div>
+        ${highlightedSnippetText}
+      </div>
+    `;
+  }).join("");
+
+  document.querySelectorAll(".snippet").forEach(snippetEl => {
+    const idx = parseInt(snippetEl.dataset.index);
+    snippetEl.addEventListener("click", () => {
+      selectSnippetForAudit(idx);
+    });
+
+    snippetEl.addEventListener("mouseenter", () => {
+      snippetEl.classList.add('hover');
+      previewSnippet(idx);
+    });
+    snippetEl.addEventListener("mouseleave", () => {
+      snippetEl.classList.remove('hover');
+      refreshHighlights();
+    });
+  });
+}
+
+// ====================== DUAL HIGHLIGHTING HELPERS ======================
+// Reusable function to highlight n-grams in any text
+// Fundamental Diagram: [text, n-grams] -> [highlighter] -> [highlighted HTML]
+function highlightTextWithNgrams(text, ngramsToHighlight, analyticType = null) {
+  let highlighted = text;
+  const grams = Array.isArray(ngramsToHighlight) ? ngramsToHighlight : [];
+  const isAnalyticMode = !!analyticType;
+  const analyticClass = isAnalyticMode ? getAnalyticHighlightClass(analyticType) : '';
+
+  // Friend 3: For loops - apply highlights from longest to shortest
+  for (let len = 7; len >= 2; len--) {
+    const lengthGrams = grams.filter(g => g.split(' ').length === len);
+    lengthGrams.forEach(gram => {
+      const regex = new RegExp(`\\b(${gram.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, "gi");
+      const spanClass = isAnalyticMode ? `highlight ${analyticClass}` : `highlight highlight-${len > 6 ? '7plus' : len}`;
+      highlighted = highlighted.replace(regex, m => 
+        `<span class="${spanClass}">${m}</span>`
+      );
+    });
+  }
+
+  return highlighted;
+}
+
+// ====================== HIGHLIGHTING (2-grams on by default) ======================
+function refreshHighlights() {
+  const responseEl = document.getElementById("responseText");
+  let html = originalHTML;
+  const isAnalyticMode = !!currentAnalyticType;
+  const analyticClass = isAnalyticMode ? getAnalyticHighlightClass(currentAnalyticType) : '';
+
+  // Friend 2: If-then - guard against default highlights in idle state (no active analytic or snippets)
+  // This eliminates the random small phrases ("Become the", "within it,", "Value Chain Analysis", "reduce costs,")
+  if (!isAnalyticMode && activeSnippets.size === 0) {
+    responseEl.innerHTML = html;
+    return;
+  }
+
+  // Prefer rich provenance data from Python engine for accurate highlighting (unique n-grams mode)
+  if (currentProvenanceMatches && currentProvenanceMatches.length > 0 && isAnalyticMode && currentAnalyticType !== 'unique-ngrams') {
+    // Only use full provenance path for specific analytic modes.
+    // 'unique-ngrams' uses the reliable n-gram path below so it highlights ALL n-grams.
+    let matchesToUse = currentProvenanceMatches;
+    if (currentAnalyticType === 'attributable') {
+      matchesToUse = currentProvenanceMatches.filter(m => m.type !== 'gap');
+    } else {
+      matchesToUse = currentProvenanceMatches.filter(m => m.type === currentAnalyticType || (currentAnalyticType === 'verbatim' && m.is_verbatim));
+    }
+    matchesToUse.forEach(match => {
+      const typeClass = (match.type === 'gap' || currentAnalyticType === 'unique-ngrams') ? 'highlight highlight-4' : `highlight-analytic-${match.type}`;
+      const escaped = match.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, "gi");
+      html = html.replace(regex, m => `<span class="${typeClass}">${m}</span>`);
+    });
+  } else if (activeSnippets.size > 0) {
+    // Use reliable n-gram logic from active snippets (this is what makes the snippet pills highlight correctly)
+    const uniqueGramsByLen = {};
+    for (let len = 7; len >= 2; len--) {
+      uniqueGramsByLen[len] = new Set();
+    }
+    activeSnippets.forEach(idx => {
+      if (currentSnippets[idx]) {
+        const snippetText = currentSnippets[idx].text;
+        for (let len = 7; len >= 2; len--) {
+          const grams = getNgrams(snippetText, len);
+          grams.forEach(gram => uniqueGramsByLen[len].add(gram.toLowerCase()));
+        }
+      }
+    });
+    for (let len = 7; len >= 2; len--) {
+      const grams = Array.from(uniqueGramsByLen[len]);
+      grams.forEach(gram => {
+        const regex = new RegExp(`\\b(${gram.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, "gi");
+        html = html.replace(regex, m => `<span class="highlight highlight-${len > 6 ? '7plus' : len}">${m}</span>`);
+      });
+    }
+  } else {
+    // Fallback to deduplicated n-gram logic
+    const uniqueGramsByLen = {};
+    for (let len = 7; len >= 2; len--) {
+      uniqueGramsByLen[len] = new Set();
+    }
+    activeSnippets.forEach(idx => {
+      const snippetText = currentSnippets[idx].text;
+      for (let len = 7; len >= 2; len--) {
+        const grams = getNgrams(snippetText, len);
+        grams.forEach(gram => uniqueGramsByLen[len].add(gram.toLowerCase()));
+      }
+    });
+    for (let len = 7; len >= 2; len--) {
+      const grams = Array.from(uniqueGramsByLen[len]);
+      grams.forEach(gram => {
+        const regex = new RegExp(`\\b(${gram.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, "gi");
+        const spanClass = isAnalyticMode ? `highlight ${analyticClass}` : `highlight highlight-${len > 6 ? '7plus' : len}`;
+        html = html.replace(regex, m => `<span class="${spanClass}">${m}</span>`);
+      });
+    }
+  }
+  responseEl.innerHTML = html;
+  reapplySelectedNgrams();
+}
+
+function previewSnippet(idx) {
+  const responseEl = document.getElementById("responseText");
+  let html = originalHTML;
+  const isAnalyticMode = !!currentAnalyticType;
+  const analyticClass = isAnalyticMode ? getAnalyticHighlightClass(currentAnalyticType) : '';
+  const snippetText = currentSnippets[idx].text;
+  for (let len = 7; len >= 2; len--) {
+    const grams = getNgrams(snippetText, len);
+    grams.forEach(gram => {
+      const regex = new RegExp(`\\b(${gram.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, "gi");
+      const spanClass = isAnalyticMode ? `highlight ${analyticClass}` : `highlight highlight-${len > 6 ? '7plus' : len}`;
+      html = html.replace(regex, m => `<span class="${spanClass}">${m}</span>`);
+    });
+  }
+  responseEl.innerHTML = html;
+  reapplySelectedNgrams();
+}
+
+
+
+// Helper for analytics active state (to persist across re-renders and provide "stay on" visual)
+function getAnalyticsItemKey(el) {
+  const metric = el.dataset.metric;
+  const url = el.dataset.url;
+  if (url && metric === 'top-snippet') {
+    return `top:${url}`;
+  }
+  return metric || 'unknown';
+}
+
+function applyActiveAnalyticsStates() {
+  const items = document.querySelectorAll('.analytics-breakdown-item');
+  items.forEach(item => {
+    const key = getAnalyticsItemKey(item);
+    if (activeAnalyticsMetrics.has(key)) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+}
+
+// ====================== EPISTEMIC AUDIT PANEL ======================
+// Replaces the old analytics panel with annotation/audit tool for tutors
+function renderAuditPanel(convId) {
+  const container = document.getElementById("analyticsContainer");
+  const convAudits = currentSessionAudits[convId] || [];
+  
+  let html = `
+    <h3 style="margin:0 0 16px;font-size:0.9em;color:#64748b;">Epistemic Audit</h3>
+    <div style="font-size:0.85em;color:#64748b;margin-bottom:12px;">
+      ${convAudits.length} audits • <button onclick="saveSessionToFile()" style="background:none;border:none;color:var(--accent);text-decoration:underline;cursor:pointer;font-size:0.8em;">Save Session</button>
+    </div>
+  `;
+
+  // Form for new or selected audit (expandable sections based on search epistemics / Britannica case)
+  html += `
+    <details style="margin-bottom:12px;background:var(--bg);border-radius:6px;padding:0 12px;">
+      <summary style="padding:10px 0;cursor:pointer;font-weight:500;">Attribution &amp; Provenance</summary>
+      <select id="select-attribution" onchange="updateCurrentAudit('${convId}', 'attribution', this.value)" style="width:100%;margin:4px 0;padding:6px;">
+        <option value="">Select...</option>
+        <option value="correct">Correct Attribution</option>
+        <option value="misattribution">Misattribution</option>
+        <option value="nonattribution">Nonattribution</option>
+        <option value="synthesized">Synthesized without citation</option>
+      </select>
+    </details>
+    
+    <details style="margin-bottom:12px;background:var(--bg);border-radius:6px;padding:0 12px;">
+      <summary style="padding:10px 0;cursor:pointer;font-weight:500;">Structural Copying</summary>
+      <select id="select-structural" onchange="updateCurrentAudit('${convId}', 'structural', this.value)" style="width:100%;margin:4px 0;padding:6px;">
+        <option value="">Select...</option>
+        <option value="none">No structural copying</option>
+        <option value="list_order">List ordering copied</option>
+        <option value="quote_selection">Quote selection copied</option>
+        <option value="organization">Overall structure/organization copied</option>
+      </select>
+    </details>
+    
+    <details style="margin-bottom:12px;background:var(--bg);border-radius:6px;padding:0 12px;">
+      <summary style="padding:10px 0;cursor:pointer;font-weight:500;">Completeness Signaling</summary>
+      <select id="select-completeness" onchange="updateCurrentAudit('${convId}', 'completeness', this.value)" style="width:100%;margin:4px 0;padding:6px;">
+        <option value="">Select...</option>
+        <option value="complete">Explicitly signals completeness</option>
+        <option value="incomplete">Signals incompleteness/abridgement</option>
+        <option value="implied_complete">Implies completeness (risky)</option>
+        <option value="omission">Undisclosed omission</option>
+      </select>
+    </details>
+    
+    <details style="margin-bottom:12px;background:var(--bg);border-radius:6px;padding:0 12px;">
+      <summary style="padding:10px 0;cursor:pointer;font-weight:500;">Verification &amp; Risk</summary>
+      <select id="select-verification" onchange="updateCurrentAudit('${convId}', 'verification', this.value)" style="width:100%;margin:4px 0;padding:6px;">
+        <option value="">Select...</option>
+        <option value="verified">Claim verified before attribution</option>
+        <option value="unverified">Unverified claim attributed</option>
+        <option value="uncertainty">Uncertainty properly flagged</option>
+        <option value="hallucination">Hallucination risk</option>
+      </select>
+    </details>
+    
+    <div style="margin-top:12px;">
+      <textarea id="auditNotes" placeholder="Notes, observations, or red-team prompt ideas..." style="width:100%;height:80px;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:0.85em;" onchange="updateCurrentAudit('${convId}', 'notes', this.value)"></textarea>
+    </div>
+    <div style="margin-top:12px;">
+      <button onclick="startNewAudit()" 
+              style="background:var(--accent);color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;width:100%;font-size:0.9em;">
+        Save
+      </button>
+    </div>
+  `;
+
+  const auditsForConv = currentSessionAudits[convId] || {};
+  const auditedKeys = Object.keys(auditsForConv);
+  if (auditedKeys.length > 0) {
+    html += '<div style="margin-top:20px;"><strong>Previous Audits</strong></div><div style="max-height:300px;overflow-y:auto;">';
+    auditedKeys.forEach(key => {
+      const audit = auditsForConv[key];
+      const isEditing = editingAuditIndex.toString() === key;
+      const displayLabel = audit.snippet_url 
+        ? audit.snippet_url.substring(0, 45) 
+        : (audit.snippet_text || audit.ngram_text || 'snippet').substring(0, 40);
+      const isReviewedOnly = audit.no_audit_needed || (!Object.keys(audit.judgments || {}).length && audit.reviewed);
+      const labelPrefix = isReviewedOnly ? '✓ Reviewed - ' : '';
+      const smallText = Object.values(audit.judgments || {}).join(', ') || 
+                       (isReviewedOnly ? 'No issues found' : 'No judgment');
+      html += `
+        <div onclick="loadAuditForEditing('${convId}', '${key}');" class="audit-pill ${isEditing ? 'editing' : ''}" style="padding:12px;margin-bottom:8px;border-radius:6px;font-size:0.85em;position:relative;cursor:pointer;">
+          <strong>${labelPrefix}"${displayLabel}..."</strong>
+          <span onclick="deleteAudit('${convId}', '${key}'); event.stopImmediatePropagation();" style="position:absolute;top:8px;right:12px;cursor:pointer;color:#ef4444;font-size:1.2em;line-height:1;">×</span>
+          <br><small>${smallText}</small>
+        </div>`;
+    });
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function updateCurrentAudit(convId, field, value) {
+  currentFormState[field] = value;
+  console.log(`Updated ${field} to ${value}`);
+}
+
+function startNewAudit() {
+  const convId = currentConvId;
+  if (!convId) {
+    alert("No conversation selected.");
+    return;
+  }
+  if (currentSelectedSnippetIndex < 0) {
+    alert("Select a snippet first.");
+    return;
+  }
+  
+  const snippet = currentSnippets[currentSelectedSnippetIndex] || {};
+  const auditData = {
+    judgments: { ...currentFormState },
+    notes: currentFormState.notes || "",
+    snippet_url: snippet.url || "",
+    snippet_text: (snippet.text || "").substring(0, 100)
+  };
+  
+  if (editingAuditIndex >= 0 && currentSessionAudits[convId]) {
+    currentSessionAudits[convId][editingAuditIndex] = auditData;
+    editingAuditIndex = -1;
+  } else {
+    addAudit(convId, auditData);
+  }
+  
+  currentFormState = {};
+  selectedNgrams.clear();
+  document.querySelectorAll(".highlight.selected").forEach(el => el.classList.remove("selected"));
+  renderAuditPanel(convId);
+  console.log("Audit saved for snippet " + currentSelectedSnippetIndex + " in conversation " + convId);
+}
+
+function loadAuditForEditing(convId, index) {
+  const audit = currentSessionAudits[convId] ? currentSessionAudits[convId][index] : null;
+  if (!audit) return;
+  
+  editingAuditIndex = index;
+  currentFormState = { ... (audit.judgments || {}) };
+  if (audit.notes) currentFormState.notes = audit.notes;
+  selectedNgramText = audit.ngram_text || '';
+  
+  renderAuditPanel(convId);
+  
+  // Populate the form after render
+  setTimeout(() => {
+    const selects = {
+      'attribution': document.getElementById('select-attribution'),
+      'structural': document.getElementById('select-structural'),
+      'completeness': document.getElementById('select-completeness'),
+      'verification': document.getElementById('select-verification')
+    };
+    Object.keys(selects).forEach(key => {
+      if (selects[key] && currentFormState[key]) {
+        selects[key].value = currentFormState[key];
+      }
+    });
+    const notesEl = document.getElementById('auditNotes');
+    if (notesEl) notesEl.value = currentFormState.notes || '';
+  }, 100);
+}
+
+
+
+function deleteAudit(convId, key) {
+  if (currentSessionAudits[convId] && currentSessionAudits[convId][key] !== undefined) {
+    if (confirm("Delete this audit?")) {
+      delete currentSessionAudits[convId][key];
+      if (Object.keys(currentSessionAudits[convId]).length === 0) {
+        delete currentSessionAudits[convId];
+      }
+      saveSessionToLocalStorage();
+      renderAuditPanel(convId);
+      // Refresh snippets and sidebar immediately when deleting a reviewed/blank audit
+      renderSnippets();
+      renderSidebar();
+      console.log("Audit deleted");
+    }
+  }
+}
+
+function reapplySelectedNgrams() {
+  document.querySelectorAll(".highlight").forEach(el => {
+    const text = el.textContent.trim();
+    if (selectedNgrams.has(text)) {
+      el.classList.add("selected");
+    }
+  });
+}
+
+function selectSnippetForAudit(index) {
+  currentSelectedSnippetIndex = index;
+  activeSnippets.clear();
+  activeSnippets.add(index);
+  renderSnippets();
+  renderAuditPanel(currentConvId);
+}
+
+// Old analytics click handler removed - replaced with Epistemic Audit system
+
+// ====================== COPY MARKDOWN ======================
+// Copies the original markdown source of the current response (useful for word counting in an editor)
+function copyResponseMarkdown() {
+  if (!currentMarkdown) {
+    alert("No response markdown available to copy.");
+    return;
+  }
+
+  navigator.clipboard.writeText(currentMarkdown).then(() => {
+    // Update the button visually
+    const buttons = document.querySelectorAll('.copy-md-btn');
+    if (buttons.length > 0) {
+      const btn = buttons[buttons.length - 1];
+      const originalHTML = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = '✅ Copied!';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = originalHTML;
+      }, 2000);
+    }
+    console.log("✅ Markdown copied to clipboard! (" + currentMarkdown.split(/\s+/).length + " words)");
+  }).catch(err => {
+    console.error("Copy failed:", err);
+    // Fallback method for older browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = currentMarkdown;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      console.log("✅ Markdown copied using fallback! (" + currentMarkdown.split(/\s+/).length + " words)");
+    } catch (e) {
+      alert("Failed to copy markdown: " + e.message);
+    }
+    document.body.removeChild(textArea);
+  });
+}
+
+// ====================== SESSION PERSISTENCE (3 layers) ======================
+// Layer 1: localStorage (autosave on change, survives refresh)
+function saveSessionToLocalStorage() {
+  const sessionData = {
+    version: "1.0",
+    xlsxFilename: currentXlsxFilename,
+    auditor: currentAuditor,
+    timestamp: new Date().toISOString(),
+    audits: currentSessionAudits
+  };
+  localStorage.setItem('epistemic_session_' + btoa(currentXlsxFilename), JSON.stringify(sessionData));
+  console.log("💾 Session autosaved to localStorage");
+}
+
+function loadSessionFromLocalStorage() {
+  const key = 'epistemic_session_' + btoa(currentXlsxFilename);
+  const saved = localStorage.getItem(key);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      currentSessionAudits = data.audits || {};
+      console.log(`✅ Restored session with ${Object.keys(currentSessionAudits).length} audited conversations`);
+      return true;
+    } catch (e) {
+      console.error("Failed to parse saved session", e);
+    }
+  }
+  return false;
+}
+
+// Layer 2: Explicit session file (downloadable backup)
+function saveSessionToFile() {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const sessionData = {
+    version: "1.0",
+    xlsxFilename: currentXlsxFilename,
+    auditor: currentAuditor,
+    timestamp: new Date().toISOString(),
+    audits: currentSessionAudits
+  };
+  
+  const blob = new Blob([JSON.stringify(sessionData, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `epistemic-session-${timestamp}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  console.log("Session file downloaded");
+}
+
+// Layer 3: Load from file
+function loadSessionFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.audits) {
+        currentSessionAudits = data.audits;
+        console.log(`✅ Loaded session file with ${Object.keys(currentSessionAudits).length} audited conversations`);
+        alert("Session loaded successfully! Switch to a conversation to see your audits.");
+      }
+    } catch (err) {
+      alert("Invalid session file: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Safety: warn before leaving with unsaved work
+function setupUnloadWarning() {
+  window.addEventListener('beforeunload', (e) => {
+    if (Object.keys(currentSessionAudits).length > 0) {
+      e.preventDefault();
+      e.returnValue = 'You have unsaved audits. Leave anyway?';
+      return e.returnValue;
+    }
+  });
+}
+
+// Add or update an audit for a snippet
+function addAudit(conversationId, auditData) {
+  if (!currentSessionAudits[conversationId]) {
+    currentSessionAudits[conversationId] = {};
+  }
+  const key = currentSelectedSnippetIndex >= 0 ? currentSelectedSnippetIndex.toString() : 'unknown';
+  currentSessionAudits[conversationId][key] = {
+    ...auditData,
+    timestamp: new Date().toISOString(),
+    auditor: currentAuditor,
+    snippet_index: currentSelectedSnippetIndex
+  };
+  saveSessionToLocalStorage();
+  console.log("Audit saved for snippet " + key + " in conversation " + conversationId);
+}
+
+// ====================== MODALS ======================
+function showAbout() {
+  document.getElementById("modal").style.display = "flex";
+}
+function hideAbout() {
+  document.getElementById("modal").style.display = "none";
+}
+
+function showInstructions() {
+  document.getElementById("instructions-modal").style.display = "flex";
+}
+
+function hideInstructions() {
+  document.getElementById("instructions-modal").style.display = "none";
+}
+
+// Initialize the application
+window.addEventListener('load', () => {
+  console.log("🚀 Epistemic Tracer initialized");
+  setupUnloadWarning();
+  
+  // Try to restore previous session if available
+  setTimeout(() => {
+    if (loadSessionFromLocalStorage()) {
+      console.log("🔄 Previous annotation session restored from localStorage");
+    }
+  }, 800);
+});
+</script>
+</body>
+</html>
