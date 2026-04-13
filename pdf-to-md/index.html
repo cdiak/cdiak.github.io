@@ -110,31 +110,38 @@
             
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                const bytes = new Uint8Array(arrayBuffer);
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                 
-                // Write file to Pyodide's virtual filesystem (avoids MemoryError)
-                pyodide.FS.writeFile('/input.pdf', bytes);
+                let fullText = '';
+                let links = [];
                 
-                const pythonCode = `
-from pypdf import PdfReader
-
-reader = PdfReader('/input.pdf')
-
-text = ""
-for page in reader.pages:
-    page_text = page.extract_text()
-    if page_text:
-        text += page_text + "\\n\\n"
-
-print(text.strip())
-`;
-                
-                const output = await pyodide.runPythonAsync(pythonCode);
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    fullText += textContent.items.map(item => item.str).join(' ') + '\n\n';
+                    
+                    // Extract hyperlinks
+                    const annotations = await page.getAnnotations();
+                    for (let ann of annotations) {
+                        if (ann.subtype === 'Link' && ann.url) {
+                            links.push({
+                                page: i,
+                                url: ann.url,
+                                text: 'LINK' // We would ideally match this to nearby text
+                            });
+                        }
+                    }
+                }
                 
                 let md = `# ${file.name.replace(/\\.pdf$/i, '')}\\n\\n`;
-                md += output;
-                md += '\\n\\n---\\n\\n**Note:** Converted using real Python (Pyodide + pypdf) running in your browser.\\n';
-                md += 'Hyperlink detection is limited in this version. The desktop Python tool (`pdf_to_md.py`) is more powerful for citations.';
+                md += fullText.replace(/\n{3,}/g, '\n\n').trim();
+                
+                if (links.length > 0) {
+                    md += '\\n\\n---\\n\\n**Extracted Hyperlinks:**\\n';
+                    links.forEach((link, i) => {
+                        md += `${i+1}. [Link ${i+1}](${link.url})\\n`;
+                    });
+                }
                 
                 currentMD = md;
                 currentFilename = file.name.replace(/\\.pdf$/i, '');
@@ -143,16 +150,16 @@ print(text.strip())
                 statusEl.classList.add('hidden');
                 resultEl.classList.remove('hidden');
                 
-                console.log('%c✅ Python conversion successful', 'color:#22c55e');
+                console.log(`✅ Processed PDF with ${pdf.numPages} pages and ${links.length} links`);
             } catch (err) {
-                console.error('Python error:', err);
+                console.error('PDF processing error:', err);
                 statusEl.innerHTML = `
                     <div class="text-red-400 text-center py-8">
                         <div class="text-4xl mb-4">⚠️</div>
-                        <div class="font-medium mb-2">Python conversion failed</div>
+                        <div class="font-medium mb-2">Processing failed</div>
                         <div class="text-sm max-w-xs mx-auto">
-                            ${err.message || 'Out of memory or unsupported PDF.'}<br><br>
-                            Try a smaller/simpler PDF or use the desktop Python tool.
+                            ${err.message}<br><br>
+                            Try a different PDF.
                         </div>
                         <button onclick="location.reload()" class="mt-8 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-xs">
                             Start Over
