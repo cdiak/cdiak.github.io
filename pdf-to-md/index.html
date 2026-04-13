@@ -110,30 +110,31 @@
             
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                const bytes = Array.from(new Uint8Array(arrayBuffer));
+                const bytes = new Uint8Array(arrayBuffer);
+                
+                // Write file to Pyodide's virtual filesystem (avoids MemoryError)
+                pyodide.FS.writeFile('/input.pdf', bytes);
                 
                 const pythonCode = `
 from pypdf import PdfReader
-from io import BytesIO
-import json
 
-pdf_bytes = bytes(${JSON.stringify(bytes)})
-reader = PdfReader(BytesIO(pdf_bytes))
+reader = PdfReader('/input.pdf')
 
 text = ""
 for page in reader.pages:
-    text += page.extract_text() or "" 
-    text += "\\n\\n"
+    page_text = page.extract_text()
+    if page_text:
+        text += page_text + "\\n\\n"
 
-print(text)
+print(text.strip())
 `;
                 
                 const output = await pyodide.runPythonAsync(pythonCode);
                 
                 let md = `# ${file.name.replace(/\\.pdf$/i, '')}\\n\\n`;
                 md += output;
-                md += '\\n\\n---\\n\\n**Note:** Converted using real Python (Pyodide) running entirely in your browser.\\n';
-                md += 'This is a proof-of-concept. The desktop Python tool has better hyperlink support.';
+                md += '\\n\\n---\\n\\n**Note:** Converted using real Python (Pyodide + pypdf) running in your browser.\\n';
+                md += 'Hyperlink detection is limited in this version. The desktop Python tool (`pdf_to_md.py`) is more powerful for citations.';
                 
                 currentMD = md;
                 currentFilename = file.name.replace(/\\.pdf$/i, '');
@@ -141,9 +142,22 @@ print(text)
                 
                 statusEl.classList.add('hidden');
                 resultEl.classList.remove('hidden');
+                
+                console.log('%c✅ Python conversion successful', 'color:#22c55e');
             } catch (err) {
-                console.error(err);
-                statusEl.innerHTML = `<div class="text-red-400 text-center">Error: ${err.message}</div>`;
+                console.error('Python error:', err);
+                statusEl.innerHTML = `
+                    <div class="text-red-400 text-center py-8">
+                        <div class="text-4xl mb-4">⚠️</div>
+                        <div class="font-medium mb-2">Python conversion failed</div>
+                        <div class="text-sm max-w-xs mx-auto">
+                            ${err.message || 'Out of memory or unsupported PDF.'}<br><br>
+                            Try a smaller/simpler PDF or use the desktop Python tool.
+                        </div>
+                        <button onclick="location.reload()" class="mt-8 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-xs">
+                            Start Over
+                        </button>
+                    </div>`;
             }
         }
 
