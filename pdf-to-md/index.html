@@ -3,211 +3,543 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF to MD</title>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>PDF → Obsidian MD</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-        body { font-family: 'Inter', system-ui, sans-serif; background: #0a0a0a; }
-        .drop-zone { border: 3px dashed #4b5563; transition: all 0.3s ease; }
-        .drop-zone.dragover { border-color: #22c55e; background: #052e16; transform: scale(1.02); }
+        :root {
+            --bg: #0c0c0e;
+            --surface: #141416;
+            --surface2: #1c1c20;
+            --border: #2a2a30;
+            --text: #d4d4dc;
+            --text2: #8888a0;
+            --accent: #a78bfa;
+            --accent2: #c4b5fd;
+            --green: #6ee7b7;
+            --green-dim: #065f46;
+            --red: #fca5a5;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Sora', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Grain overlay ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        .container { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+
+        /* ── Header ── */
+        .hero { text-align: center; margin-bottom: 48px; }
+        .hero h1 {
+            font-size: 3.2rem; font-weight: 700; letter-spacing: -0.04em;
+            background: linear-gradient(135deg, var(--accent2), var(--green));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1; margin-bottom: 12px;
+        }
+        .hero p { color: var(--text2); font-size: 0.95rem; }
+        .hero .tag {
+            display: inline-block; margin-top: 14px;
+            font-family: 'DM Mono', monospace; font-size: 0.72rem;
+            padding: 4px 12px; border-radius: 99px;
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--accent); letter-spacing: 0.02em;
+        }
+
+        /* ── Drop zone ── */
+        .drop-zone {
+            border: 2px dashed var(--border); border-radius: 20px;
+            padding: 64px 32px; text-align: center; cursor: pointer;
+            transition: all 0.25s ease; background: var(--surface);
+            position: relative; overflow: hidden;
+        }
+        .drop-zone::after {
+            content: ''; position: absolute; inset: 0; border-radius: 20px;
+            background: radial-gradient(circle at 50% 0%, rgba(167,139,250,0.06), transparent 60%);
+            pointer-events: none;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent);
+            background: #18181c;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(167,139,250,0.08);
+        }
+        .drop-zone .icon {
+            font-size: 3rem; margin-bottom: 20px;
+            display: block; opacity: 0.8;
+        }
+        .drop-zone h2 {
+            font-size: 1.3rem; font-weight: 600; color: #fff; margin-bottom: 8px;
+        }
+        .drop-zone p { color: var(--text2); font-size: 0.85rem; max-width: 300px; margin: 0 auto; }
+        .file-btn {
+            margin-top: 20px; display: inline-block;
+            padding: 10px 28px; border-radius: 12px; border: none;
+            background: var(--accent); color: #0c0c0e;
+            font-family: 'Sora', sans-serif; font-weight: 600; font-size: 0.88rem;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .file-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+        .file-btn:active { transform: scale(0.97); }
+        input[type="file"] { display: none; }
+
+        /* ── Options ── */
+        .options {
+            margin-top: 20px; display: flex; gap: 16px;
+            justify-content: center; flex-wrap: wrap;
+        }
+        .option {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.78rem; color: var(--text2); cursor: pointer;
+            user-select: none;
+        }
+        .option input[type="checkbox"] { accent-color: var(--accent); }
+
+        /* ── Processing ── */
+        .processing {
+            text-align: center; padding: 48px 0;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        .spinner {
+            width: 32px; height: 32px; border: 3px solid var(--border);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .processing p { color: var(--accent); font-size: 0.9rem; font-weight: 500; }
+        .processing .sub { color: var(--text2); font-size: 0.78rem; margin-top: 6px; }
+
+        /* ── Result ── */
+        .result { animation: fadeIn 0.4s ease; }
+        .result-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .result-header .done {
+            display: flex; align-items: center; gap: 8px;
+            color: var(--green); font-weight: 500; font-size: 0.9rem;
+        }
+        .result-actions { display: flex; gap: 8px; }
+        .result-actions button {
+            padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text); font-size: 0.78rem;
+            font-family: 'Sora', sans-serif; cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .result-actions button:hover { border-color: var(--accent); color: var(--accent); }
+        .md-preview {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 24px; overflow: auto;
+            max-height: 480px; font-family: 'DM Mono', monospace;
+            font-size: 0.8rem; line-height: 1.65; color: var(--text);
+            white-space: pre-wrap; word-break: break-word;
+            tab-size: 4;
+        }
+        .stats {
+            display: flex; gap: 24px; margin-top: 16px;
+            font-size: 0.75rem; color: var(--text2);
+        }
+        .stats span { display: flex; align-items: center; gap: 5px; }
+        .download-btn {
+            margin-top: 24px; width: 100%; padding: 16px;
+            border-radius: 14px; border: none;
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            color: white; font-family: 'Sora', sans-serif;
+            font-weight: 600; font-size: 1rem; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+        }
+        .download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(167,139,250,0.25); }
+        .download-btn:active { transform: scale(0.98); }
+        .reset-link {
+            display: block; text-align: center; margin-top: 16px;
+            font-size: 0.8rem; color: var(--text2); cursor: pointer;
+            text-decoration: none;
+        }
+        .reset-link:hover { color: var(--text); }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--green); padding: 10px 24px; border-radius: 10px;
+            font-size: 0.82rem; font-weight: 500; z-index: 999;
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 1.5s forwards;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(12px); } }
+        @keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(12px); } }
     </style>
 </head>
-<body class="text-zinc-200">
-    <div class="max-w-2xl mx-auto p-8">
-        <div class="text-center mb-12">
-            <h1 class="text-6xl font-bold tracking-tighter text-white mb-2">PDF → MD</h1>
-            <p class="text-emerald-400">Python running in your browser (Pyodide)</p>
-        </div>
+<body>
 
-        <div id="loading" class="text-center py-20">
-            <div class="inline-block">
-                <div class="w-8 h-8 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                <div class="text-emerald-400 font-medium">Loading Python environment...</div>
-                <div class="text-xs text-zinc-500 mt-8 max-w-xs mx-auto">
-                    First load takes 15-30 seconds (downloads ~15MB). After that it's cached.
-                </div>
-            </div>
-        </div>
+<div class="container">
+    <div class="hero">
+        <h1>PDF → MD</h1>
+        <p>Convert research PDFs to Obsidian-ready Markdown with inline links</p>
+        <span class="tag">runs entirely in your browser · nothing uploaded</span>
+    </div>
 
-        <div id="app" class="hidden">
-            <div id="upload-area" class="drop-zone bg-zinc-900 border-dashed rounded-3xl p-20 text-center cursor-pointer mb-8">
-                <div class="mx-auto w-24 h-24 bg-emerald-500/10 text-emerald-400 rounded-3xl flex items-center justify-center text-6xl mb-8">
-                    📄
-                </div>
-                <h2 class="text-4xl font-medium text-white mb-4">Drop your PDF here</h2>
-                <p class="text-zinc-400 text-lg max-w-xs mx-auto">
-                    Real Python code will convert it to Markdown
-                </p>
-                <input type="file" id="file-input" accept="application/pdf" class="hidden">
-                <button onclick="document.getElementById('file-input').click()" 
-                        class="mt-8 bg-white text-black px-10 py-4 rounded-2xl font-medium text-base hover:bg-zinc-100 transition-all active:scale-95">
-                    Or select a file
-                </button>
-            </div>
-
-            <div id="status" class="hidden text-center py-16">
-                <div class="flex flex-col items-center gap-6">
-                    <div class="w-8 h-8 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
-                    <div class="text-emerald-400 font-medium">Running Python conversion...</div>
-                </div>
-            </div>
-
-            <div id="result" class="hidden">
-                <div class="bg-zinc-900 rounded-3xl p-8 mb-8">
-                    <div class="flex justify-between items-center mb-6">
-                        <div class="text-emerald-400 font-medium flex items-center gap-2">
-                            <span>✓</span> 
-                            <span>Your Markdown is ready</span>
-                        </div>
-                        <div onclick="copyToClipboard()" class="cursor-pointer text-xs flex items-center gap-2 text-zinc-400 hover:text-white">
-                            📋 Copy
-                        </div>
-                    </div>
-                    <pre id="md-output" class="bg-black p-8 rounded-2xl text-zinc-300 overflow-auto max-h-[420px] whitespace-pre-wrap border border-zinc-800 text-sm font-mono"></pre>
-                </div>
-                
-                <button onclick="downloadMD()" 
-                        class="w-full py-6 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 transition-all text-white font-semibold text-xl rounded-3xl flex items-center justify-center gap-3">
-                    ⬇️ Download .md File
-                </button>
-            </div>
+    <div id="drop-zone" class="drop-zone">
+        <span class="icon">📄</span>
+        <h2>Drop your PDF here</h2>
+        <p>Hyperlinks become inline Markdown links, structure is preserved</p>
+        <button class="file-btn" onclick="document.getElementById('file-input').click()">Select file</button>
+        <input type="file" id="file-input" accept=".pdf">
+        <div class="options">
+            <label class="option"><input type="checkbox" id="opt-links" checked> Inline hyperlinks</label>
+            <label class="option"><input type="checkbox" id="opt-headings" checked> Detect headings</label>
+            <label class="option"><input type="checkbox" id="opt-footnotes"> Footnote-style links</label>
         </div>
     </div>
 
-    <script>
-        let pyodide;
-        let currentMD = '';
-        let currentFilename = 'converted';
+    <div id="processing" class="processing" style="display:none">
+        <div class="spinner"></div>
+        <p>Converting…</p>
+        <div class="sub" id="progress-text">Reading pages</div>
+    </div>
 
-        const loadingEl = document.getElementById('loading');
-        const appEl = document.getElementById('app');
-        const dropZone = document.getElementById('upload-area');
-        const fileInput = document.getElementById('file-input');
-        const statusEl = document.getElementById('status');
-        const resultEl = document.getElementById('result');
-        const mdOutput = document.getElementById('md-output');
+    <div id="result" style="display:none" class="result">
+        <div class="result-header">
+            <div class="done">✓ Converted</div>
+            <div class="result-actions">
+                <button onclick="copyMD()">📋 Copy</button>
+                <button onclick="copyMD('html')">🌐 Copy as HTML</button>
+            </div>
+        </div>
+        <pre class="md-preview" id="md-output"></pre>
+        <div class="stats">
+            <span id="stat-pages">📄 — pages</span>
+            <span id="stat-links">🔗 — links</span>
+            <span id="stat-chars">✏️ — chars</span>
+        </div>
+        <button class="download-btn" onclick="downloadMD()">⬇ Download .md</button>
+        <a class="reset-link" onclick="reset()">Convert another PDF</a>
+    </div>
+</div>
 
-        async function main() {
-            try {
-                pyodide = await loadPyodide();
-                await pyodide.loadPackage("micropip");
-                const micropip = pyodide.pyimport("micropip");
-                await micropip.install("pypdf");
-                console.log("%cPython + pypdf is ready in the browser", "color:#22c55e");
-                
-                loadingEl.classList.add('hidden');
-                appEl.classList.remove('hidden');
-            } catch (err) {
-                console.error(err);
-                loadingEl.innerHTML = `<div class="text-red-400">Failed to load Python. Please try the desktop Python tool instead.</div>`;
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+let currentMD = '';
+let currentFilename = 'document';
+
+// ── DOM ──
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const processingEl = document.getElementById('processing');
+const resultEl = document.getElementById('result');
+const progressText = document.getElementById('progress-text');
+
+// ── Drag & drop ──
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f && f.name.toLowerCase().endsWith('.pdf')) processPDF(f);
+});
+fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) processPDF(e.target.files[0]);
+});
+
+// ── Core conversion ──
+async function processPDF(file) {
+    currentFilename = file.name.replace(/\.pdf$/i, '');
+    dropZone.style.display = 'none';
+    processingEl.style.display = '';
+    resultEl.style.display = 'none';
+
+    const optLinks = document.getElementById('opt-links').checked;
+    const optHeadings = document.getElementById('opt-headings').checked;
+    const optFootnotes = document.getElementById('opt-footnotes').checked;
+
+    try {
+        const buf = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+        const totalPages = pdf.numPages;
+        let allParagraphs = [];
+        let footnoteLinks = [];
+        let fnCounter = 0;
+
+        for (let p = 1; p <= totalPages; p++) {
+            progressText.textContent = `Page ${p} / ${totalPages}`;
+            const page = await pdf.getPage(p);
+            const vp = page.getViewport({ scale: 1.0 });
+
+            // ── Get text items with positions ──
+            const textContent = await page.getTextContent();
+            const items = textContent.items.filter(it => it.str.trim() !== '');
+
+            // ── Get hyperlink annotations ──
+            const annotations = await page.getAnnotations();
+            const links = annotations.filter(a => a.subtype === 'Link' && a.url);
+
+            // ── Build link map: for each link rect, find which text items overlap ──
+            // This is the key step — matching URLs to their visible anchor text.
+            const linkRects = links.map(a => ({
+                url: a.url,
+                // PDF coords: [x1, y1(bottom), x2, y2(top)]
+                x1: a.rect[0], y1: a.rect[1], x2: a.rect[2], y2: a.rect[3],
+            }));
+
+            // For each text item, check if it falls inside a link rect
+            function findLinkForItem(item) {
+                // item.transform = [scaleX, skewX, skewY, scaleY, translateX, translateY]
+                const tx = item.transform[4];
+                const ty = item.transform[5];
+                const w = item.width;
+                const h = item.height || Math.abs(item.transform[3]);
+
+                for (const lr of linkRects) {
+                    // Check overlap: item center-ish falls within link rect
+                    const cx = tx + w / 2;
+                    const cy = ty + h / 2;
+                    if (cx >= lr.x1 - 2 && cx <= lr.x2 + 2 &&
+                        cy >= lr.y1 - 2 && cy <= lr.y2 + 2) {
+                        return lr.url;
+                    }
+                }
+                return null;
             }
-        }
 
-        async function processPDF(file) {
-            statusEl.classList.remove('hidden');
-            resultEl.classList.add('hidden');
-            
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                
-                let fullText = '';
-                let links = [];
-                
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    fullText += textContent.items.map(item => item.str).join(' ') + '\n\n';
-                    
-                    // Extract hyperlinks
-                    const annotations = await page.getAnnotations();
-                    for (let ann of annotations) {
-                        if (ann.subtype === 'Link' && ann.url) {
-                            links.push({
-                                page: i,
-                                url: ann.url,
-                                text: 'LINK' // We would ideally match this to nearby text
-                            });
+            // ── Group text items into lines by y-position ──
+            // Items within ~3 units vertically are on the same line.
+            const LINE_THRESHOLD = 3;
+            let lines = [];
+            let currentLine = null;
+
+            // Sort by y descending (top of page first), then x ascending
+            const sorted = [...items].sort((a, b) => {
+                const ay = a.transform[5], by = b.transform[5];
+                if (Math.abs(ay - by) > LINE_THRESHOLD) return by - ay; // higher y = earlier
+                return a.transform[4] - b.transform[4]; // left to right
+            });
+
+            for (const item of sorted) {
+                const y = item.transform[5];
+                if (!currentLine || Math.abs(currentLine.y - y) > LINE_THRESHOLD) {
+                    currentLine = { y, items: [], fontSize: 0 };
+                    lines.push(currentLine);
+                }
+                const url = optLinks ? findLinkForItem(item) : null;
+                currentLine.items.push({ str: item.str, url, fontSize: Math.abs(item.transform[0]) });
+                currentLine.fontSize = Math.max(currentLine.fontSize, Math.abs(item.transform[0]));
+            }
+
+            // ── Convert lines to markdown text ──
+            for (const line of lines) {
+                // Build line text, wrapping linked segments in markdown links
+                let lineText = '';
+                let prevUrl = null;
+                let linkBuffer = '';
+
+                for (const it of line.items) {
+                    if (it.url && it.url === prevUrl) {
+                        // Continue accumulating text for the same link
+                        linkBuffer += it.str;
+                    } else {
+                        // Flush previous link if any
+                        if (prevUrl && linkBuffer) {
+                            if (optFootnotes) {
+                                fnCounter++;
+                                lineText += linkBuffer.trim() + `[^${fnCounter}]`;
+                                footnoteLinks.push({ n: fnCounter, url: prevUrl, text: linkBuffer.trim() });
+                            } else {
+                                lineText += `[${linkBuffer.trim()}](${prevUrl})`;
+                            }
+                            linkBuffer = '';
+                        } else if (linkBuffer) {
+                            lineText += linkBuffer;
+                            linkBuffer = '';
+                        }
+
+                        if (it.url) {
+                            prevUrl = it.url;
+                            linkBuffer = it.str;
+                        } else {
+                            prevUrl = null;
+                            lineText += it.str;
                         }
                     }
                 }
-                
-                let md = `# ${file.name.replace(/\\.pdf$/i, '')}\\n\\n`;
-                md += fullText.replace(/\n{3,}/g, '\n\n').trim();
-                
-                if (links.length > 0) {
-                    md += '\\n\\n---\\n\\n**Extracted Hyperlinks:**\\n';
-                    links.forEach((link, i) => {
-                        md += `${i+1}. [Link ${i+1}](${link.url})\\n`;
-                    });
+                // Flush trailing link
+                if (prevUrl && linkBuffer) {
+                    if (optFootnotes) {
+                        fnCounter++;
+                        lineText += linkBuffer.trim() + `[^${fnCounter}]`;
+                        footnoteLinks.push({ n: fnCounter, url: prevUrl, text: linkBuffer.trim() });
+                    } else {
+                        lineText += `[${linkBuffer.trim()}](${prevUrl})`;
+                    }
+                } else if (linkBuffer) {
+                    lineText += linkBuffer;
                 }
-                
-                currentMD = md;
-                currentFilename = file.name.replace(/\\.pdf$/i, '');
-                mdOutput.textContent = md;
-                
-                statusEl.classList.add('hidden');
-                resultEl.classList.remove('hidden');
-                
-                console.log(`✅ Processed PDF with ${pdf.numPages} pages and ${links.length} links`);
-            } catch (err) {
-                console.error('PDF processing error:', err);
-                statusEl.innerHTML = `
-                    <div class="text-red-400 text-center py-8">
-                        <div class="text-4xl mb-4">⚠️</div>
-                        <div class="font-medium mb-2">Processing failed</div>
-                        <div class="text-sm max-w-xs mx-auto">
-                            ${err.message}<br><br>
-                            Try a different PDF.
-                        </div>
-                        <button onclick="location.reload()" class="mt-8 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-xs">
-                            Start Over
-                        </button>
-                    </div>`;
+
+                lineText = lineText.trim();
+                if (!lineText) continue;
+
+                allParagraphs.push({
+                    text: lineText,
+                    fontSize: line.fontSize,
+                    page: p,
+                });
             }
         }
 
-        // Drag & drop and file selection (same as before)
-        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', async e => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file?.type === 'application/pdf') await processPDF(file);
-        });
+        // ── Detect headings by font size ──
+        // Collect font sizes to find the body size (most common) and larger sizes
+        const sizeCounts = {};
+        for (const para of allParagraphs) {
+            const s = Math.round(para.fontSize * 10) / 10;
+            sizeCounts[s] = (sizeCounts[s] || 0) + 1;
+        }
+        const bodySize = parseFloat(
+            Object.entries(sizeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || '10'
+        );
 
-        fileInput.addEventListener('change', async e => {
-            const file = e.target.files[0];
-            if (file) await processPDF(file);
-        });
+        // ── Assemble final markdown ──
+        let md = '';
+        let prevWasEmpty = false;
 
-        function downloadMD() {
-            if (!currentMD) return;
-            const blob = new Blob([currentMD], { type: 'text/markdown' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = currentFilename + '.md';
-            a.click();
-            URL.revokeObjectURL(url);
+        for (const para of allParagraphs) {
+            let line = para.text;
+
+            // Heading detection
+            if (optHeadings && para.fontSize > bodySize + 1.5) {
+                // Strip any link markup from headings (cleaner in Obsidian)
+                const cleanLine = line.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+                if (para.fontSize > bodySize + 5) {
+                    line = `## ${cleanLine}`;
+                } else if (para.fontSize > bodySize + 2.5) {
+                    line = `### ${cleanLine}`;
+                } else {
+                    line = `#### ${cleanLine}`;
+                }
+                if (!prevWasEmpty) md += '\n';
+                md += line + '\n\n';
+                prevWasEmpty = true;
+                continue;
+            }
+
+            // Check if this line continues the previous paragraph
+            // (same font size, doesn't start with a heading marker, etc.)
+            // Heuristic: if previous line didn't end with a period/colon/semicolon,
+            // this is likely a continuation.
+            const lastChar = md.trimEnd().slice(-1);
+            const isNewParagraph = !lastChar || lastChar === '.' || lastChar === ':' ||
+                                   lastChar === ';' || lastChar === '!' || lastChar === '?' ||
+                                   lastChar === '\n' || prevWasEmpty;
+
+            if (isNewParagraph) {
+                md += line + '\n';
+            } else {
+                // Join with previous line (continuation)
+                // Remove trailing newline, add space, then this line
+                md = md.trimEnd() + ' ' + line + '\n';
+            }
+            prevWasEmpty = false;
         }
 
-        function copyToClipboard() {
-            if (!currentMD) return;
-            navigator.clipboard.writeText(currentMD).then(() => {
-                const orig = event.target.textContent;
-                event.target.textContent = '✅ Copied!';
-                setTimeout(() => event.target.textContent = orig, 2000);
-            });
+        // ── Append footnote-style links ──
+        if (optFootnotes && footnoteLinks.length > 0) {
+            md += '\n---\n\n';
+            for (const fn of footnoteLinks) {
+                md += `[^${fn.n}]: ${fn.url}\n`;
+            }
         }
 
-        window.downloadMD = downloadMD;
-        window.copyToClipboard = copyToClipboard;
+        // ── Clean up ──
+        // Collapse 3+ newlines to 2
+        md = md.replace(/\n{3,}/g, '\n\n').trim();
+        // Fix double spaces
+        md = md.replace(/  +/g, ' ');
 
-        // Start loading Python
-        main();
-    </script>
+        currentMD = md;
+
+        // Stats
+        const linkCount = (md.match(/\]\(/g) || []).length +
+                          (md.match(/\[\^/g) || []).length;
+        document.getElementById('stat-pages').textContent = `📄 ${totalPages} pages`;
+        document.getElementById('stat-links').textContent = `🔗 ${linkCount} links`;
+        document.getElementById('stat-chars').textContent = `✏️ ${md.length.toLocaleString()} chars`;
+
+        document.getElementById('md-output').textContent = md;
+        processingEl.style.display = 'none';
+        resultEl.style.display = '';
+
+    } catch (err) {
+        console.error(err);
+        processingEl.innerHTML = `
+            <div style="color:var(--red);text-align:center">
+                <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
+                <div style="font-weight:500;margin-bottom:8px">Conversion failed</div>
+                <div style="font-size:0.8rem;color:var(--text2);max-width:320px;margin:0 auto">
+                    ${err.message}
+                </div>
+                <a class="reset-link" onclick="reset()" style="margin-top:20px">Try again</a>
+            </div>`;
+    }
+}
+
+// ── Actions ──
+function downloadMD() {
+    if (!currentMD) return;
+    const blob = new Blob([currentMD], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = currentFilename + '.md';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function copyMD(format) {
+    if (!currentMD) return;
+    const text = format === 'html' ? currentMD
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+        : currentMD;
+
+    navigator.clipboard.writeText(text).then(() => {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = format === 'html' ? 'Copied as HTML' : 'Copied to clipboard';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    });
+}
+
+function reset() {
+    dropZone.style.display = '';
+    processingEl.style.display = 'none';
+    processingEl.innerHTML = `<div class="spinner"></div><p>Converting…</p><div class="sub" id="progress-text">Reading pages</div>`;
+    resultEl.style.display = 'none';
+    fileInput.value = '';
+    currentMD = '';
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'c' && currentMD && !window.getSelection().toString()) {
+        copyMD();
+    }
+});
+</script>
 </body>
 </html>
