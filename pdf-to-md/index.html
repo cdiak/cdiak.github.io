@@ -99,8 +99,23 @@
     </div>
 
     <script>
-        // Set up pdf.js worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.js';
+        // Wait for pdf.js to load before using it
+        let pdfjsLibReady = false;
+
+        function initPDFJS() {
+            if (typeof pdfjsLib !== 'undefined') {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.js';
+                pdfjsLibReady = true;
+                console.log('✅ pdf.js initialized successfully');
+            } else {
+                console.error('pdf.js failed to load');
+            }
+        }
+
+        // Initialize once the page loads
+        window.addEventListener('load', () => {
+            initPDFJS();
+        });
 
         let currentMD = '';
         let currentFilename = '';
@@ -127,6 +142,25 @@
         async function processPDF(file) {
             showStatus();
             
+            // Ensure pdf.js is ready
+            if (!pdfjsLibReady) {
+                console.warn('pdf.js not ready yet - waiting...');
+                await new Promise(resolve => setTimeout(resolve, 800));
+                if (!pdfjsLibReady && typeof pdfjsLib === 'undefined') {
+                    statusEl.innerHTML = `
+                        <div class="text-red-400 text-center">
+                            <div class="text-2xl mb-3">⚠️</div>
+                            <div class="font-medium">PDF.js library failed to load</div>
+                            <div class="text-sm mt-3 max-w-xs mx-auto">Please refresh the page and try again.</div>
+                            <button onclick="location.reload()" 
+                                    class="mt-8 text-xs px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl">
+                                Refresh Page
+                            </button>
+                        </div>`;
+                    return;
+                }
+            }
+            
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
@@ -148,6 +182,7 @@
                 md += 'which has smarter citation mapping.\n';
                 
                 showResult(md, file.name.replace(/\.pdf$/i, ''));
+                console.log('✅ Successfully processed PDF with', pdf.numPages, 'pages');
                 
             } catch (err) {
                 console.error('PDF processing error:', err);
