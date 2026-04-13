@@ -283,7 +283,7 @@ async function processPDF(file) {
 
             // ── Get text items with positions ──
             const textContent = await page.getTextContent();
-            const items = textContent.items.filter(it => it.str.trim() !== '');
+            const items = textContent.items.filter(it => it.str !== '');
 
             // ── Get hyperlink annotations ──
             const annotations = await page.getAnnotations();
@@ -337,21 +337,54 @@ async function processPDF(file) {
                     lines.push(currentLine);
                 }
                 const url = optLinks ? findLinkForItem(item) : null;
-                currentLine.items.push({ str: item.str, url, fontSize: Math.abs(item.transform[0]) });
-                currentLine.fontSize = Math.max(currentLine.fontSize, Math.abs(item.transform[0]));
+                const x = item.transform[4];
+                const w = item.width || 0;
+                const fs = Math.abs(item.transform[0]);
+                const hasEOL = item.hasEOL || false;
+                currentLine.items.push({ str: item.str, url, fontSize: fs, x, w, hasEOL });
+                currentLine.fontSize = Math.max(currentLine.fontSize, fs);
             }
 
             // ── Convert lines to markdown text ──
             for (const line of lines) {
-                // Build line text, wrapping linked segments in markdown links
+                // Build line text, inserting spaces based on spatial gaps between items
+                // and wrapping linked segments in markdown links.
+                //
+                // The key insight: PDF text items are positioned by x-coordinate.
+                // If the gap between one item's right edge and the next item's left edge
+                // is larger than ~30% of a typical character width, there's a space.
+                // If items have hasEOL or the string already ends with a space, honor that.
+
                 let lineText = '';
                 let prevUrl = null;
                 let linkBuffer = '';
+                let prevRight = -1; // x + width of previous item
 
-                for (const it of line.items) {
+                for (let idx = 0; idx < line.items.length; idx++) {
+                    const it = line.items[idx];
+
+                    // ── Determine if we need to insert a space before this item ──
+                    let needsSpace = false;
+                    if (idx > 0 && prevRight >= 0) {
+                        const gap = it.x - prevRight;
+                        // Estimate character width from font size (~0.5 * fontSize for typical fonts)
+                        const charW = it.fontSize * 0.3;
+                        if (gap > charW) {
+                            needsSpace = true;
+                        }
+                    }
+                    // Also insert space if prev item's string ended with a space or this one starts with one
+                    const prevItem = idx > 0 ? line.items[idx - 1] : null;
+                    if (prevItem && (prevItem.str.endsWith(' ') || it.str.startsWith(' '))) {
+                        needsSpace = false; // already has one, don't double up
+                    }
+
+                    const spacer = needsSpace ? ' ' : '';
+                    prevRight = it.x + it.w;
+
                     if (it.url && it.url === prevUrl) {
                         // Continue accumulating text for the same link
-                        linkBuffer += it.str;
+                        linkBuffer += spacer + it.str;
                     } else {
                         // Flush previous link if any
                         if (prevUrl && linkBuffer) {
@@ -370,10 +403,10 @@ async function processPDF(file) {
 
                         if (it.url) {
                             prevUrl = it.url;
-                            linkBuffer = it.str;
+                            linkBuffer = spacer + it.str;
                         } else {
                             prevUrl = null;
-                            lineText += it.str;
+                            lineText += spacer + it.str;
                         }
                     }
                 }
@@ -466,8 +499,10 @@ async function processPDF(file) {
         // ── Clean up ──
         // Collapse 3+ newlines to 2
         md = md.replace(/\n{3,}/g, '\n\n').trim();
-        // Fix double spaces
-        md = md.replace(/  +/g, ' ');
+        // Fix triple+ spaces but leave single and double spaces alone
+        md = md.replace(/ {3,}/g, ' ');
+        // Fix space before punctuation that sometimes appears from PDF extraction
+        md = md.replace(/ ([.,;:!?])/g, '$1');
 
         currentMD = md;
 
