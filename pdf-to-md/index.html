@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF to MD • Hyperlink Preserver</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
@@ -99,22 +99,28 @@
     </div>
 
     <script>
-        // Wait for pdf.js to load before using it
+        // Robust pdf.js initialization
         let pdfjsLibReady = false;
+        let pdfjsLib = null;
 
-        function initPDFJS() {
-            if (typeof pdfjsLib !== 'undefined') {
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.js';
+        async function initPDFJS() {
+            // Wait for the script to define the global
+            if (typeof window.pdfjsLib !== 'undefined') {
+                pdfjsLib = window.pdfjsLib;
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
                 pdfjsLibReady = true;
-                console.log('✅ pdf.js initialized successfully');
+                console.log('%c✅ pdf.js v3 initialized successfully', 'color:#22c55e');
+                return true;
             } else {
-                console.error('pdf.js failed to load');
+                console.warn('pdf.js not loaded yet, retrying...');
+                await new Promise(r => setTimeout(r, 500));
+                return initPDFJS();
             }
         }
 
-        // Initialize once the page loads
-        window.addEventListener('load', () => {
-            initPDFJS();
+        // Initialize on load
+        window.addEventListener('load', async () => {
+            await initPDFJS();
         });
 
         let currentMD = '';
@@ -145,13 +151,18 @@
             // Ensure pdf.js is ready
             if (!pdfjsLibReady) {
                 console.warn('pdf.js not ready yet - waiting...');
-                await new Promise(resolve => setTimeout(resolve, 800));
-                if (!pdfjsLibReady && typeof pdfjsLib === 'undefined') {
+                await new Promise(resolve => setTimeout(resolve, 1200));
+                if (!pdfjsLibReady) {
                     statusEl.innerHTML = `
                         <div class="text-red-400 text-center">
                             <div class="text-2xl mb-3">⚠️</div>
                             <div class="font-medium">PDF.js library failed to load</div>
-                            <div class="text-sm mt-3 max-w-xs mx-auto">Please refresh the page and try again.</div>
+                            <div class="text-sm mt-3 max-w-xs mx-auto">
+                                This can happen due to network/CDN issues.<br><br>
+                                <strong>Try:</strong><br>
+                                • Hard refresh (Cmd + Shift + R)<br>
+                                • Use the Python version instead (recommended)
+                            </div>
                             <button onclick="location.reload()" 
                                     class="mt-8 text-xs px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl">
                                 Refresh Page
@@ -182,7 +193,7 @@
                 md += 'which has smarter citation mapping.\n';
                 
                 showResult(md, file.name.replace(/\.pdf$/i, ''));
-                console.log('✅ Successfully processed PDF with', pdf.numPages, 'pages');
+                console.log('%c✅ Successfully processed PDF with ' + pdf.numPages + ' pages', 'color:#22c55e');
                 
             } catch (err) {
                 console.error('PDF processing error:', err);
