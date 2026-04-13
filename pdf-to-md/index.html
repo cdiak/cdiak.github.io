@@ -7,78 +7,166 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        h1, h2 { font-family: 'Space Grotesk', sans-serif; }
+        
         .drop-zone {
-            border: 3px dashed #3b82f6;
-            transition: all 0.2s;
+            border: 3px dashed #64748b;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .drop-zone.dragover {
-            background-color: #eff6ff;
-            border-color: #1e40af;
+            background-color: #1e2937;
+            border-color: #3b82f6;
+            transform: scale(1.02);
+        }
+        .output-pre {
+            font-family: ui-monospace, monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            tab-size: 2;
         }
     </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100">
+<body class="bg-zinc-950 text-zinc-200">
     <div class="max-w-4xl mx-auto p-8">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold">PDF → MD</h1>
-            <div class="text-sm text-zinc-400">with hyperlink preservation</div>
+        <div class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-5xl font-semibold tracking-tighter text-white">PDF → MD</h1>
+                <p class="text-emerald-400 text-sm mt-1">with hyperlink preservation</p>
+            </div>
+            <a href="https://github.com/cdiak/cdiak.github.io/tree/main/pdf-to-md" 
+               target="_blank"
+               class="text-xs px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-full border border-zinc-700 flex items-center gap-2">
+                <span class="text-blue-400">↗</span>
+                <span>View Source</span>
+            </a>
         </div>
         
-        <div id="upload-area" class="drop-zone rounded-2xl p-12 text-center cursor-pointer mb-8">
-            <div class="mx-auto w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-4">
+        <div id="upload-area" 
+             class="drop-zone bg-zinc-900 border-dashed rounded-3xl p-16 text-center cursor-pointer mb-8">
+            <div class="mx-auto w-20 h-20 bg-blue-500/10 text-blue-400 rounded-2xl flex items-center justify-center text-4xl mb-6">
                 📄
             </div>
-            <h2 class="text-2xl font-semibold mb-2">Drop a PDF here</h2>
-            <p class="text-zinc-400 mb-6">or click to select • Max 10MB</p>
+            <h2 class="text-3xl font-medium text-white mb-3">Drop a PDF here</h2>
+            <p class="text-zinc-400 mb-8 max-w-xs mx-auto">
+                Supports text-based PDFs with embedded links.<br>
+                Client-side only • No data is uploaded
+            </p>
             <input type="file" id="file-input" accept="application/pdf" class="hidden">
             <button onclick="document.getElementById('file-input').click()" 
-                    class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl text-sm font-medium">
-                Select PDF
+                    class="bg-white text-zinc-900 px-8 py-3.5 rounded-2xl font-medium text-sm hover:bg-zinc-100 transition-colors">
+                Select PDF File
             </button>
+            <p class="text-[10px] text-zinc-500 mt-6">or press <span class="font-mono bg-zinc-800 px-1.5 py-0.5 rounded">⌘K</span></p>
         </div>
 
-        <div id="status" class="hidden text-center py-8">
-            <div class="inline-flex items-center gap-3 text-blue-400">
-                <div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                Processing PDF...
+        <div id="status" class="hidden text-center py-12">
+            <div class="inline-flex flex-col items-center gap-4">
+                <div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                <div class="text-blue-400 text-sm">Extracting text and structure...</div>
             </div>
         </div>
 
         <div id="result" class="hidden">
-            <div class="bg-zinc-900 rounded-2xl p-6 mb-6">
-                <h3 class="font-medium mb-4 flex items-center gap-2">
-                    <span>📋</span>
-                    <span>Converted Markdown</span>
-                </h3>
-                <pre id="md-output" class="bg-black p-6 rounded-xl text-sm overflow-auto max-h-96 font-mono whitespace-pre-wrap"></pre>
+            <div class="bg-zinc-900 rounded-3xl p-8 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-semibold text-lg flex items-center gap-3">
+                        <span class="text-emerald-400">✓</span>
+                        Converted Markdown
+                    </h3>
+                    <div onclick="copyToClipboard()" 
+                         class="text-xs flex items-center gap-2 px-5 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl cursor-pointer transition-colors">
+                        📋 Copy
+                    </div>
+                </div>
+                
+                <pre id="md-output" 
+                     class="output-pre bg-black p-8 rounded-2xl text-zinc-300 overflow-auto max-h-[520px] whitespace-pre-wrap border border-zinc-800"></pre>
             </div>
             
-            <div class="flex gap-4">
-                <button onclick="downloadMD()" 
-                        class="flex-1 bg-emerald-600 hover:bg-emerald-700 py-4 rounded-2xl font-medium">
-                    ⬇️ Download .md
-                </button>
-                <button onclick="copyToClipboard()" 
-                        class="flex-1 bg-zinc-700 hover:bg-zinc-600 py-4 rounded-2xl font-medium">
-                    📋 Copy to Clipboard
-                </button>
-            </div>
+            <button onclick="downloadMD()" 
+                    class="w-full bg-emerald-500 hover:bg-emerald-600 transition-colors text-white font-medium py-5 rounded-3xl text-lg flex items-center justify-center gap-3">
+                <span>⬇️</span>
+                <span>Download .md File</span>
+            </button>
+            
+            <p class="text-center text-xs text-zinc-500 mt-8">
+                Built as a static tool for <a href="https://cdiak.github.io" class="hover:text-zinc-300">cdiak.github.io</a>
+            </p>
         </div>
     </div>
 
     <script>
+        // Set up pdf.js worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.js';
 
         let currentMD = '';
+        let currentFilename = '';
 
         const dropZone = document.getElementById('upload-area');
         const fileInput = document.getElementById('file-input');
-        const status = document.getElementById('status');
-        const result = document.getElementById('result');
+        const statusEl = document.getElementById('status');
+        const resultEl = document.getElementById('result');
         const mdOutput = document.getElementById('md-output');
 
-        // Drag and drop
+        function showStatus() {
+            statusEl.classList.remove('hidden');
+            resultEl.classList.add('hidden');
+        }
+
+        function showResult(md, filename) {
+            currentMD = md;
+            currentFilename = filename || 'output';
+            mdOutput.textContent = md;
+            statusEl.classList.add('hidden');
+            resultEl.classList.remove('hidden');
+        }
+
+        async function processPDF(file) {
+            showStatus();
+            
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdf = await loadingTask.promise;
+                
+                let fullText = '';
+                
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n\n';
+                }
+                
+                let md = `# ${file.name.replace(/\.pdf$/i, '')}\n\n`;
+                md += fullText.replace(/\n{3,}/g, '\n\n').trim();
+                md += '\n\n---\n\n**Note:** This is a client-side converter using pdf.js. ';
+                md += 'Hyperlinks are best handled by the Python version in `~/Development/Scripts/xAI/pdf_to_md.py` ';
+                md += 'which has smarter citation mapping.\n';
+                
+                showResult(md, file.name.replace(/\.pdf$/i, ''));
+                
+            } catch (err) {
+                console.error('PDF processing error:', err);
+                statusEl.innerHTML = `
+                    <div class="text-red-400 text-center">
+                        <div class="text-2xl mb-3">⚠️</div>
+                        <div class="font-medium">Could not process this PDF</div>
+                        <div class="text-sm mt-2 max-w-xs mx-auto">
+                            ${err.message || 'Unknown error. Try a different PDF or use the Python version instead.'}
+                        </div>
+                        <button onclick="location.reload()" 
+                                class="mt-8 text-xs px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl">
+                            Try Again
+                        </button>
+                    </div>`;
+            }
+        }
+
+        // Drag and drop handlers
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('dragover');
@@ -94,77 +182,60 @@
             const file = e.dataTransfer.files[0];
             if (file && file.type === 'application/pdf') {
                 await processPDF(file);
+            } else {
+                alert("Please drop a valid PDF file.");
             }
         });
 
+        // Click to upload
         fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (file) await processPDF(file);
+            if (file) {
+                await processPDF(file);
+            }
         });
 
-        async function processPDF(file) {
-            status.classList.remove('hidden');
-            result.classList.add('hidden');
-            
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                
-                let fullText = '';
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    fullText += textContent.items.map(item => item.str).join(' ') + '\n\n';
-                }
-                
-                // Simple Markdown formatting
-                let md = `# ${file.name.replace('.pdf', '')}\n\n`;
-                md += fullText.replace(/\n{3,}/g, '\n\n');
-                
-                // Add note about hyperlinks
-                md += '\n\n---\n\n**Note:** Hyperlinks were extracted from the PDF. ';
-                md += 'For best results, use the desktop Python version in ~/Development/Scripts/xAI/ ';
-                md += 'which has smarter citation-to-link mapping.\n';
-                
-                currentMD = md;
-                mdOutput.textContent = md;
-                
-                status.classList.add('hidden');
-                result.classList.remove('hidden');
-                
-            } catch (err) {
-                console.error(err);
-                status.innerHTML = `<div class="text-red-400">Error processing PDF: ${err.message}</div>`;
-            }
-        }
-
         function downloadMD() {
+            if (!currentMD) return;
             const blob = new Blob([currentMD], { type: 'text/markdown' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'output.md';
+            a.download = (currentFilename || 'converted') + '.md';
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
         function copyToClipboard() {
+            if (!currentMD) return;
             navigator.clipboard.writeText(currentMD).then(() => {
-                const orig = event.target.textContent;
-                event.target.textContent = '✅ Copied!';
-                setTimeout(() => {
-                    event.target.textContent = orig;
-                }, 2000);
+                const notif = document.createElement('div');
+                notif.textContent = '✅ Copied to clipboard';
+                notif.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#10b981;color:white;padding:12px 24px;border-radius:9999px;font-size:14px;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.3);z-index:9999';
+                document.body.appendChild(notif);
+                setTimeout(() => notif.remove(), 2200);
+            }).catch(err => {
+                console.error(err);
+                alert('Failed to copy: ' + err.message);
             });
         }
 
         // Keyboard shortcut
         document.addEventListener('keydown', (e) => {
-            if (e.metaKey && e.key === 'k') {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
                 fileInput.click();
             }
         });
+
+        // Make functions available globally for inline onclick handlers
+        window.downloadMD = downloadMD;
+        window.copyToClipboard = copyToClipboard;
+        
+        // Auto-init message
+        console.log('%cPDF → MD converter ready. Drop a PDF to begin.', 'color:#22c55e;font-size:13px');
     </script>
 </body>
 </html>
