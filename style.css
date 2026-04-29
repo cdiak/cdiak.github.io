@@ -143,7 +143,7 @@ body {
 ============================================================ */
 
 #menu-bar {
-  /* Pinned to the glass. Never moves. */
+  /* Solid background for clean dark mode (pure black to match signature.png). Pinned header. */
   position: fixed; 
   top: 0;
   left: 0;
@@ -151,7 +151,8 @@ body {
   height: 80px;
   z-index: 1000;
   pointer-events: none;
-  background: linear-gradient(to bottom, var(--bg) 98%, transparent);
+  background: var(--bg);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
 }
 
 .menu-inner {
@@ -656,21 +657,33 @@ footer {
   
   .menu-inner {
     padding: 1rem 1.5rem;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    height: 100%;
   }
   
-  #title-container { margin-left: 0; }
-  #menu-bar nav { margin-right: 0; margin-top: 0; }
+  #title-container { 
+    margin-left: 0; 
+    height: auto;
+    width: auto;
+    padding-right: 1rem;
+  }
+  #menu-bar nav { 
+    margin-right: 0; 
+    margin-top: 0; 
+    align-items: center;
+  }
 
-  /* --- MODIFIED MOBILE LAYOUT --- */
+  /* Solid header now fully contains signature as part of top menu bar */
+  #menu-bar {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Updated mobile layout — signature is now integrated into the header bar */
   .page { 
-    /* WE KEEP THE INVISIBLE WALL FOR THE SIGNATURE 
-       Instead of resetting to 0 auto, we reduce it to ~170px 
-       to ensure text clears the signature. */
-    margin-left: 170px;
-    
-    padding-top: 120px; 
-    padding-right: 2rem;
+    margin-left: 0;
+    padding-top: 95px; 
+    padding-right: 1.5rem;
   }
   
   #portfolio {
@@ -679,15 +692,22 @@ footer {
   }
   
   h2 { font-size: 1.75rem; }
+  
+  #title-logo {
+    width: 120px;
+  }
 }
 
-/* --- OPTIONAL: EXTRA SMALL SCREENS (Phones) --- 
-   If the screen is truly too narrow (< 600px), 170px margin 
-   might break the layout. We force a stack here. */
+/* --- EXTRA SMALL SCREENS (Phones) --- 
+   Signature is now part of the top menu bar (no left wall needed). */
 @media (max-width: 600px) {
   .page {
-    margin-left: 1.5rem; /* Reset wall for phones */
-    padding-top: 160px; /* Push down further to clear signature vertically */
-    padding-right: 1.5rem;
+    margin-left: 0;
+    padding-top: 100px;
+    padding-right: 1rem;
+  }
+  
+  #title-logo {
+    width: 110px;
   }
 }
