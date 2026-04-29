@@ -143,7 +143,7 @@ body {
 ============================================================ */
 
 #menu-bar {
-  /* Solid background for clean dark mode (pure black to match signature.png). Pinned header. */
+  /* Invisible/flat pinned aesthetic restored with tuned gradient (solid-feeling in dark for signature.png match, no visible bar or shadow). */
   position: fixed; 
   top: 0;
   left: 0;
@@ -151,10 +151,8 @@ body {
   height: 80px;
   z-index: 1000;
   pointer-events: none;
-  background: var(--bg);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to bottom, var(--bg) 85%, transparent);
 }
-
 .menu-inner {
   width: 100%;
   padding: 1.5rem 4rem 0;
@@ -652,37 +650,28 @@ footer {
    RESPONSIVE
 ============================================================ */
 @media (max-width: 900px) {
-  /* HIDE PORTRAIT (User requested behavior for small screens) */
+  /* HIDE PORTRAIT. Simplified rules for scroll performance (no height:100% or excess alignment that caused lag). */
   .portrait { display: none; }
   
   .menu-inner {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.25rem 0;
     grid-template-columns: auto 1fr;
-    align-items: center;
-    height: 100%;
   }
   
   #title-container { 
     margin-left: 0; 
-    height: auto;
+    height: 55px; /* Matches signature bottom to bar edge */
     width: auto;
-    padding-right: 1rem;
   }
   #menu-bar nav { 
     margin-right: 0; 
-    margin-top: 0; 
-    align-items: center;
+    margin-top: 0.75rem; 
   }
 
-  /* Solid header now fully contains signature as part of top menu bar */
-  #menu-bar {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  /* Updated mobile layout — signature is now integrated into the header bar */
+  /* Signature bottom-flush with bar (no jutting); invisible flat aesthetic preserved. */
   .page { 
     margin-left: 0;
-    padding-top: 95px; 
+    padding-top: 90px; 
     padding-right: 1.5rem;
   }
   
@@ -695,19 +684,22 @@ footer {
   
   #title-logo {
     width: 120px;
+    bottom: 2px; /* Flush bottom alignment with bar */
+    top: auto;
   }
 }
 
-/* --- EXTRA SMALL SCREENS (Phones) --- 
-   Signature is now part of the top menu bar (no left wall needed). */
+/* Phones: further tuning for performance and flush alignment. */
 @media (max-width: 600px) {
+  .menu-inner {
+    padding: 0.5rem 1rem 0;
+  }
   .page {
     margin-left: 0;
-    padding-top: 100px;
+    padding-top: 85px;
     padding-right: 1rem;
   }
-  
   #title-logo {
-    width: 110px;
+    width: 105px;
   }
 }
