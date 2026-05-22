@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Afterslop · Chris Diak</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111113;
+      --surface2: #1a1a1d;
+      --border: #2a2a2e;
+      --text: #e8e8ea;
+      --text2: #8a8a90;
+      --accent: #a5b4fc;
+      --accent2: #c0cfff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Password gate — now respects portfolio theme */
+    #gate {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding-top: 0; /* reset the earlier relative adjustment for the gate itself */
+    }
+    #gate.hidden { display: none; }
+    
+    .gate-inner {
+      width: 100%;
+      max-width: 360px;
+      padding: 0 24px;
+      text-align: center;
+    }
+    .gate-inner h1 {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    .gate-inner p {
+      color: var(--text2);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+    .gate-form {
+      display: flex;
+      gap: 8px;
+    }
+    .gate-form input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+    .gate-form input:focus {
+      border-color: var(--accent);
+    }
+    .gate-form button {
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #0a0a0b;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .gate-form button:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+    .gate-error {
+      color: #f87171;
+      font-size: 0.85rem;
+      margin-top: 12px;
+      min-height: 1.2em;
+    }
+
+    /* Main content */
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 80px 24px 100px;
+    }
+
+    header {
+      margin-bottom: 56px;
+    }
+    h1 {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: 3rem;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      margin-bottom: 12px;
+    }
+    .tagline {
+      font-size: 1.15rem;
+      color: var(--text2);
+      max-width: 520px;
+    }
+
+    .downloads {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 48px 0 64px;
+    }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 28px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+    .download-btn:hover {
+      border-color: var(--accent);
+      background: var(--surface2);
+      transform: translateY(-2px);
+    }
+    .download-btn .arch {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--border);
+      color: var(--text2);
+    }
+
+    section {
+      margin-bottom: 48px;
+    }
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--accent);
+      letter-spacing: 0.01em;
+    }
+    p {
+      color: var(--text2);
+      margin-bottom: 16px;
+    }
+    ul {
+      color: var(--text2);
+      padding-left: 20px;
+    }
+    li { margin-bottom: 6px; }
+
+    .note {
+      font-size: 0.85rem;
+      color: var(--text2);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px 20px;
+      border-radius: 12px;
+    }
+
+    .footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--text2);
+    }
+
+    /* README-style content */
+    .hero-logo {
+      width: 720px;                 /* size is good */
+      max-width: none;
+      margin-left: -252px;          /* first shifted further left with the text column, then nudged 6px right as requested */
+      margin-bottom: 12px;
+      display: block;
+      border-radius: 4px;
+    }
+
+    .intro-lead {
+      font-size: 1.05rem;
+      color: var(--text);
+      margin-bottom: 12px;
+      max-width: 640px;
+    }
+
+    .citation {
+      font-size: 0.9rem;
+      color: var(--text2);
+      margin-bottom: 48px;
+    }
+
+    .citation a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 48px 0 16px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .problem-text {
+      font-size: 1.02rem;
+      color: var(--text2);
+      margin-bottom: 20px;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 28px 0 28px 8px;
+      padding-left: 22px;
+      color: #c8c8d0;
+      font-style: italic;
+    }
+
+    blockquote p {
+      margin-bottom: 8px;
+    }
+
+    .quote-attrib {
+      font-style: normal;
+      font-size: 0.95rem;
+      color: var(--text2);
+    }
+
+    .pipeline-img {
+      width: 100%;
+      max-width: 780px;
+      margin: 32px auto;
+      display: block;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .solution-text {
+      font-size: 1.02rem;
+      color: var(--text2);
+      margin-bottom: 18px;
+    }
+
+    .downloads-secondary {
+      margin-top: 40px;
+    }
+
+    /* ============================================================
+       INTEGRATION WITH MAIN PORTFOLIO STYLES
+    ============================================================ */
+
+    /* Give the page breathing room under the fixed header */
+    body {
+      padding-top: 90px;
+    }
+
+    /* Make the password gate sit nicely below the header (centered, not indented) */
+    #gate {
+      position: relative;
+      min-height: calc(100vh - 90px);
+      align-items: center;
+      padding-top: 40px;
+    }
+
+    /* Content container — further left to match desired alignment */
+    #content {
+      padding-left: 0px;           /* moved significantly left from previous 160px */
+      padding-right: 2rem;
+      padding-bottom: 4rem;
+      max-width: 980px;
+      font-family: var(--font-geo), system-ui, sans-serif;
+    }
+
+    /* Headings lean on the portfolio's Geogrotesque */
+    #content h1 {
+      font-family: var(--font-geo);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    /* Make the explainer text readable in both light and dark themes */
+    .problem-text,
+    .solution-text {
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    /* Softer list styling to match main site */
+    #content ul {
+      padding-left: 1.25rem;
+      color: var(--text);
+    }
+
+    /* The pipeline image should feel like part of the content */
+    .pipeline-img {
+      border: 1px solid var(--border, #2a2a2e);
+      background: var(--bg);
+    }
+
+    /* Download buttons adapted to portfolio accent */
+    .download-btn {
+      border-color: var(--accent, #567482);
+      background: var(--surface, #f8f8f8);
+      color: var(--text);
+    }
+    [data-theme="dark"] .download-btn {
+      background: var(--surface, #1a1a1d);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Shared Portfolio Header for continuity -->
+  <header id="menu-bar">
+    <div class="menu-inner">
+      <div id="title-container">
+        <a href="/" id="title-link" aria-label="Home">
+          <span id="title-text">Chris Diak</span>
+          <img src="../signature.png" id="title-logo" alt="Chris Diak">
+        </a>
+      </div>
+      <nav aria-label="Site">
+        <a href="/">Portfolio</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Password Gate -->
+  <div id="gate">
+    <div class="gate-inner">
+      <h1>Afterslop</h1>
+      <p>Private link. Enter access code.</p>
+      <form class="gate-form" onsubmit="checkPassword(event)">
+        <input type="password" id="pw" placeholder="access code" autocomplete="off" autofocus>
+        <button type="submit">Enter</button>
+      </form>
+      <div class="gate-error" id="error"></div>
+    </div>
+  </div>
+
+  <!-- Main Content (hidden until unlocked) -->
+  <div class="container" id="content" style="display:none;">
+
+    <!-- Hero / Logo -->
+    <img src="./logo.png"
+         alt="Afterslop"
+         class="hero-logo">
+
+    <p class="intro-lead">
+      A deterministic symbolic knowledge system for LLM conversation exports. Turns chat histories from ChatGPT, Claude, and Grok into a cross-linked Obsidian vault backed by a symbolic extensional database.
+    </p>
+
+    <p class="citation">
+      Based on David E. Shaw’s 1980 dissertation on conceptual matching:
+      <a href="https://dl.acm.org/doi/10.5555/909640" target="_blank" rel="noreferrer">Knowledge-Based Retrieval on a Relational Database Machine</a>.
+    </p>
+
+    <!-- Prominent downloads -->
+    <div class="downloads">
+      <a href="https://github.com/cdiak/afterslop/releases/latest/download/afterslop_0.1.6_aarch64.dmg" class="download-btn">
+        Download for Apple Silicon
+        <span class="arch">aarch64</span>
+      </a>
+      <a href="https://github.com/cdiak/afterslop/releases/latest/download/afterslop_0.1.6_x86_64.dmg" class="download-btn">
+        Download for Intel
+        <span class="arch">x86_64</span>
+      </a>
+    </div>
+
+    <h2 class="section-title">For the tutor team</h2>
+
+    <p class="problem-text">
+      Every day you have high-signal conversations with Grok (and other models) that surface real behavioral patterns — refusals, sycophancy modes, reasoning collapses, jailbreak techniques, style tics, capability boundaries. Right now those insights live in linear chat history and are hard to compare across sessions or teammates.
+    </p>
+
+    <p class="problem-text">
+      Afterslop turns those tutoring sessions into a living symbolic knowledge base. Each turn is parsed, described in a constrained formal language, normalized, and indexed with Shaw-style matching. The result is a queryable graph of model behavior that gets more powerful the more you and the team use it.
+    </p>
+
+    <h2 class="section-title">Two ways to work inside the app</h2>
+
+    <p class="solution-text">
+      <strong>1. Agent Chat panel (Cmd + L)</strong><br>
+      The desktop app has a built-in agent sidebar. You can talk to Grok models that have been given first-class tools over your (and the team’s) tutoring data:
+    </p>
+
+    <ul>
+      <li><strong>Normal Grok models</strong> — When you say “save every clear example of excessive agreeableness on political topics as a collection,” the model autonomously calls <code>run_match</code>, proposes a good LSEC pattern, and saves the collection with backlinks. You get an immediate <code>saved_as</code> confirmation.</li>
+      <li><strong>Grok Build mode</strong> — Select “Grok Build” in the dropdown and you get the full visible-reasoning ACP leader + the exact same <code>.grok/docs/agents/</code> harness (AGENT.md + ENVIRONMENT.md) that powers the deepest Grok Build sessions. It is still strictly permissioned: all writes go through propose → review → promote, and it can only act on the vault through the approved bin/ surface.</li>
+    </ul>
+
+    <p class="solution-text">
+      Shared tools in both modes include <code>run_match</code>, <code>read_turn</code>, <code>list_collections</code>, <code>vault_stats</code>, and <code>propose_rule</code>.
+    </p>
+
+    <p class="solution-text">
+      <strong>2. The bin/ CLI surface</strong><br>
+      When you want precision, scripting, or to stay in the terminal, the same symbolic core is exposed through a small set of high-leverage commands:
+    </p>
+
+    <ul>
+      <li><code>bin/match</code> — run any LSEC pattern against the current snapshot (with <code>--save</code> to persist as a collection)</li>
+      <li><code>bin/propose-rule</code>, <code>bin/review-proposal</code>, <code>bin/promote-rules</code> — the full disciplined rule lifecycle</li>
+      <li><code>bin/grok-load-context</code> — pull specific turns or an entire collection into your current Grok Build session context</li>
+      <li><code>bin/vault-stats</code>, <code>bin/materialize_vault</code>, etc.</li>
+    </ul>
+
+    <p class="solution-text">
+      The <code>.grok/</code> harness (AGENT.md + ENVIRONMENT.md) defines exactly what the deep agent mode is allowed to see and do. It is the same clean, auditable contract used in the main Grok Build environment.
+    </p>
+
+    <!-- Pipeline diagram -->
+    <img src="./pipeline.png"
+         alt="Afterslop pipeline and emergent behavior graph"
+         class="pipeline-img">
+
+    <p style="text-align:center; font-size:0.9rem; color:var(--text2); margin-bottom: 48px;">
+      From raw tutoring exports → structured descriptions → queryable behavior graph and rule induction.
+    </p>
+
+    <div class="footer">
+      Built by <a href="https://cdiak.github.io" style="color: var(--accent); text-decoration: none;">Chris Diak</a>.
+    </div>
+
+  </div>
+
+  <script>
+    // Simple client-side password gate.
+    // Password is compared against a SHA-256 hash so the plaintext is not obvious in source.
+    // To rotate the password:
+    //   1. Run: echo -n 'new-password-here' | shasum -a 256
+    //   2. Replace the value below with the resulting hex string (no newline).
+
+    const PASSWORD_HASH = 'ae418b0949617d9480e58bcd97ffc8307dc152d4518ef6c968e2daaa199bb423'; // 'afterslop'
+
+    function sha256(str) {
+      const buffer = new TextEncoder().encode(str);
+      return crypto.subtle.digest('SHA-256', buffer).then(hash => {
+        return Array.from(new Uint8Array(hash))
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+      });
+    }
+
+    async function checkPassword(e) {
+      e.preventDefault();
+      const input = document.getElementById('pw').value.trim();
+      const errorEl = document.getElementById('error');
+
+      if (!input) {
+        errorEl.textContent = 'Please enter the access code.';
+        return;
+      }
+
+      const hash = await sha256(input);
+      if (hash === PASSWORD_HASH) {
+        // Success — unlock and remember for the session
+        sessionStorage.setItem('afterslop_unlocked', '1');
+        unlock();
+      } else {
+        errorEl.textContent = 'Incorrect access code.';
+        document.getElementById('pw').value = '';
+      }
+    }
+
+    function unlock() {
+      document.getElementById('gate').classList.add('hidden');
+      document.getElementById('content').style.display = 'block';
+      // Scroll to top in case we were mid-page
+      window.scrollTo(0, 0);
+    }
+
+    // Auto-unlock if already passed in this session
+    if (sessionStorage.getItem('afterslop_unlocked') === '1') {
+      // Run after DOM is ready
+      window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('content').style.display = 'block';
+      });
+    }
+
+    // Allow pressing Enter in the password field to submit (already handled by form)
+    // Bonus: clear error on new typing
+    document.addEventListener('DOMContentLoaded', () => {
+      const pw = document.getElementById('pw');
+      if (pw) {
+        pw.addEventListener('input', () => {
+          document.getElementById('error').textContent = '';
+        });
+      }
+    });
+  </script>
+
+  <!-- Portfolio script for theme toggle + header behavior -->
+  <script src="../script.js"></script>
+</body>
+</html>
