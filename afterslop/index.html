@@ -6,42 +6,29 @@
   <title>Afterslop · Chris Diak</title>
   <link rel="stylesheet" href="../style.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+    /* ============================================================
+       AFTERSLOP SUBPAGE — layered on top of ../style.css
+       Only page-specific additions; inherits theme, fonts, colors.
+    ============================================================ */
 
-    :root {
-      --bg: #0a0a0b;
-      --surface: #111113;
-      --surface2: #1a1a1d;
-      --border: #2a2a2e;
-      --text: #e8e8ea;
-      --text2: #8a8a90;
-      --accent: #a5b4fc;
-      --accent2: #c0cfff;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
+    /* Override the main-site .page layout since this page
+       has its own container and no portrait sidebar.            */
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.6;
+      padding-top: 90px;          /* clear the fixed header      */
     }
 
-    /* Password gate — now respects portfolio theme */
+    /* ---- PASSWORD GATE ---- */
     #gate {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
+      position: relative;
+      min-height: calc(100vh - 90px);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 100;
-      padding-top: 0; /* reset the earlier relative adjustment for the gate itself */
+      background: var(--bg);
+      z-index: 10;
     }
     #gate.hidden { display: none; }
-    
+
     .gate-inner {
       width: 100%;
       max-width: 360px;
@@ -49,14 +36,14 @@
       text-align: center;
     }
     .gate-inner h1 {
-      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-family: var(--font-geo);
       font-size: 1.75rem;
-      font-weight: 600;
+      font-weight: 500;
       margin-bottom: 8px;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.01em;
     }
     .gate-inner p {
-      color: var(--text2);
+      color: var(--muted);
       font-size: 0.95rem;
       margin-bottom: 24px;
     }
@@ -67,61 +54,84 @@
     .gate-form input {
       flex: 1;
       padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface);
+      border-radius: 8px;
+      border: 1px solid var(--muted);
+      background: var(--bg);
       color: var(--text);
+      font-family: var(--font-geo);
       font-size: 1rem;
       outline: none;
+      transition: border-color 0.2s;
     }
     .gate-form input:focus {
       border-color: var(--accent);
     }
     .gate-form button {
       padding: 12px 24px;
-      border-radius: 10px;
-      border: none;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
       background: var(--accent);
-      color: #0a0a0b;
-      font-weight: 600;
+      color: #fff;
+      font-family: var(--font-geo);
+      font-weight: 500;
       font-size: 0.95rem;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: opacity 0.15s ease;
     }
     .gate-form button:hover {
-      background: var(--accent2);
-      transform: translateY(-1px);
+      opacity: 0.85;
     }
     .gate-error {
-      color: #f87171;
+      color: #c0392b;
       font-size: 0.85rem;
       margin-top: 12px;
       min-height: 1.2em;
     }
+    [data-theme="dark"] .gate-error {
+      color: #f87171;
+    }
 
-    /* Main content */
-    .container {
+    /* ---- MAIN CONTENT ---- */
+    #content {
       max-width: 720px;
       margin: 0 auto;
-      padding: 80px 24px 100px;
+      padding: 40px 24px 100px;
     }
 
-    header {
-      margin-bottom: 56px;
-    }
-    h1 {
-      font-family: 'Space Grotesk', 'Inter', sans-serif;
-      font-size: 3rem;
-      font-weight: 600;
-      letter-spacing: -0.04em;
+    /* Hero logo — oversized, bleeds left */
+    .hero-logo {
+      width: 720px;
+      max-width: none;
+      margin-left: -252px;
       margin-bottom: 12px;
-    }
-    .tagline {
-      font-size: 1.15rem;
-      color: var(--text2);
-      max-width: 520px;
+      display: block;
+      border-radius: 4px;
     }
 
+    .intro-lead {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 12px;
+      max-width: 640px;
+    }
+
+    .citation {
+      font-family: var(--font-serif);
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 48px;
+    }
+    .citation a {
+      color: var(--accent);
+      border-bottom: 1px solid transparent;
+    }
+    .citation a:hover {
+      border-bottom-color: var(--accent);
+    }
+
+    /* ---- DOWNLOADS ---- */
     .downloads {
       display: flex;
       gap: 12px;
@@ -132,212 +142,158 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 16px 28px;
-      border-radius: 14px;
+      padding: 14px 24px;
+      border-radius: 8px;
       text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: all 0.2s ease;
-      border: 1px solid var(--border);
-      background: var(--surface);
+      border: 1px solid var(--muted);
+      border-bottom: 1px solid var(--muted);
+      background: var(--bg);
       color: var(--text);
+      font-family: var(--font-geo);
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease, color 0.2s ease;
     }
     .download-btn:hover {
       border-color: var(--accent);
-      background: var(--surface2);
-      transform: translateY(-2px);
+      color: var(--accent);
     }
     .download-btn .arch {
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 0.8rem;
       padding: 2px 8px;
-      border-radius: 6px;
-      background: var(--border);
-      color: var(--text2);
-    }
-
-    section {
-      margin-bottom: 48px;
-    }
-    h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--accent);
-      letter-spacing: 0.01em;
-    }
-    p {
-      color: var(--text2);
-      margin-bottom: 16px;
-    }
-    ul {
-      color: var(--text2);
-      padding-left: 20px;
-    }
-    li { margin-bottom: 6px; }
-
-    .note {
-      font-size: 0.85rem;
-      color: var(--text2);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 16px 20px;
-      border-radius: 12px;
-    }
-
-    .footer {
-      margin-top: 80px;
-      padding-top: 32px;
-      border-top: 1px solid var(--border);
-      font-size: 0.85rem;
-      color: var(--text2);
-    }
-
-    /* README-style content */
-    .hero-logo {
-      width: 720px;                 /* size is good */
-      max-width: none;
-      margin-left: -252px;          /* first shifted further left with the text column, then nudged 6px right as requested */
-      margin-bottom: 12px;
-      display: block;
       border-radius: 4px;
+      background: var(--code-bg);
+      color: var(--muted);
     }
 
-    .intro-lead {
-      font-size: 1.05rem;
-      color: var(--text);
-      margin-bottom: 12px;
-      max-width: 640px;
-    }
-
-    .citation {
-      font-size: 0.9rem;
-      color: var(--text2);
-      margin-bottom: 48px;
-    }
-
-    .citation a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
+    /* ---- SECTION HEADINGS ---- */
     .section-title {
+      font-family: var(--font-geo);
       font-size: 1.35rem;
-      font-weight: 600;
-      margin: 48px 0 16px;
-      color: var(--text);
+      font-weight: 500;
       letter-spacing: -0.01em;
+      color: var(--text);
+      margin: 48px 0 16px;
     }
 
-    .problem-text {
-      font-size: 1.02rem;
-      color: var(--text2);
-      margin-bottom: 20px;
+    /* ---- BODY TEXT ---- */
+    #content p {
+      font-family: var(--font-serif);
+      color: var(--text);
+      line-height: 1.8;
+      max-width: 42rem;
+      margin-bottom: 1.25rem;
+    }
+    #content ul,
+    #content ol {
+      font-family: var(--font-serif);
+      color: var(--text);
+      max-width: 42rem;
+      padding-left: 1.25rem;
+      line-height: 1.8;
+    }
+    #content li {
+      margin-bottom: 6px;
+    }
+    /* Reset h2 back from style.css's large heading —
+       the page uses h2 only for .section-title              */
+    #content h2 {
+      font-size: inherit;
+      margin-bottom: 0;
+      color: inherit;
     }
 
+    /* ---- BLOCKQUOTE ---- */
     blockquote {
       border-left: 3px solid var(--accent);
       margin: 28px 0 28px 8px;
       padding-left: 22px;
-      color: #c8c8d0;
+      color: var(--text);
       font-style: italic;
     }
-
     blockquote p {
       margin-bottom: 8px;
     }
-
     .quote-attrib {
       font-style: normal;
       font-size: 0.95rem;
-      color: var(--text2);
+      color: var(--muted);
     }
 
+    /* ---- PIPELINE IMAGE ---- */
     .pipeline-img {
       width: 100%;
       max-width: 780px;
       margin: 32px auto;
       display: block;
       border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-
-    .solution-text {
-      font-size: 1.02rem;
-      color: var(--text2);
-      margin-bottom: 18px;
-    }
-
-    .downloads-secondary {
-      margin-top: 40px;
-    }
-
-    /* ============================================================
-       INTEGRATION WITH MAIN PORTFOLIO STYLES
-    ============================================================ */
-
-    /* Give the page breathing room under the fixed header */
-    body {
-      padding-top: 90px;
-    }
-
-    /* Make the password gate sit nicely below the header (centered, not indented) */
-    #gate {
-      position: relative;
-      min-height: calc(100vh - 90px);
-      align-items: center;
-      padding-top: 40px;
-    }
-
-    /* Content container — further left to match desired alignment */
-    #content {
-      padding-left: 0px;           /* moved significantly left from previous 160px */
-      padding-right: 2rem;
-      padding-bottom: 4rem;
-      max-width: 980px;
-      font-family: var(--font-geo), system-ui, sans-serif;
-    }
-
-    /* Headings lean on the portfolio's Geogrotesque */
-    #content h1 {
-      font-family: var(--font-geo);
-      font-weight: 500;
-      letter-spacing: -0.01em;
-    }
-
-    /* Make the explainer text readable in both light and dark themes */
-    .problem-text,
-    .solution-text {
-      color: var(--text);
-      line-height: 1.65;
-    }
-
-    /* Softer list styling to match main site */
-    #content ul {
-      padding-left: 1.25rem;
-      color: var(--text);
-    }
-
-    /* The pipeline image should feel like part of the content */
-    .pipeline-img {
-      border: 1px solid var(--border, #2a2a2e);
+      border: 1px solid var(--muted);
       background: var(--bg);
     }
 
-    /* Download buttons adapted to portfolio accent */
-    .download-btn {
-      border-color: var(--accent, #567482);
-      background: var(--surface, #f8f8f8);
-      color: var(--text);
+    /* ---- NOTE BOX ---- */
+    .note {
+      font-size: 0.9rem;
+      color: var(--muted);
+      background: var(--code-bg);
+      border: 1px solid var(--muted);
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: var(--font-serif);
     }
-    [data-theme="dark"] .download-btn {
-      background: var(--surface, #1a1a1d);
+
+    /* ---- FOOTER ---- */
+    .afterslop-footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--muted);
+      font-family: var(--font-geo);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .afterslop-footer a {
+      color: var(--accent);
+      border-bottom: none;
+    }
+    .afterslop-footer a:hover {
+      border-bottom: 1px solid var(--accent);
+    }
+
+    /* ---- CODE INLINE ---- */
+    #content code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.88em;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 900px) {
+      body { padding-top: 80px; }
+      #gate { min-height: calc(100vh - 80px); }
+      .hero-logo {
+        width: 100%;
+        margin-left: 0;
+      }
+      #content {
+        padding: 24px 1.25rem 80px;
+      }
+    }
+    @media (max-width: 600px) {
+      body { padding-top: 70px; }
+      #gate { min-height: calc(100vh - 70px); }
+      .gate-inner h1 { font-size: 1.5rem; }
+      .downloads { flex-direction: column; }
+      .download-btn { width: 100%; justify-content: center; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Shared Portfolio Header for continuity -->
+  <!-- Shared Portfolio Header -->
   <header id="menu-bar">
     <div class="menu-inner">
       <div id="title-container">
@@ -366,23 +322,18 @@
   </div>
 
   <!-- Main Content (hidden until unlocked) -->
-  <div class="container" id="content" style="display:none;">
+  <div id="content" style="display:none;">
 
-    <!-- Hero / Logo -->
-    <img src="./logo.png"
-         alt="Afterslop"
-         class="hero-logo">
+    <img src="./logo.png" alt="Afterslop" class="hero-logo">
 
     <p class="intro-lead">
       A deterministic symbolic knowledge system for LLM conversation exports. Turns chat histories from ChatGPT, Claude, and Grok into a cross-linked Obsidian vault backed by a symbolic extensional database.
     </p>
-
     <p class="citation">
-      Based on David E. Shaw’s 1980 dissertation on conceptual matching:
+      Based on David E. Shaw's 1980 dissertation on conceptual matching:
       <a href="https://dl.acm.org/doi/10.5555/909640" target="_blank" rel="noreferrer">Knowledge-Based Retrieval on a Relational Database Machine</a>.
     </p>
 
-    <!-- Prominent downloads -->
     <div class="downloads">
       <a href="https://github.com/cdiak/afterslop/releases/latest/download/afterslop_0.1.6_aarch64.dmg" class="download-btn">
         Download for Apple Silicon
@@ -395,7 +346,6 @@
     </div>
 
     <h2 class="section-title">Getting Started</h2>
-
     <ol>
       <li>Download and open Afterslop.</li>
       <li>Export your tutoring sessions (ChatGPT, Claude, or Grok) and put the zip files in one folder.</li>
@@ -406,26 +356,19 @@
     </ol>
 
     <h2 class="section-title">Background</h2>
-
     <p><strong>Afterslop is a tool for collecting and organizing model behaviors from LLM export data.</strong></p>
-
     <p>It turns your exported conversations into a usable knowledge base in the following way:</p>
-
     <ul>
       <li>It creates an Obsidian-style vault from all the conversations you import, across ChatGPT, Claude, and Grok.</li>
       <li>Each individual exchange (a turn) gets its own file and a formal description that captures the underlying structure of what happened.</li>
       <li>These structured descriptions allow a conceptual matching algorithm to run across your data. Instead of relying on keywords or embedding similarity, the system can find turns that are related at the level of their logical structure.</li>
-      <li>The matching approach is inspired by David E. Shaw’s doctoral thesis on knowledge-based retrieval on relational databases.</li>
+      <li>The matching approach is inspired by David E. Shaw's doctoral thesis on knowledge-based retrieval on relational databases.</li>
     </ul>
-
-    <p>The key idea behind the system is that the <strong>turn</strong>, not the full conversation thread, is usually the right unit of analysis. At xAI, tasking happens at the level of individual turns. Because the real value in most tutoring work lives at that granular level, giving each turn a structured description makes certain conceptual patterns visible and comparable in ways that would otherwise be hard to find.</p>
-
-    <p>A useful way to understand how the matching works is “description implies description.” For example, if a turn is described as the model breaking a hard problem into smaller steps and solving them one by one, the matching rules can recognize that this turn also counts as an example of structured reasoning — even if those exact words were never used. The formal descriptions let the system draw these connections automatically.</p>
+    <p>The key idea behind the system is that the <strong>turn</strong>, not the full conversation thread, is the right unit of analysis for analyzing user-LLM interactions. Tasking usually happens at the level of individual turns. Because the real value in most tutoring work lives at that granular level, giving each turn a structured description makes certain conceptual patterns visible and comparable in ways that would otherwise be hard to find.</p>
+    <p>A useful way to understand how the matching works is "description implies description." For example, if a turn is described as the model breaking a hard problem into smaller steps and solving them one by one, the matching rules can recognize that this turn also counts as an example of structured reasoning — even if those exact words were never used. The formal descriptions let the system draw these connections automatically.</p>
 
     <h2 class="section-title">Workflow</h2>
-
-    <p>Here’s a practical way most tutors use Afterslop:</p>
-
+    <p>Here's a practical way most tutors use Afterslop:</p>
     <ol>
       <li><strong>Export your data</strong> — Export the conversations you want to work with from any provider and put the zip files in one folder.</li>
       <li><strong>Open Afterslop and drop the files</strong> — Drag the zips into the app window. It will detect the providers automatically.</li>
@@ -434,42 +377,30 @@
       <li><strong>Run the pipeline</strong> — Let the app process your files. This is the longest step.</li>
       <li><strong>Use the agent chat (<code>Cmd + L</code>)</strong> to explore and organize what you found.</li>
     </ol>
-
     <p><strong>Using the agent chat effectively</strong></p>
-
-    <p>Grok 4.3 is currently one of the strongest models for writing good search patterns in the agent. When asking it to find examples or create collections, give it clear instructions so it doesn’t overly restrict the results. Useful prompts often include lines like:</p>
-
+    <p>Grok 4.3 is currently one of the strongest models for writing good search patterns in the agent. When asking it to find examples or create collections, give it clear instructions so it doesn't overly restrict the results. Useful prompts often include lines like:</p>
     <ul>
-      <li>“Write a broad pattern that catches as many relevant cases as possible, even if some results are noisy.”</li>
-      <li>“Prioritize recall over precision for now — I can refine afterward.”</li>
-      <li>“Avoid adding too many extra constraints that would make the results too narrow.”</li>
-      <li>“Return the full list of matches rather than summarizing or truncating.”</li>
+      <li>"Write a broad pattern that catches as many relevant cases as possible, even if some results are noisy."</li>
+      <li>"Prioritize recall over precision for now — I can refine afterward."</li>
+      <li>"Avoid adding too many extra constraints that would make the results too narrow."</li>
+      <li>"Return the full list of matches rather than summarizing or truncating."</li>
     </ul>
 
     <h2 class="section-title">Notes</h2>
-
     <ul>
       <li>The normal Grok models (especially Grok 4.3 and Grok 4 Fast) work reliably in the agent chat for finding patterns and saving collections.</li>
-      <li>The deeper “Grok Build” integration inside the desktop app is currently not working well. If you want the full visible-reasoning experience, it’s currently better to use the main Grok Build interface together with the CLI tools.</li>
+      <li>The deeper "Grok Build" integration inside the desktop app is currently not working well. If you want the full visible-reasoning experience, it's currently better to use the main Grok Build interface together with the CLI tools.</li>
       <li>The local model (<code>donny</code>) is the lowest-friction way to get started. The quality is good enough for a lot of collection-building work.</li>
       <li>You can always re-run the pipeline later with a stronger model if you want higher-quality descriptions on the same data.</li>
     </ul>
 
-    <div class="footer">
-      Built by <a href="https://cdiak.github.io" style="color: var(--accent); text-decoration: none;">Chris Diak</a>.
+    <div class="afterslop-footer">
+      Built by <a href="https://cdiak.github.io">Chris Diak</a>.
     </div>
-
   </div>
 
   <script>
-    // Simple client-side password gate.
-    // Password is compared against a SHA-256 hash so the plaintext is not obvious in source.
-    // To rotate the password:
-    //   1. Run: echo -n 'new-password-here' | shasum -a 256
-    //   2. Replace the value below with the resulting hex string (no newline).
-
-    const PASSWORD_HASH = 'ae418b0949617d9480e58bcd97ffc8307dc152d4518ef6c968e2daaa199bb423'; // 'afterslop'
-
+    const PASSWORD_HASH = 'ae418b0949617d9480e58bcd97ffc8307dc152d4518ef6c968e2daaa199bb423';
     function sha256(str) {
       const buffer = new TextEncoder().encode(str);
       return crypto.subtle.digest('SHA-256', buffer).then(hash => {
@@ -478,20 +409,16 @@
           .join('');
       });
     }
-
     async function checkPassword(e) {
       e.preventDefault();
       const input = document.getElementById('pw').value.trim();
       const errorEl = document.getElementById('error');
-
       if (!input) {
         errorEl.textContent = 'Please enter the access code.';
         return;
       }
-
       const hash = await sha256(input);
       if (hash === PASSWORD_HASH) {
-        // Success — unlock and remember for the session
         sessionStorage.setItem('afterslop_unlocked', '1');
         unlock();
       } else {
@@ -499,25 +426,17 @@
         document.getElementById('pw').value = '';
       }
     }
-
     function unlock() {
       document.getElementById('gate').classList.add('hidden');
       document.getElementById('content').style.display = 'block';
-      // Scroll to top in case we were mid-page
       window.scrollTo(0, 0);
     }
-
-    // Auto-unlock if already passed in this session
     if (sessionStorage.getItem('afterslop_unlocked') === '1') {
-      // Run after DOM is ready
       window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('gate').classList.add('hidden');
         document.getElementById('content').style.display = 'block';
       });
     }
-
-    // Allow pressing Enter in the password field to submit (already handled by form)
-    // Bonus: clear error on new typing
     document.addEventListener('DOMContentLoaded', () => {
       const pw = document.getElementById('pw');
       if (pw) {
@@ -527,8 +446,6 @@
       }
     });
   </script>
-
-  <!-- Portfolio script for theme toggle + header behavior -->
   <script src="../script.js"></script>
 </body>
 </html>
