@@ -394,56 +394,66 @@
       </a>
     </div>
 
-    <h2 class="section-title">For the tutor team</h2>
+    <h2 class="section-title">Getting Started</h2>
 
-    <p class="problem-text">
-      Every day you have high-signal conversations with Grok (and other models) that surface real behavioral patterns — refusals, sycophancy modes, reasoning collapses, jailbreak techniques, style tics, capability boundaries. Right now those insights live in linear chat history and are hard to compare across sessions or teammates.
-    </p>
+    <ol>
+      <li>Download and open Afterslop.</li>
+      <li>Export your tutoring sessions (ChatGPT, Claude, or Grok) and put the zip files in one folder.</li>
+      <li>Drag the zips into the app window.</li>
+      <li>Choose <strong>donny</strong> (local Llama via proxy) and click <strong>Start Local Proxy</strong>.</li>
+      <li>Run the pipeline and wait for it to finish.</li>
+      <li>Press <strong>Cmd + L</strong> to open the agent chat and start exploring.</li>
+    </ol>
 
-    <p class="problem-text">
-      Afterslop turns those tutoring sessions into a living symbolic knowledge base. Each turn is parsed, described in a constrained formal language, normalized, and indexed with Shaw-style matching. The result is a queryable graph of model behavior that gets more powerful the more you and the team use it.
-    </p>
+    <h2 class="section-title">Background</h2>
 
-    <h2 class="section-title">Two ways to work inside the app</h2>
+    <p><strong>Afterslop is a tool for collecting and organizing model behaviors from LLM export data.</strong></p>
 
-    <p class="solution-text">
-      <strong>1. Agent Chat panel (Cmd + L)</strong><br>
-      The desktop app has a built-in agent sidebar. You can talk to Grok models that have been given first-class tools over your (and the team’s) tutoring data:
-    </p>
-
-    <ul>
-      <li><strong>Normal Grok models</strong> — When you say “save every clear example of excessive agreeableness on political topics as a collection,” the model autonomously calls <code>run_match</code>, proposes a good LSEC pattern, and saves the collection with backlinks. You get an immediate <code>saved_as</code> confirmation.</li>
-      <li><strong>Grok Build mode</strong> — Select “Grok Build” in the dropdown and you get the full visible-reasoning ACP leader + the exact same <code>.grok/docs/agents/</code> harness (AGENT.md + ENVIRONMENT.md) that powers the deepest Grok Build sessions. It is still strictly permissioned: all writes go through propose → review → promote, and it can only act on the vault through the approved bin/ surface.</li>
-    </ul>
-
-    <p class="solution-text">
-      Shared tools in both modes include <code>run_match</code>, <code>read_turn</code>, <code>list_collections</code>, <code>vault_stats</code>, and <code>propose_rule</code>.
-    </p>
-
-    <p class="solution-text">
-      <strong>2. The bin/ CLI surface</strong><br>
-      When you want precision, scripting, or to stay in the terminal, the same symbolic core is exposed through a small set of high-leverage commands:
-    </p>
+    <p>It turns your exported conversations into a usable knowledge base in the following way:</p>
 
     <ul>
-      <li><code>bin/match</code> — run any LSEC pattern against the current snapshot (with <code>--save</code> to persist as a collection)</li>
-      <li><code>bin/propose-rule</code>, <code>bin/review-proposal</code>, <code>bin/promote-rules</code> — the full disciplined rule lifecycle</li>
-      <li><code>bin/grok-load-context</code> — pull specific turns or an entire collection into your current Grok Build session context</li>
-      <li><code>bin/vault-stats</code>, <code>bin/materialize_vault</code>, etc.</li>
+      <li>It creates an Obsidian-style vault from all the conversations you import, across ChatGPT, Claude, and Grok.</li>
+      <li>Each individual exchange (a turn) gets its own file and a formal description that captures the underlying structure of what happened.</li>
+      <li>These structured descriptions allow a conceptual matching algorithm to run across your data. Instead of relying on keywords or embedding similarity, the system can find turns that are related at the level of their logical structure.</li>
+      <li>The matching approach is inspired by David E. Shaw’s doctoral thesis on knowledge-based retrieval on relational databases.</li>
     </ul>
 
-    <p class="solution-text">
-      The <code>.grok/</code> harness (AGENT.md + ENVIRONMENT.md) defines exactly what the deep agent mode is allowed to see and do. It is the same clean, auditable contract used in the main Grok Build environment.
-    </p>
+    <p>The key idea behind the system is that the <strong>turn</strong>, not the full conversation thread, is usually the right unit of analysis. At xAI, tasking happens at the level of individual turns. Because the real value in most tutoring work lives at that granular level, giving each turn a structured description makes certain conceptual patterns visible and comparable in ways that would otherwise be hard to find.</p>
 
-    <!-- Pipeline diagram -->
-    <img src="./pipeline.png"
-         alt="Afterslop pipeline and emergent behavior graph"
-         class="pipeline-img">
+    <p>A useful way to understand how the matching works is “description implies description.” For example, if a turn is described as the model breaking a hard problem into smaller steps and solving them one by one, the matching rules can recognize that this turn also counts as an example of structured reasoning — even if those exact words were never used. The formal descriptions let the system draw these connections automatically.</p>
 
-    <p style="text-align:center; font-size:0.9rem; color:var(--text2); margin-bottom: 48px;">
-      From raw tutoring exports → structured descriptions → queryable behavior graph and rule induction.
-    </p>
+    <h2 class="section-title">Workflow</h2>
+
+    <p>Here’s a practical way most tutors use Afterslop:</p>
+
+    <ol>
+      <li><strong>Export your data</strong> — Export the conversations you want to work with from any provider and put the zip files in one folder.</li>
+      <li><strong>Open Afterslop and drop the files</strong> — Drag the zips into the app window. It will detect the providers automatically.</li>
+      <li><strong>Choose a description provider</strong> — <strong>donny</strong> (local Llama 3.1-8B via the built-in proxy) is the easiest and cheapest way to start. Grok models generally give sharper descriptions but cost tokens.</li>
+      <li><strong>Start the local proxy</strong> (if using donny) — Click the button to launch the local model server.</li>
+      <li><strong>Run the pipeline</strong> — Let the app process your files. This is the longest step.</li>
+      <li><strong>Use the agent chat (<code>Cmd + L</code>)</strong> to explore and organize what you found.</li>
+    </ol>
+
+    <p><strong>Using the agent chat effectively</strong></p>
+
+    <p>Grok 4.3 is currently one of the strongest models for writing good search patterns in the agent. When asking it to find examples or create collections, give it clear instructions so it doesn’t overly restrict the results. Useful prompts often include lines like:</p>
+
+    <ul>
+      <li>“Write a broad pattern that catches as many relevant cases as possible, even if some results are noisy.”</li>
+      <li>“Prioritize recall over precision for now — I can refine afterward.”</li>
+      <li>“Avoid adding too many extra constraints that would make the results too narrow.”</li>
+      <li>“Return the full list of matches rather than summarizing or truncating.”</li>
+    </ul>
+
+    <h2 class="section-title">Notes</h2>
+
+    <ul>
+      <li>The normal Grok models (especially Grok 4.3 and Grok 4 Fast) work reliably in the agent chat for finding patterns and saving collections.</li>
+      <li>The deeper “Grok Build” integration inside the desktop app is currently not working well. If you want the full visible-reasoning experience, it’s currently better to use the main Grok Build interface together with the CLI tools.</li>
+      <li>The local model (<code>donny</code>) is the lowest-friction way to get started. The quality is good enough for a lot of collection-building work.</li>
+      <li>You can always re-run the pipeline later with a stronger model if you want higher-quality descriptions on the same data.</li>
+    </ul>
 
     <div class="footer">
       Built by <a href="https://cdiak.github.io" style="color: var(--accent); text-decoration: none;">Chris Diak</a>.
