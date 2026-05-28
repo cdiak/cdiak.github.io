@@ -1,0 +1,5 @@
+
+# FFC confidential content (StatiCrypt)
+_src/
+.env
+.DS_Store
