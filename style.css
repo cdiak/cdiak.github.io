@@ -82,7 +82,7 @@
 }
 
 [data-theme="dark"] {
-  --bg: #050505;
+  --bg: #000000;
   --text: #e0e0e0;
   --muted: #888888;
   
