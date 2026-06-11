@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Analytics (same property as main site) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RG58M47TX9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RG58M47TX9');
+  </script>
+
+  <title>Margin of Safety — Intrinsic Value Worksheets</title>
+  <meta name="description" content="Probability-weighted intrinsic value (NAV / EPV / GV) for any company, researched live by Claude.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="mos-bar">
+    <div class="mos-bar-inner">
+      <a href="/" class="mos-home">Chris Diak</a>
+      <span class="mos-crumb">/ margin-of-safety</span>
+      <nav class="mos-nav">
+        <a href="#how">How it works</a>
+        <a href="https://github.com/cdiak/cdiak.github.io/tree/main/margin-of-safety" target="_blank" rel="noreferrer">Source</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mos-page">
+
+    <!-- ============ HERO / INPUT ============ -->
+    <section class="hero">
+      <div class="eyebrow">INVESTMENT THESIS WORKSHEET · NAV / EPV / GV · EXPECTED-VALUE METHOD</div>
+      <h1>What is <span class="hl" id="hero-company">any company</span> actually worth?</h1>
+      <p class="lede">
+        Name a company. Claude researches it live, applies a Greenwald-style valuation framework
+        — liquidation NAV, earning-power value, growth value — across five probability-weighted
+        scenarios, and hands you a research report plus an interactive model you can argue with.
+        <strong>Analytical tool, not investment advice.</strong>
+      </p>
+
+      <form id="run-form" class="run-form" autocomplete="off">
+        <div class="row">
+          <input id="company-input" type="text" placeholder="e.g. Stripe, Databricks, Epic Games…"
+                 aria-label="Company name" required>
+          <button id="run-btn" type="submit">Run the worksheet</button>
+        </div>
+        <div class="row key-row">
+          <input id="key-input" type="password" placeholder="Your Anthropic API key (sk-ant-…)"
+                 aria-label="Anthropic API key" required>
+          <label class="remember">
+            <input type="checkbox" id="remember-key"> remember on this device
+          </label>
+        </div>
+        <p class="key-note">
+          Your key is sent <em>only</em> to api.anthropic.com, directly from your browser —
+          never to this site or any other server. Get a key at
+          <a href="https://console.anthropic.com" target="_blank" rel="noreferrer">console.anthropic.com</a>.
+          A run uses web search + a long completion (typically a few cents to ~$0.50).
+        </p>
+      </form>
+
+      <div id="status" class="status" hidden></div>
+      <div id="error" class="error" hidden></div>
+    </section>
+
+    <!-- ============ RESULTS ============ -->
+    <section id="results" hidden>
+      <div class="results-actions">
+        <button id="dl-md" class="ghost-btn">Download report (.md)</button>
+        <button id="dl-jsx" class="ghost-btn">Download dashboard (.jsx)</button>
+        <button id="dl-json" class="ghost-btn">Download data (.json)</button>
+        <button id="print-btn" class="ghost-btn">Print / save as PDF</button>
+      </div>
+
+      <!-- Interactive dashboard renders here -->
+      <div id="dashboard"></div>
+
+      <!-- Written report renders here -->
+      <article id="report"></article>
+    </section>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section id="how" class="how">
+      <h2>How it works</h2>
+      <ol>
+        <li><strong>Research.</strong> Claude (with web search) pulls the company's latest revenue,
+            margins, funding marks, burn, and competitive position.</li>
+        <li><strong>Framework.</strong> It values five scenarios by the rule each one earns:
+            catastrophe → NAV at liquidation; commoditization → max(NAV, EPV) capped at replacement
+            cost; a moat around the current business → EPV = normalized earnings ÷ K; a moat around
+            new investment → GV = D/(K−G); plus a transformative tail.</li>
+        <li><strong>Expected value.</strong> E(V) = Σ pᵢ·Vᵢ, compared against the latest market mark.
+            Then you take over: drag the probabilities, change K, edit the assumptions, and watch
+            the tape move.</li>
+      </ol>
+      <p class="fine">
+        Built on the public worksheet series (OpenAI, Notion, Anthropic, SpaceX, Waymo).
+        All outputs are model-generated estimates from public reporting — verify before relying on
+        anything, and nothing here is investment advice.
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="mos-footer">
+    <span>© Christopher J. Diak · powered by the Claude API</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
