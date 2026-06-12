@@ -104,11 +104,11 @@
     }
 
     /* no scrollbars, anywhere — the panes scroll silently by wheel and touch */
-    .treenav, main, .figcol {
+    .treenav, main, .figcol, .key {
       scrollbar-width: none;        /* Firefox */
       -ms-overflow-style: none;     /* old Edge */
     }
-    .treenav::-webkit-scrollbar, main::-webkit-scrollbar, .figcol::-webkit-scrollbar {
+    .treenav::-webkit-scrollbar, main::-webkit-scrollbar, .figcol::-webkit-scrollbar, .key::-webkit-scrollbar {
       display: none;                /* WebKit */
     }
 
@@ -222,11 +222,26 @@
     .illuminated main a[href*="dyakcraft"]      { color: var(--b-tom); }
     .illuminated main a[href*="lindadiak"]      { color: var(--b-linda); }
 
-    /* ---------- the plate: pinned ---------- */
-    .figcol { min-width: 0; overflow-y: auto; min-height: 0; }
-    .figcol .stick { padding-bottom: 1rem; }
-    figure.plate { margin: 0; text-align: center; }
-    .plate svg { width: 100%; max-width: 590px; height: auto; display: block; margin: 0 auto; }
+    /* ---------- the plate: pinned for good ----------
+       The plate and caption never move; on short windows the plate
+       shrinks to fit, and only the index beneath it scrolls, its
+       entries slipping away under the caption's line. */
+    .figcol { min-width: 0; min-height: 0; }
+    .figcol .stick {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 1rem;
+    }
+    figure.plate { margin: 0; text-align: center; flex-shrink: 0; }
+    .plate svg {
+      width: 100%;
+      max-width: 590px;
+      max-height: min(62vh, 531px);
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
 
     .plate .ring     { fill: none; stroke: var(--ink); stroke-width: 1.4; }
     .plate .constr   { fill: none; stroke: var(--muted); stroke-width: 0.8; stroke-dasharray: 2 5; }
@@ -256,10 +271,14 @@
     }
     figcaption .figno { font-style: normal; font-variant: small-caps; letter-spacing: 0.08em; }
 
-    /* the index, under the plate */
+    /* the index, under the plate — the one part of the column that scrolls */
     .key {
       margin: 1rem auto 0;
+      width: 100%;
       max-width: 590px;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
       padding-top: 0.9rem;
       border-top: 1px solid var(--faint);
       columns: 2;
@@ -288,9 +307,11 @@
       /* release the frame: back to ordinary page scroll */
       body { height: auto; overflow: visible; display: block; padding-bottom: 2.5rem; }
       .leaf { grid-template-columns: 220px minmax(0, 1fr); }
-      .treenav, main, .figcol { overflow: visible; }
+      .treenav, main, .figcol, .key { overflow: visible; }
       .figcol { grid-column: 2; }
-      .figcol .stick { max-width: 640px; margin: 1rem auto 0; }
+      .figcol .stick { max-width: 640px; margin: 1rem auto 0; height: auto; display: block; }
+      .plate svg { max-height: none; }
+      .key { flex: none; }
     }
     @media (max-width: 920px) {
       body { padding: 0 1.25rem 2.5rem; font-size: 17px; }
