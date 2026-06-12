@@ -47,6 +47,17 @@
       --g-media:    hsl(268, 55%, 48%);
       --g-context:  hsl(248, 45%, 50%);
 
+      /* the old semantic palette, for the names in the text */
+      --b-harvard:    #A51C30;
+      --b-dartmouth:  #12312b;
+      --b-chernik:    #567482;
+      --b-penn:       #011F5B;
+      --b-openai:     #660066;
+      --b-greene:     #ba6100;
+      --b-middlebury: #0D395F;
+      --b-tom:        #630cb8;
+      --b-linda:      #7e6ed4;
+
       --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
       --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     }
@@ -63,6 +74,16 @@
       --g-design:   hsl(210, 80%, 66%);
       --g-media:    hsl(268, 70%, 72%);
       --g-context:  hsl(248, 56%, 70%);
+
+      /* dark-mode tunings of the old palette */
+      --b-harvard:    #ff4d6d;
+      --b-dartmouth:  #4a8a7b;
+      --b-chernik:    #8aaebf;
+      --b-penn:       #4d8aff;
+      --b-openai:     #d94dd9;
+      --b-middlebury: #4d94ff;
+      --b-tom:        #9e5cff;
+      --b-linda:      #a394ff;
     }
 
     * { box-sizing: border-box; }
@@ -184,6 +205,22 @@
     main li { margin-bottom: 0.3rem; }
     a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
     a:hover { text-decoration-thickness: 2px; }
+
+    /* ---------- the illumination ----------
+       Once the plate has drawn itself, the names in the text
+       take back their old colours. */
+    main a { transition: color 1.2s ease; }
+    .illuminated main a[href*="mindbrain"]      { color: var(--b-dartmouth); }
+    .illuminated main a[href*="chernik"]        { color: var(--b-chernik); }
+    .illuminated main a[href*="rapoport"],
+    .illuminated main a[href*="harbus"]         { color: var(--b-harvard); }
+    .illuminated main a[href*="upenn"]          { color: var(--b-penn); }
+    .illuminated main a[href*="joshua-greene"]  { color: var(--b-greene); }
+    .illuminated main a[href*="openai"]         { color: var(--b-openai); }
+    .illuminated main a[href*="middlebury"],
+    .illuminated main a[href*="rachelaurora"]   { color: var(--b-middlebury); }
+    .illuminated main a[href*="dyakcraft"]      { color: var(--b-tom); }
+    .illuminated main a[href*="lindadiak"]      { color: var(--b-linda); }
 
     /* ---------- the plate: pinned ---------- */
     .figcol { min-width: 0; overflow-y: auto; min-height: 0; }
@@ -663,9 +700,11 @@
     /* ---------- the figure draws itself, as if by pen ---------- */
     let inkDone = reduceMotion;
     let inked = [];
+    if (reduceMotion) document.body.classList.add("illuminated");
     function finishInk() {
       if (inkDone) return;
       inkDone = true;
+      document.body.classList.add("illuminated");
       inked.forEach(e => {
         e.style.strokeDasharray = ""; e.style.strokeDashoffset = "";
         e.style.opacity = ""; e.style.transition = "";
