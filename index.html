@@ -532,8 +532,11 @@
         angle += perNode;
       });
       const mid = (start + angle) / 2;
-      const [gx, gy] = pol(mid, R + 62);
-      const t = el("text", { x: gx, y: gy + 4, class: "grp", "text-anchor": "middle" });
+      // side labels anchor outward so they never reach back over the sigils
+      const c = Math.cos(mid * Math.PI / 180);
+      const anchor = c > 0.35 ? "start" : c < -0.35 ? "end" : "middle";
+      const [gx, gy] = pol(mid, anchor === "middle" ? R + 72 : R + 52);
+      const t = el("text", { x: gx, y: gy + 4, class: "grp", "text-anchor": anchor });
       t.textContent = g;
       SVG.appendChild(t);
       angle += GAP;
