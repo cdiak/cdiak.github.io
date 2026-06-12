@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>cdiak.github.io — design directions</title>
+  <style>
+    body {
+      margin: 0; min-height: 100vh;
+      display: grid; place-content: center; gap: 1rem;
+      font-family: Georgia, serif;
+      background: #faf6ee; color: #2b241a;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.4rem; font-weight: 600; margin: 0 0 0.5rem; }
+    p  { margin: 0 0 1rem; color: #7a6f5f; font-style: italic; }
+    a.card {
+      display: block; padding: 1.1rem 1.4rem;
+      border: 1px solid #ddd0ba; border-radius: 6px;
+      text-decoration: none; color: inherit;
+      background: #fff; max-width: 34rem;
+      transition: transform .12s, box-shadow .12s;
+    }
+    a.card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(60,45,20,.08); }
+    a.card b { display: block; margin-bottom: 0.2rem; }
+    a.card span { color: #7a6f5f; font-size: 0.92rem; }
+    .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>Three directions for cdiak.github.io</h1>
+    <p>Each keeps the signature and the multicolor repo tree. Toggle ◐ for dark mode on each.</p>
+  </div>
+
+  <a class="card" href="principia-pinned.html" style="border-width: 2px; border-color: #211c14;">
+    <b><span class="swatch" style="background:#211c14"></span>G · Principia, pinned — newest</b>
+    <span>Fork of F. The frame holds still: archive, plate, and index fixed to the viewport; only the text column scrolls. The archive scrolls quietly within its own pane.</span>
+  </a>
+
+  <a class="card" href="principia.html">
+    <b><span class="swatch" style="background:#211c14"></span>F · Principia</b>
+    <span>One leaf, three columns: the repo diagram in the margin, the biography in the middle, the sigil-marked plate and its index sticky at the right. Black ink that draws itself; hovering the margin, the index, or the plate traces kinships in colour.</span>
+  </a>
+
+  <a class="card" href="loop.html">
+    <b><span class="swatch" style="background:#a33b2e"></span>E · The Loop</b>
+    <span>Dossier's skeleton + Broadsheet's skin. The visualization is an estranged loop: sections sit on a ring that never quite closes, and your scroll position travels around it.</span>
+  </a>
+
+  <a class="card" href="broadsheet.html">
+    <b><span class="swatch" style="background:#2c6e49"></span>D · The Broadsheet</b>
+    <span>ai-2027, properly — clean bookish serif on near-white, black ink, life from monospace accents: date chips, a sticky "archive at a glance" dashboard with chart and colored bars, timeline dots, outlined buttons.</span>
+  </a>
+
+  <a class="card" href="paper.html">
+    <b><span class="swatch" style="background:#b06214"></span>A · The Notebook</b>
+    <span>Ink &amp; Switch energy — warm paper, ink typography, the portfolio framed as “Figure 1.” Quiet, scholarly, handmade.</span>
+  </a>
+
+  <a class="card" href="dossier.html">
+    <b><span class="swatch" style="background:#3a6b8a"></span>B · The Dossier</b>
+    <span>ai-2027 energy — sticky section nav with colored markers, big serif headline, rainbow reading-progress bar, narrative sections above the tree.</span>
+  </a>
+
+  <a class="card" href="archive.html">
+    <b><span class="swatch" style="background:#5c5a9e"></span>C · The Refined Archive</b>
+    <span>Your current layout, debugged and re-toned — warm white / deep slate instead of stark white / pure black, hairline header, monospace tree.</span>
+  </a>
+</body>
+</html>

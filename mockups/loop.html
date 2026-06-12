@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Christopher J. Diak — Loop direction</title>
+
+  <!-- Set theme before first paint to prevent flash -->
+  <script>
+    (function () {
+      var theme = localStorage.getItem("theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+
+  <style>
+    /* ============================================================
+       DIRECTION E — "THE LOOP"
+       Dossier's skeleton (sticky sidebar + sections), Broadsheet's
+       skin (bookish serif, ink, mono accents). The visualization is
+       an estranged loop: the sections sit on a ring that never quite
+       closes, and your scroll position travels around it.
+    ============================================================ */
+
+    :root {
+      color-scheme: light;
+      --bg:     #fffef8;
+      --ink:    #141414;
+      --muted:  #6b6b66;
+      --line:   #141414;
+      --faint:  #e8e6dc;
+      --chip:   #141414;
+      --chip-text: #fffef8;
+      --green:  #2c6e49;
+
+      --c-root:     hsl(356, 72%, 46%);
+      --c-research: hsl(28, 85%, 44%);
+      --c-software: hsl(46, 85%, 40%);
+      --c-writing:  hsl(142, 55%, 36%);
+      --c-design:   hsl(210, 70%, 44%);
+      --c-media:    hsl(268, 55%, 50%);
+      --c-context:  hsl(248, 45%, 50%);
+
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
+      --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg:     #131312;
+      --ink:    #ece9e0;
+      --muted:  #97948b;
+      --line:   #ece9e0;
+      --faint:  #2c2b27;
+      --chip:   #ece9e0;
+      --chip-text: #131312;
+      --green:  #5fb380;
+
+      --c-root:     hsl(356, 80%, 66%);
+      --c-research: hsl(28, 90%, 62%);
+      --c-software: hsl(46, 90%, 58%);
+      --c-writing:  hsl(142, 58%, 58%);
+      --c-design:   hsl(210, 80%, 66%);
+      --c-media:    hsl(268, 70%, 72%);
+      --c-context:  hsl(248, 56%, 70%);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); color: var(--ink); scroll-behavior: smooth; }
+    body { margin: 0; font-family: var(--serif); font-size: 19px; line-height: 1.62; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    /* ================= sidebar ================= */
+    aside {
+      position: sticky; top: 0;
+      height: 100vh;
+      padding: 2.2rem 2rem 1.8rem 2.2rem;
+      display: flex; flex-direction: column;
+      border-right: 1px solid var(--faint);
+    }
+    .signature { width: 122px; mix-blend-mode: multiply; }
+    [data-theme="dark"] .signature { filter: invert(1); mix-blend-mode: screen; }
+
+    .toc { margin-top: 2.4rem; }
+    .toc a {
+      position: relative;
+      display: block;
+      padding: 0.42rem 0 0.42rem 1.45rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .toc a::before {
+      content: "";
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid var(--dot, var(--ink));
+    }
+    .toc a:hover { color: var(--ink); }
+    .toc a.active { color: var(--ink); font-weight: 700; }
+    .toc a.active::before { background: var(--dot, var(--ink)); }
+
+    /* ----- the loop ----- */
+    .loopfig { margin-top: auto; }
+    .loopfig svg { width: 180px; height: 180px; display: block; margin: 0 auto; overflow: visible; }
+    .loopfig .ring   { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+    .loopfig .defer  { fill: none; stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 3 4; }
+    .loopfig .secdot { stroke: var(--bg); stroke-width: 1.5; cursor: pointer; }
+    .loopfig .you    { fill: var(--ink); }
+    .loopfig .you-halo { fill: none; stroke: var(--ink); stroke-width: 1; opacity: 0.35; }
+    .loopfig figcaption {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.8rem;
+      line-height: 1.7;
+    }
+    .loopfig figcaption a { color: var(--muted); }
+    .loopfig figcaption a:hover { color: var(--ink); }
+
+    .side-foot {
+      margin-top: 1.4rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid var(--faint);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    #theme-toggle { all: unset; cursor: pointer; font-size: 1rem; color: var(--muted); }
+    #theme-toggle:hover { color: var(--ink); }
+
+    /* ================= main ================= */
+    main { padding: 3.2rem 3.5rem 4rem; max-width: 760px; }
+
+    h1 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: clamp(2.7rem, 5.5vw, 4.2rem);
+      line-height: 1.06;
+      letter-spacing: 0.005em;
+      margin: 0 0 1rem;
+    }
+    .byline { font-size: 1.18rem; margin: 0 0 2.2rem; }
+
+    .standfirst { font-size: 1.14em; margin: 0 0 1.35rem; }
+    p { margin: 0 0 1.35rem; }
+    a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+    a:hover { text-decoration-thickness: 2px; }
+    ul { padding-left: 1.3rem; margin: 0 0 1.35rem; }
+    li { margin-bottom: 0.45rem; }
+
+    .quick { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 1.8rem 0 2rem; }
+    .quick a {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.42rem 1rem;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .quick a:hover { background: var(--ink); color: var(--bg); }
+
+    .meta {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
+      margin: 0 0 0.75rem;
+    }
+    .meta a { color: var(--muted); text-decoration: none; }
+    .meta a:hover { color: var(--ink); }
+    .chip {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      background: var(--chip);
+      color: var(--chip-text);
+      padding: 0.14rem 0.55rem;
+      border-radius: 3px;
+      letter-spacing: 0.02em;
+    }
+
+    section { padding-top: 3.4rem; }
+    h2 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 1.9rem;
+      margin: 0 0 1.1rem;
+    }
+    h2 .sq { display: inline-block; width: 0.52em; height: 0.52em; border-radius: 2px; margin-right: 0.45rem; background: var(--sec, var(--ink)); }
+
+    details.box {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.8rem 1.1rem;
+      margin: 0 0 1.5rem;
+    }
+    details.box summary { cursor: pointer; font-size: 1rem; }
+    details.box[open] summary { margin-bottom: 0.6rem; }
+    details.box p { font-size: 0.95em; margin-bottom: 0.5rem; }
+
+    blockquote {
+      margin: 0 0 1.5rem;
+      padding: 0.2rem 0 0.2rem 1.2rem;
+      border-left: 2px solid var(--ink);
+      font-style: italic;
+    }
+    blockquote .who { font-style: normal; font-family: var(--mono); font-size: 0.74rem; color: var(--muted); display: block; margin-top: 0.5rem; }
+
+    /* ----- tree ----- */
+    .tree {
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      line-height: 1.95;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.4rem 1.6rem;
+      overflow-x: auto;
+    }
+    .tree .label {
+      all: unset; cursor: pointer;
+      display: inline-block; padding: 0 4px; border-radius: 3px;
+      color: var(--c, var(--ink)); font-weight: 700;
+    }
+    .tree .label:hover { background: color-mix(in oklab, var(--c, var(--ink)) 13%, transparent); }
+    .tree a.label { text-decoration: none; }
+    .tree .file > .label { font-weight: 400; color: color-mix(in oklab, var(--c, var(--ink)) 45%, var(--ink)); }
+    .tree .children {
+      margin-left: 9px; padding-left: 21px;
+      border-left: 1px solid color-mix(in oklab, var(--c, var(--faint)) 30%, var(--faint));
+      display: none;
+    }
+    .tree .open > .children { display: block; }
+    .tree .label::before { content: "▸ "; font-size: 0.8em; color: var(--muted); }
+    .tree .open > .label::before { content: "▾ "; }
+    .tree .file > .label::before { content: ""; }
+
+    footer {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      color: var(--muted);
+      border-top: 1px solid var(--faint);
+      margin-top: 4.5rem;
+      padding-top: 1.4rem;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+    }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      aside {
+        position: static; height: auto;
+        flex-direction: row; align-items: center; justify-content: space-between;
+        border-right: 0; border-bottom: 1px solid var(--faint);
+        padding: 1.2rem 1.25rem;
+      }
+      .signature { width: 98px; }
+      .toc, .loopfig { display: none; }
+      .side-foot { margin: 0; padding: 0; border: 0; }
+      main { padding: 2.2rem 1.25rem 3rem; font-size: 17px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+
+    <!-- ================= sidebar ================= -->
+    <aside>
+      <a href="/" aria-label="Home"><img src="../signature.png" class="signature" alt="Chris Diak"></a>
+
+      <nav class="toc" id="toc" aria-label="Sections">
+        <a href="#about"    style="--dot: var(--c-root)">about</a>
+        <a href="#research" style="--dot: var(--c-research)">research/</a>
+        <a href="#software" style="--dot: var(--c-software)">software/</a>
+        <a href="#writing"  style="--dot: var(--c-writing)">writing/</a>
+        <a href="#archive"  style="--dot: var(--c-design)">archive/</a>
+        <a href="#contact"  style="--dot: var(--c-context)">contact</a>
+      </nav>
+
+      <!-- the estranged loop: sections on a ring that never closes;
+           the marker is your scroll position travelling around it -->
+      <figure class="loopfig" aria-hidden="true">
+        <svg id="loop" viewBox="0 0 200 200"></svg>
+        <figcaption>
+          fig. 1 — this page is a loop.<br>
+          it closes only from the outside.<br>
+          <a href="https://tm4m.net/" target="_blank" rel="noreferrer">“Estranged Loops” (2025)</a>
+        </figcaption>
+      </figure>
+
+      <div class="side-foot">
+        <span>© CHRIS DIAK</span>
+        <button id="theme-toggle" aria-label="Toggle dark mode">◐</button>
+      </div>
+    </aside>
+
+    <!-- ================= main ================= -->
+    <main>
+
+      <article id="about">
+        <h1>Christopher J. Diak</h1>
+        <p class="byline">Model behavior · Lab for Mind, Brain, and Computation, Dartmouth · xAI</p>
+
+        <p class="standfirst">
+          I study how mental representations are composed — and the limits of reasoning,
+          executive function, and working memory under capacity constraints.
+        </p>
+        <p class="standfirst">
+          I often wonder: how do the strategies we use to think shape what can be thought?
+        </p>
+
+        <div class="quick">
+          <a href="#research">What do I work on?</a>
+          <a href="#archive">What have I made?</a>
+          <a href="#writing">What do I think?</a>
+        </div>
+
+        <p class="meta">
+          <span class="chip">JUN 2026</span>
+          <span>last updated</span> <span>|</span>
+          <a href="https://www.linkedin.com/in/cdiak" target="_blank" rel="noreferrer">LinkedIn</a> <span>|</span>
+          <a href="https://tm4m.net/" target="_blank" rel="noreferrer">Substack</a> <span>|</span>
+          <a href="https://github.com/cdiak" target="_blank" rel="noreferrer">GitHub</a>
+        </p>
+      </article>
+
+      <section id="research">
+        <h2><span class="sq" style="--sec: var(--c-research)"></span>Research</h2>
+        <p>
+          I work on model behavior as a researcher in the
+          <a href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">Lab for Mind, Brain, and Computation</a>
+          at Dartmouth College, and as a model behavior tutor with xAI, where I focus on
+          epistemic rigor &amp; truthfulness. The work draws on cognitive science,
+          organizational behavior, and deep reinforcement learning.
+        </p>
+
+        <details class="box">
+          <summary>Where did this start? — the longer arc</summary>
+          <p>
+            As a student at Middlebury and Harvard I worked with laboratories across biology,
+            neuroscience, psychology, and AI: the Rapoport Laboratory at Harvard Medical School,
+            ChatLab at Penn's Center for Cognitive Neuroscience, the Joshua Greene Laboratory at
+            Harvard, and the Model Behavior Team at OpenAI. Before that: a sheep farm in
+            Grafton, Vermont.
+          </p>
+        </details>
+
+        <p>Selected artifacts — the rest live in the <a href="#archive">archive</a>:</p>
+        <ul>
+          <li><a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63522" target="_blank" rel="noreferrer">Ethical Analysis: Honesty and Self-Interest</a> (HBS Publishing, 2023)</li>
+          <li><a href="http://frontiersin.org/articles/10.3389/fsufs.2022.983398/full" target="_blank" rel="noreferrer">Policy Pathways for Perennial Agriculture</a> (Scott et al., 2022)</li>
+          <li><a href="https://docs.google.com/presentation/d/13X8xXwQZdn7PFDeh3I9I723fIJGdsMoyotY7mEvP9ac/edit?usp=sharing" target="_blank" rel="noreferrer">Auditory Compositional Cognition</a> (Joshua Greene Laboratory, 2020)</li>
+        </ul>
+      </section>
+
+      <section id="software">
+        <h2><span class="sq" style="--sec: var(--c-software)"></span>Software</h2>
+        <p>
+          Interactive prototypes that double as research instruments.
+          <a href="https://aligning.app" target="_blank" rel="noreferrer">aligning.app</a> explores
+          time, place, and meaning through a dynamic “vibe field”;
+          <a href="https://twinkle.ml" target="_blank" rel="noreferrer">twinkle.ml</a> is a
+          predictive symbolic engine for reflection and decision-making. Repositories on
+          <a href="https://github.com/cdiak" target="_blank" rel="noreferrer">GitHub</a>.
+        </p>
+      </section>
+
+      <section id="writing">
+        <h2><span class="sq" style="--sec: var(--c-writing)"></span>Writing</h2>
+
+        <p class="meta">
+          <span class="chip">DEC 2025</span>
+          <span>featured essay</span>
+        </p>
+        <p>
+          <a href="https://tm4m.net/" target="_blank" rel="noreferrer"><em>Estranged Loops</em></a> —
+          why every accusation is a confession and every question is its own answer. On strange
+          loops, the grammar of ideologies, and the difference between problems and mysteries.
+        </p>
+        <blockquote>
+          When you tell me what counts as evidence, what counts as explanation, and what counts
+          as a reasonable question, you have already told me the limits of your world.
+          <span class="who">— ESTRANGED LOOPS, § THE GRAMMAR OF IDEOLOGY</span>
+        </blockquote>
+        <p>
+          Earlier academic work runs from
+          <a href="https://drive.google.com/file/d/1_K2BUgRDf6EIh6nahiYdxSpLpZQceWNK/view?usp=sharing" target="_blank" rel="noreferrer"><em>Transcendental Grammar</em></a>
+          — Chomsky and Bhartṛhari in dialogue — to
+          <a href="https://drive.google.com/file/d/1XDOyXFIqiXrkY5jZ3_k43V8UyBIm6efh/view?usp=sharing" target="_blank" rel="noreferrer">modeling the Capitalist's Dilemma with multiple RL systems</a>,
+          to <a href="https://drive.google.com/file/d/1C6RhpurhtEwVzEmhNBJbdHxO0qF6SjJf/view?usp=sharing" target="_blank" rel="noreferrer">the Yoga Sutras</a>.
+          More at <a href="https://tm4m.net/" target="_blank" rel="noreferrer">tm4m.net</a>.
+        </p>
+      </section>
+
+      <section id="archive">
+        <h2><span class="sq" style="--sec: var(--c-design)"></span>The Archive</h2>
+        <p class="meta">
+          <span class="chip">LIVING DOCUMENT</span>
+          <span>est. 2017</span> <span>|</span> <span>7 folders</span> <span>|</span> <span>60+ artifacts</span>
+        </p>
+
+        <div class="tree">
+          <div class="folder open" style="--c: var(--c-root)">
+            <button class="label">portfolio/</button>
+            <div class="children">
+
+              <div class="folder" style="--c: var(--c-research)">
+                <button class="label">research/</button>
+                <div class="children">
+                  <div class="folder">
+                    <button class="label">cases/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63522" target="_blank" rel="noreferrer">honesty-and-self-interest.hbs-2023</a></div>
+                      <div class="file"><a class="label" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63822" target="_blank" rel="noreferrer">hidden-costs-of-layoffs.hbs-2023</a></div>
+                      <div class="file"><a class="label" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63273" target="_blank" rel="noreferrer">esg-in-investment-strategy.hbs-2022</a></div>
+                    </div>
+                  </div>
+                  <div class="folder">
+                    <button class="label">publications/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="http://frontiersin.org/articles/10.3389/fsufs.2022.983398/full" target="_blank" rel="noreferrer">policy-pathways-for-perennial-agriculture.2022</a></div>
+                    </div>
+                  </div>
+                  <div class="folder">
+                    <button class="label">posters/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://docs.google.com/presentation/d/13X8xXwQZdn7PFDeh3I9I723fIJGdsMoyotY7mEvP9ac/edit?usp=sharing" target="_blank" rel="noreferrer">auditory-compositional-cognition.greene-lab-2020</a></div>
+                      <div class="file"><a class="label" href="https://docs.google.com/presentation/d/1Ix0DjkwXkBMejfJzMAefRH7acB_4ZJy3LtAPpwAloco/edit?usp=sharing" target="_blank" rel="noreferrer">metaphor-as-metamorphosis.penn-2017</a></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-software)">
+                <button class="label">software/</button>
+                <div class="children">
+                  <div class="file"><a class="label" href="https://aligning.app" target="_blank" rel="noreferrer">alignment/</a></div>
+                  <div class="file"><a class="label" href="https://twinkle.ml" target="_blank" rel="noreferrer">twinkle-ml/</a></div>
+                  <div class="file"><a class="label" href="https://github.com/cdiak/local-whisper" target="_blank" rel="noreferrer">local-whisper</a></div>
+                  <div class="file"><a class="label" href="https://github.com/cdiak/intro-to-programming" target="_blank" rel="noreferrer">intro-to-programming</a></div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-writing)">
+                <button class="label">writing/</button>
+                <div class="children">
+                  <div class="file"><a class="label" href="https://tm4m.net/" target="_blank" rel="noreferrer">substack/</a></div>
+                  <div class="folder">
+                    <button class="label">academic-essays/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://drive.google.com/file/d/1XDOyXFIqiXrkY5jZ3_k43V8UyBIm6efh/view?usp=sharing" target="_blank" rel="noreferrer">capitalists-dilemma-multiple-rl-systems.hbs-2021</a></div>
+                      <div class="file"><a class="label" href="https://drive.google.com/file/d/1_K2BUgRDf6EIh6nahiYdxSpLpZQceWNK/view?usp=sharing" target="_blank" rel="noreferrer">transcendental-grammar.thesis-2019</a></div>
+                      <div class="file"><a class="label" href="https://drive.google.com/file/d/1C6RhpurhtEwVzEmhNBJbdHxO0qF6SjJf/view?usp=sharing" target="_blank" rel="noreferrer">is-kaivalyam-a-state-of-samadhi.2024</a></div>
+                    </div>
+                  </div>
+                  <div class="folder">
+                    <button class="label">notebooks/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://docs.google.com/document/d/14y9nH-RU_UV0fo6bhS2Wm6qXTBTfbv7LVvFRew2wP9Y/edit?usp=sharing" target="_blank" rel="noreferrer">concepts-the-stuff-of-thought.doc</a></div>
+                      <div class="file"><a class="label" href="https://docs.google.com/document/d/1yYW8tWpBnzeRq4A58vbuZHzxX1-56AZK/edit?usp=sharing" target="_blank" rel="noreferrer">philosophy-of-mind.doc</a></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-design)">
+                <button class="label">design/</button>
+                <div class="children">
+                  <div class="file"><a class="label" href="https://web.archive.org/web/20230329215209/http://www.hbsforum.org/" target="_blank" rel="noreferrer">hbsforum.org.archived</a></div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-media)">
+                <button class="label">media/</button>
+                <div class="children">
+                  <div class="folder">
+                    <button class="label">the-disruptive-voice/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://thedisruptivevoice.libsyn.com/choosing-college-bob-moesta-and-michael-horn-on-why-we-hire-education" target="_blank" rel="noreferrer">ep-44.choosing-college</a></div>
+                      <div class="file"><a class="label" href="https://thedisruptivevoice.libsyn.com/62-covid-19-and-the-educators-dilemma-a-conversation-with-michael-horn" target="_blank" rel="noreferrer">ep-62.educators-dilemma</a></div>
+                    </div>
+                  </div>
+                  <div class="file"><a class="label" href="https://www.youtube.com/watch?v=FR2GbcPWbzA" target="_blank" rel="noreferrer">majnun.short-film.youtube</a></div>
+                  <div class="file"><a class="label" href="https://suno.com/playlist/b09d65c7-08f3-4145-ab4f-539e2fe98694" target="_blank" rel="noreferrer">ftx-the-musical/</a></div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-context)">
+                <button class="label">context/</button>
+                <div class="children">
+                  <div class="file"><a class="label" href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">lab-for-mind-brain-and-computation.link</a></div>
+                  <div class="file"><a class="label" href="https://www.linkedin.com/in/cdiak" target="_blank" rel="noreferrer">linkedin.profile.link</a></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact">
+        <h2><span class="sq" style="--sec: var(--c-context)"></span>Contact</h2>
+        <p>
+          christopher (dot) diak (at) alumni (dot) harvard (dot) edu —
+          or <a href="https://www.linkedin.com/in/cdiak" target="_blank" rel="noreferrer">LinkedIn</a>.
+        </p>
+        <p class="standfirst" style="color: var(--muted); font-style: italic;">
+          You've reached the bottom, which is also almost the top.
+        </p>
+      </section>
+
+      <footer>
+        <span>© CHRIS DIAK — THIS ARCHIVE IS A LIVING DOCUMENT</span>
+        <span>SET IN IOWAN OLD STYLE &amp; SF MONO</span>
+      </footer>
+
+    </main>
+  </div>
+
+  <script>
+    /* ---------- theme ---------- */
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+      const root = document.documentElement;
+      const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+
+    /* ---------- tree ---------- */
+    document.querySelectorAll(".tree .folder > button.label").forEach(btn => {
+      btn.addEventListener("click", () => btn.parentElement.classList.toggle("open"));
+    });
+
+    /* ============================================================
+       THE ESTRANGED LOOP
+       A ring that sweeps 332° and never closes; the gap is bridged
+       only by a dashed arc. Section dots are placed around the ring
+       at their true relative positions in the document. The ink dot
+       is you: scroll progress mapped to angle. At the bottom of the
+       page you are back beside the beginning — but not at it.
+    ============================================================ */
+
+    const SVG  = document.getElementById("loop");
+    const NS   = "http://www.w3.org/2000/svg";
+    const CX = 100, CY = 100, R = 74;
+    const SWEEP = 332;                       // degrees the loop closes
+    const START = -90;                       // begin at 12 o'clock
+
+    const pol = (deg, r = R) => {
+      const a = (deg * Math.PI) / 180;
+      return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
+    };
+    const arcPath = (a0, a1, r = R) => {
+      const [x0, y0] = pol(a0, r), [x1, y1] = pol(a1, r);
+      const large = (a1 - a0) > 180 ? 1 : 0;
+      return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
+    };
+
+    // solid ring (the loop) + dashed remainder (the deferral)
+    const ring = document.createElementNS(NS, "path");
+    ring.setAttribute("d", arcPath(START, START + SWEEP));
+    ring.setAttribute("class", "ring");
+    SVG.appendChild(ring);
+
+    const defer = document.createElementNS(NS, "path");
+    defer.setAttribute("d", arcPath(START + SWEEP + 4, START + 356));
+    defer.setAttribute("class", "defer");
+    SVG.appendChild(defer);
+
+    // section dots at true document positions
+    const tocLinks = [...document.querySelectorAll("#toc a")];
+    const targets  = tocLinks.map(a => document.querySelector(a.getAttribute("href")));
+    const colors   = ["--c-root","--c-research","--c-software","--c-writing","--c-design","--c-context"];
+
+    const docMax = () => document.documentElement.scrollHeight - innerHeight;
+    const READ_LINE = 0.35;   // shared by dots, marker, and scrollspy
+
+    function placeDots() {
+      [...SVG.querySelectorAll(".secdot")].forEach(d => d.remove());
+      const max = Math.max(docMax(), 1);
+      targets.forEach((t, i) => {
+        // the scroll position at which this section reaches the reading
+        // line — so the marker passes through each dot as it activates
+        const frac = Math.min(Math.max((t.offsetTop - innerHeight * READ_LINE) / max, 0), 1);
+        const [x, y] = pol(START + frac * SWEEP);
+        const dot = document.createElementNS(NS, "circle");
+        dot.setAttribute("cx", x); dot.setAttribute("cy", y); dot.setAttribute("r", 5);
+        dot.setAttribute("class", "secdot");
+        dot.setAttribute("fill", getComputedStyle(document.documentElement).getPropertyValue(colors[i]));
+        dot.addEventListener("click", () => t.scrollIntoView({ behavior: "smooth" }));
+        const title = document.createElementNS(NS, "title");
+        title.textContent = tocLinks[i].textContent;
+        dot.appendChild(title);
+        SVG.appendChild(dot);
+      });
+    }
+
+    // you-are-here marker
+    const halo = document.createElementNS(NS, "circle");
+    halo.setAttribute("r", 7.5); halo.setAttribute("class", "you-halo");
+    SVG.appendChild(halo);
+    const you = document.createElementNS(NS, "circle");
+    you.setAttribute("r", 3.4); you.setAttribute("class", "you");
+    SVG.appendChild(you);
+
+    function moveYou() {
+      const frac = Math.min(Math.max(scrollY / Math.max(docMax(), 1), 0), 1);
+      const [x, y] = pol(START + frac * SWEEP);
+      you.setAttribute("cx", x); you.setAttribute("cy", y);
+      halo.setAttribute("cx", x); halo.setAttribute("cy", y);
+    }
+
+    /* ---------- scrollspy that can reach the bottom ----------
+       Active section = last one whose top has crossed the reading
+       line; if the page is scrolled to the end, the last section
+       wins outright (the observer-band approach could never reach
+       short sections at the bottom). */
+    function updateSpy() {
+      const line = scrollY + innerHeight * READ_LINE;
+      let idx = 0;
+      targets.forEach((t, i) => { if (t.offsetTop <= line) idx = i; });
+      if (scrollY >= docMax() - 4) idx = targets.length - 1;
+      tocLinks.forEach((a, i) => a.classList.toggle("active", i === idx));
+    }
+
+    const onScroll = () => { moveYou(); updateSpy(); };
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", () => { placeDots(); onScroll(); });
+    // re-place dots when the tree opens/closes (document height changes)
+    document.querySelectorAll(".tree button.label").forEach(b =>
+      b.addEventListener("click", () => { placeDots(); onScroll(); }));
+    new MutationObserver(() => placeDots())
+      .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+    placeDots(); onScroll();
+  </script>
+</body>
+</html>

@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Christopher J. Diak — Broadsheet direction</title>
+
+  <!-- Set theme before first paint to prevent flash -->
+  <script>
+    (function () {
+      var theme = localStorage.getItem("theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+
+  <style>
+    /* ============================================================
+       DIRECTION D — "THE BROADSHEET"  (ai-2027, properly)
+       Clean bookish serif on near-white. Black ink. The life comes
+       from monospace data accents: date chips, a sticky archive
+       dashboard, timeline dots, outlined buttons, colored squares.
+    ============================================================ */
+
+    :root {
+      color-scheme: light;
+      --bg:     #fffef8;
+      --ink:    #141414;
+      --muted:  #6b6b66;
+      --line:   #141414;          /* borders are ink, like ai-2027 */
+      --faint:  #e8e6dc;
+      --chip:   #141414;
+      --chip-text: #fffef8;
+      --green:  #2c6e49;          /* the "touch of life" green */
+
+      --c-root:     hsl(356, 72%, 46%);
+      --c-research: hsl(28, 85%, 44%);
+      --c-software: hsl(46, 85%, 40%);
+      --c-writing:  hsl(142, 55%, 36%);
+      --c-design:   hsl(210, 70%, 44%);
+      --c-media:    hsl(268, 55%, 50%);
+      --c-context:  hsl(248, 45%, 50%);
+
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
+      --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg:     #131312;
+      --ink:    #ece9e0;
+      --muted:  #97948b;
+      --line:   #ece9e0;
+      --faint:  #2c2b27;
+      --chip:   #ece9e0;
+      --chip-text: #131312;
+      --green:  #5fb380;
+
+      --c-root:     hsl(356, 80%, 66%);
+      --c-research: hsl(28, 90%, 62%);
+      --c-software: hsl(46, 90%, 58%);
+      --c-writing:  hsl(142, 58%, 58%);
+      --c-design:   hsl(210, 80%, 66%);
+      --c-media:    hsl(268, 70%, 72%);
+      --c-context:  hsl(248, 56%, 70%);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); color: var(--ink); scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 19px;
+      line-height: 1.62;
+      max-width: 1280px;
+      margin-inline: auto;
+      padding: 0 2.5rem;
+    }
+
+    /* ---------- header ---------- */
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 2rem 0 0;
+    }
+    .signature { width: 118px; mix-blend-mode: multiply; }
+    [data-theme="dark"] .signature { filter: invert(1); mix-blend-mode: screen; }
+
+    header nav { display: flex; gap: 1.6rem; align-items: center; padding-top: 0.8rem; font-size: 1rem; }
+    header nav a { color: var(--ink); text-decoration: none; }
+    header nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    header nav a.boxed {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.3rem 0.85rem;
+    }
+    header nav a.boxed:hover { background: var(--ink); color: var(--bg); text-decoration: none; }
+    #theme-toggle { all: unset; cursor: pointer; font-size: 1.05rem; color: var(--muted); }
+    #theme-toggle:hover { color: var(--ink); }
+
+    /* ---------- masthead ---------- */
+    .masthead { margin: 3rem 0 0; }
+    h1 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: clamp(3rem, 7vw, 5rem);
+      letter-spacing: 0.005em;
+      line-height: 1.05;
+      margin: 0 0 1.2rem;
+    }
+    .byline { font-size: 1.25rem; margin: 0; }
+
+    /* ---------- 3-column shell ---------- */
+    .shell {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 640px) 1fr;
+      gap: 3.5rem;
+      margin-top: 3.5rem;
+    }
+
+    /* ---------- left timeline rail ---------- */
+    .rail { position: relative; }
+    .rail-inner { position: sticky; top: 3rem; }
+    .rail-inner::before {
+      content: "";
+      position: absolute; left: 4px; top: 8px; bottom: 8px;
+      width: 1.5px; background: var(--ink);
+    }
+    .rail a {
+      position: relative;
+      display: block;
+      padding: 0.55rem 0 0.55rem 1.4rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .rail a::before {
+      content: "";
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid var(--ink);
+    }
+    .rail a:hover { color: var(--ink); }
+    .rail a.active { color: var(--ink); font-weight: 700; }
+    .rail a.active::before { background: var(--ink); }
+
+    /* ---------- main column ---------- */
+    main { min-width: 0; }
+
+    .standfirst { font-size: 1.16em; margin: 0 0 1.4rem; }
+    p { margin: 0 0 1.35rem; }
+    a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+    a:hover { text-decoration-thickness: 2px; }
+    sup { font-family: var(--mono); font-size: 0.6em; color: var(--green); }
+
+    /* outlined question-buttons, ai-2027 style */
+    .quick {
+      display: flex; flex-wrap: wrap; gap: 0.7rem;
+      margin: 2rem 0 2.5rem;
+    }
+    .quick a {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.45rem 1rem;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .quick a:hover { background: var(--ink); color: var(--bg); }
+
+    /* mono meta line: Published ... | PDF | Listen */
+    .meta {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
+      margin: 0 0 0.75rem;
+    }
+    .meta a { color: var(--muted); text-decoration: none; }
+    .meta a:hover { color: var(--ink); }
+
+    .chip {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      background: var(--chip);
+      color: var(--chip-text);
+      padding: 0.15rem 0.55rem;
+      border-radius: 3px;
+      letter-spacing: 0.02em;
+    }
+
+    section { padding-top: 3.5rem; }
+    h2 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 2rem;
+      letter-spacing: 0.005em;
+      margin: 0 0 1.2rem;
+    }
+    h2 .sq { display: inline-block; width: 0.55em; height: 0.55em; border-radius: 2px; margin-right: 0.45rem; background: var(--sec, var(--ink)); }
+    ul { padding-left: 1.3rem; margin: 0 0 1.35rem; }
+    li { margin-bottom: 0.45rem; }
+
+    /* collapsible aside, like their "AI R&D progress multiplier" box */
+    details.box {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.8rem 1.1rem;
+      margin: 0 0 1.5rem;
+    }
+    details.box summary { cursor: pointer; font-size: 1rem; }
+    details.box[open] summary { margin-bottom: 0.6rem; }
+    details.box p { font-size: 0.95em; margin-bottom: 0.5rem; }
+
+    /* ---------- the tree ---------- */
+    .tree {
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      line-height: 1.95;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.4rem 1.6rem;
+      overflow-x: auto;
+    }
+    .tree .label {
+      all: unset; cursor: pointer;
+      display: inline-block; padding: 0 4px; border-radius: 3px;
+      color: var(--c, var(--ink)); font-weight: 700;
+    }
+    .tree .label:hover { background: color-mix(in oklab, var(--c, var(--ink)) 13%, transparent); }
+    .tree a.label { text-decoration: none; }
+    .tree .file > .label { font-weight: 400; color: color-mix(in oklab, var(--c, var(--ink)) 45%, var(--ink)); }
+    .tree .children {
+      margin-left: 9px; padding-left: 21px;
+      border-left: 1px solid color-mix(in oklab, var(--c, var(--faint)) 30%, var(--faint));
+      display: none;
+    }
+    .tree .open > .children { display: block; }
+    .tree .label::before { content: "▸ "; font-size: 0.8em; color: var(--muted); }
+    .tree .open > .label::before { content: "▾ "; }
+    .tree .file > .label::before { content: ""; }
+
+    /* ---------- right rail: the dashboard ---------- */
+    .dash-wrap { min-width: 0; }
+    .dash {
+      position: sticky; top: 3rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      max-width: 330px;
+      justify-self: start;
+    }
+    .dash .chip { margin-bottom: 0.9rem; display: inline-block; }
+
+    .dash svg.chart { width: 100%; height: auto; display: block; margin-bottom: 0.4rem; }
+    .dash .chart-x {
+      display: flex; justify-content: space-between;
+      color: var(--muted); margin-bottom: 1.6rem;
+    }
+
+    .dash table { border-collapse: collapse; width: 100%; margin-bottom: 1.5rem; }
+    .dash td { padding: 0.32rem 0.4rem 0.32rem 0; vertical-align: middle; white-space: nowrap; }
+    .dash td.n { text-align: right; font-weight: 700; }
+    .dash .sq {
+      display: inline-block; width: 9px; height: 9px; border-radius: 2px;
+      margin-right: 0.5rem; vertical-align: baseline;
+    }
+    .dash .bar { color: var(--faint); letter-spacing: 0.1em; }
+    .dash .bar b { color: var(--bar, var(--green)); font-weight: 400; }
+
+    .dash .stat-line { color: var(--muted); margin-bottom: 0.3rem; }
+    .dash .stat-line b { color: var(--ink); }
+    .dash .legend { display: flex; gap: 1rem; color: var(--muted); margin-top: 1.2rem; }
+    .dash .legend i { font-style: normal; color: var(--green); }
+
+    footer {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--faint);
+      margin-top: 5rem;
+      padding: 1.4rem 0 2.5rem;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+    }
+
+    @media (max-width: 1100px) { .shell { grid-template-columns: 120px minmax(0, 1fr); } .dash-wrap { display: none; } }
+    @media (max-width: 760px) {
+      body { padding: 0 1.25rem; font-size: 17px; }
+      .shell { grid-template-columns: 1fr; gap: 0; margin-top: 2rem; }
+      .rail { display: none; }
+      .signature { width: 96px; }
+      header nav { gap: 1rem; font-size: 0.92rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <a href="/" aria-label="Home"><img src="../signature.png" class="signature" alt="Chris Diak"></a>
+    <nav>
+      <a href="#research">Research</a>
+      <a href="#archive">Archive</a>
+      <a class="boxed" href="#contact">Contact</a>
+      <button id="theme-toggle" aria-label="Toggle dark mode">◐</button>
+    </nav>
+  </header>
+
+  <div class="masthead">
+    <h1>Christopher J. Diak</h1>
+    <p class="byline">Model behavior · Lab for Mind, Brain, and Computation, Dartmouth · xAI</p>
+  </div>
+
+  <div class="shell">
+
+    <!-- ============ left timeline rail ============ -->
+    <div class="rail">
+      <div class="rail-inner" id="rail">
+        <a href="#about">About</a>
+        <a href="#research">Research</a>
+        <a href="#software">Software</a>
+        <a href="#writing">Writing</a>
+        <a href="#archive">Archive</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+
+    <!-- ============ main column ============ -->
+    <main>
+
+      <article id="about">
+        <p class="standfirst">
+          I study how mental representations are composed — and the limits of reasoning,
+          executive function, and working memory under capacity constraints.
+        </p>
+        <p class="standfirst">
+          I often wonder: how do the strategies we use to think shape what can be
+          thought?<sup>1</sup>
+        </p>
+
+        <div class="quick">
+          <a href="#research">What do I work on?</a>
+          <a href="#archive">What have I made?</a>
+          <a href="https://www.linkedin.com/in/cdiak" target="_blank" rel="noreferrer">Who am I?</a>
+        </div>
+
+        <p class="meta">
+          <span class="chip">JUN 2026</span>
+          <span>last updated</span> <span>|</span>
+          <a href="https://www.linkedin.com/in/cdiak" target="_blank" rel="noreferrer">LinkedIn</a> <span>|</span>
+          <a href="https://tm4m.net/" target="_blank" rel="noreferrer">Substack</a> <span>|</span>
+          <a href="https://github.com/cdiak" target="_blank" rel="noreferrer">GitHub</a>
+        </p>
+      </article>
+
+      <section id="research">
+        <h2><span class="sq" style="--sec: var(--c-research)"></span>Research</h2>
+        <p>
+          I work on model behavior as a researcher in the
+          <a href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">Lab for Mind, Brain, and Computation</a>
+          at Dartmouth College, and as a model behavior tutor with xAI, where I focus on
+          epistemic rigor &amp; truthfulness. The work draws on cognitive science,
+          organizational behavior, and deep reinforcement learning.
+        </p>
+
+        <details class="box">
+          <summary>Where did this start? — the longer arc</summary>
+          <p>
+            As a student at Middlebury and Harvard I worked with laboratories across biology,
+            neuroscience, psychology, and AI: the Rapoport Laboratory at Harvard Medical School,
+            ChatLab at Penn's Center for Cognitive Neuroscience, the Joshua Greene Laboratory at
+            Harvard, and the Model Behavior Team at OpenAI. Before that: a sheep farm in
+            Grafton, Vermont.
+          </p>
+        </details>
+
+        <p>Selected artifacts — the rest live in the <a href="#archive">archive</a>:</p>
+        <ul>
+          <li><a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63522" target="_blank" rel="noreferrer">Ethical Analysis: Honesty and Self-Interest</a> (HBS Publishing, 2023)</li>
+          <li><a href="http://frontiersin.org/articles/10.3389/fsufs.2022.983398/full" target="_blank" rel="noreferrer">Policy Pathways for Perennial Agriculture</a> (Scott et al., 2022)</li>
+          <li><a href="https://docs.google.com/presentation/d/13X8xXwQZdn7PFDeh3I9I723fIJGdsMoyotY7mEvP9ac/edit?usp=sharing" target="_blank" rel="noreferrer">Auditory Compositional Cognition</a> (Joshua Greene Laboratory, 2020)</li>
+        </ul>
+      </section>
+
+      <section id="software">
+        <h2><span class="sq" style="--sec: var(--c-software)"></span>Software</h2>
+        <p>
+          Interactive prototypes that double as research instruments.
+          <a href="https://aligning.app" target="_blank" rel="noreferrer">aligning.app</a> explores
+          time, place, and meaning through a dynamic “vibe field”;
+          <a href="https://twinkle.ml" target="_blank" rel="noreferrer">twinkle.ml</a> is a
+          predictive symbolic engine for reflection and decision-making. Repositories on
+          <a href="https://github.com/cdiak" target="_blank" rel="noreferrer">GitHub</a>.
+        </p>
+      </section>
+
+      <section id="writing">
+        <h2><span class="sq" style="--sec: var(--c-writing)"></span>Writing</h2>
+        <p>
+          Essays at <a href="https://tm4m.net/" target="_blank" rel="noreferrer">tm4m.net</a>.
+          Academic work runs from
+          <a href="https://drive.google.com/file/d/1_K2BUgRDf6EIh6nahiYdxSpLpZQceWNK/view?usp=sharing" target="_blank" rel="noreferrer"><em>Transcendental Grammar</em></a>
+          — Chomsky and Bhartṛhari in dialogue — to
+          <a href="https://drive.google.com/file/d/1XDOyXFIqiXrkY5jZ3_k43V8UyBIm6efh/view?usp=sharing" target="_blank" rel="noreferrer">modeling the Capitalist's Dilemma with multiple RL systems</a>,
+          to <a href="https://drive.google.com/file/d/1C6RhpurhtEwVzEmhNBJbdHxO0qF6SjJf/view?usp=sharing" target="_blank" rel="noreferrer">the Yoga Sutras</a>.
+        </p>
+      </section>
+
+      <section id="archive">
+        <h2><span class="sq" style="--sec: var(--c-root)"></span>The Archive</h2>
+        <p class="meta">
+          <span class="chip">LIVING DOCUMENT</span>
+          <span>est. 2017</span> <span>|</span> <span>7 folders</span> <span>|</span> <span>60+ artifacts</span>
+        </p>
+
+        <div class="tree">
+          <div class="folder open" style="--c: var(--c-root)">
+            <button class="label">portfolio/</button>
+            <div class="children">
+
+              <div class="folder" style="--c: var(--c-research)">
+                <button class="label">research/</button>
+                <div class="children">
+                  <div class="folder">
+                    <button class="label">cases/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63522" target="_blank" rel="noreferrer">honesty-and-self-interest.hbs-2023</a></div>
+                      <div class="file"><a class="label" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63822" target="_blank" rel="noreferrer">hidden-costs-of-layoffs.hbs-2023</a></div>
+                      <div class="file"><a class="label" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63273" target="_blank" rel="noreferrer">esg-in-investment-strategy.hbs-2022</a></div>
+                    </div>
+                  </div>
+                  <div class="folder">
+                    <button class="label">publications/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="http://frontiersin.org/articles/10.3389/fsufs.2022.983398/full" target="_blank" rel="noreferrer">policy-pathways-for-perennial-agriculture.2022</a></div>
+                    </div>
+                  </div>
+                  <div class="folder">
+                    <button class="label">posters/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://docs.google.com/presentation/d/13X8xXwQZdn7PFDeh3I9I723fIJGdsMoyotY7mEvP9ac/edit?usp=sharing" target="_blank" rel="noreferrer">auditory-compositional-cognition.greene-lab-2020</a></div>
+                      <div class="file"><a class="label" href="https://docs.google.com/presentation/d/1Ix0DjkwXkBMejfJzMAefRH7acB_4ZJy3LtAPpwAloco/edit?usp=sharing" target="_blank" rel="noreferrer">metaphor-as-metamorphosis.penn-2017</a></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-software)">
+                <button class="label">software/</button>
+                <div class="children">
+                  <div class="file"><a class="label" href="https://aligning.app" target="_blank" rel="noreferrer">alignment/</a></div>
+                  <div class="file"><a class="label" href="https://twinkle.ml" target="_blank" rel="noreferrer">twinkle-ml/</a></div>
+                  <div class="file"><a class="label" href="https://github.com/cdiak/local-whisper" target="_blank" rel="noreferrer">local-whisper</a></div>
+                  <div class="file"><a class="label" href="https://github.com/cdiak/intro-to-programming" target="_blank" rel="noreferrer">intro-to-programming</a></div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-writing)">
+                <button class="label">writing/</button>
+                <div class="children">
+                  <div class="file"><a class="label" href="https://tm4m.net/" target="_blank" rel="noreferrer">substack/</a></div>
+                  <div class="folder">
+                    <button class="label">academic-essays/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://drive.google.com/file/d/1XDOyXFIqiXrkY5jZ3_k43V8UyBIm6efh/view?usp=sharing" target="_blank" rel="noreferrer">capitalists-dilemma-multiple-rl-systems.hbs-2021</a></div>
+                      <div class="file"><a class="label" href="https://drive.google.com/file/d/1_K2BUgRDf6EIh6nahiYdxSpLpZQceWNK/view?usp=sharing" target="_blank" rel="noreferrer">transcendental-grammar.thesis-2019</a></div>
+                      <div class="file"><a class="label" href="https://drive.google.com/file/d/1C6RhpurhtEwVzEmhNBJbdHxO0qF6SjJf/view?usp=sharing" target="_blank" rel="noreferrer">is-kaivalyam-a-state-of-samadhi.2024</a></div>
+                    </div>
+                  </div>
+                  <div class="folder">
+                    <button class="label">notebooks/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://docs.google.com/document/d/14y9nH-RU_UV0fo6bhS2Wm6qXTBTfbv7LVvFRew2wP9Y/edit?usp=sharing" target="_blank" rel="noreferrer">concepts-the-stuff-of-thought.doc</a></div>
+                      <div class="file"><a class="label" href="https://docs.google.com/document/d/1yYW8tWpBnzeRq4A58vbuZHzxX1-56AZK/edit?usp=sharing" target="_blank" rel="noreferrer">philosophy-of-mind.doc</a></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-design)">
+                <button class="label">design/</button>
+                <div class="children">
+                  <div class="file"><a class="label" href="https://web.archive.org/web/20230329215209/http://www.hbsforum.org/" target="_blank" rel="noreferrer">hbsforum.org.archived</a></div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-media)">
+                <button class="label">media/</button>
+                <div class="children">
+                  <div class="folder">
+                    <button class="label">the-disruptive-voice/</button>
+                    <div class="children">
+                      <div class="file"><a class="label" href="https://thedisruptivevoice.libsyn.com/choosing-college-bob-moesta-and-michael-horn-on-why-we-hire-education" target="_blank" rel="noreferrer">ep-44.choosing-college</a></div>
+                      <div class="file"><a class="label" href="https://thedisruptivevoice.libsyn.com/62-covid-19-and-the-educators-dilemma-a-conversation-with-michael-horn" target="_blank" rel="noreferrer">ep-62.educators-dilemma</a></div>
+                    </div>
+                  </div>
+                  <div class="file"><a class="label" href="https://www.youtube.com/watch?v=FR2GbcPWbzA" target="_blank" rel="noreferrer">majnun.short-film.youtube</a></div>
+                  <div class="file"><a class="label" href="https://suno.com/playlist/b09d65c7-08f3-4145-ab4f-539e2fe98694" target="_blank" rel="noreferrer">ftx-the-musical/</a></div>
+                </div>
+              </div>
+
+              <div class="folder" style="--c: var(--c-context)">
+                <button class="label">context/</button>
+                <div class="children">
+                  <div class="file"><a class="label" href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">lab-for-mind-brain-and-computation.link</a></div>
+                  <div class="file"><a class="label" href="https://www.linkedin.com/in/cdiak" target="_blank" rel="noreferrer">linkedin.profile.link</a></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact">
+        <h2><span class="sq" style="--sec: var(--c-context)"></span>Contact</h2>
+        <p>
+          christopher (dot) diak (at) alumni (dot) harvard (dot) edu —
+          or <a href="https://www.linkedin.com/in/cdiak" target="_blank" rel="noreferrer">LinkedIn</a>.
+        </p>
+      </section>
+
+    </main>
+
+    <!-- ============ right rail: archive dashboard ============ -->
+    <div class="dash-wrap">
+      <aside class="dash" aria-label="Archive at a glance">
+        <span class="chip">THE ARCHIVE, AT A GLANCE</span>
+
+        <svg class="chart" viewBox="0 0 300 90" aria-hidden="true">
+          <line x1="0" y1="82" x2="300" y2="82" stroke="var(--faint)" stroke-width="1"/>
+          <polyline points="0,78 40,74 80,72 120,62 160,55 200,38 240,28 300,14"
+                    fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+          <polyline points="0,80 40,79 80,76 120,73 160,66 200,60 240,50 300,42"
+                    fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3"/>
+          <circle cx="300" cy="14" r="2.5" fill="var(--green)"/>
+          <text x="208" y="20" font-size="9" font-family="var(--mono)" fill="var(--ink)">artifacts</text>
+          <text x="216" y="58" font-size="9" font-family="var(--mono)" fill="var(--muted)">degrees</text>
+        </svg>
+        <div class="chart-x"><span>2017</span><span>2026</span></div>
+
+        <table>
+          <tr><td><span class="sq" style="background: var(--c-research)"></span>research/</td>
+              <td class="bar" style="--bar: var(--c-research)"><b>■■■■■■</b>■■</td><td class="n">14</td></tr>
+          <tr><td><span class="sq" style="background: var(--c-software)"></span>software/</td>
+              <td class="bar" style="--bar: var(--c-software)"><b>■■■</b>■■■■■</td><td class="n">7</td></tr>
+          <tr><td><span class="sq" style="background: var(--c-writing)"></span>writing/</td>
+              <td class="bar" style="--bar: var(--c-writing)"><b>■■■■■■■</b>■</td><td class="n">16</td></tr>
+          <tr><td><span class="sq" style="background: var(--c-design)"></span>design/</td>
+              <td class="bar" style="--bar: var(--c-design)"><b>■■</b>■■■■■■</td><td class="n">3</td></tr>
+          <tr><td><span class="sq" style="background: var(--c-media)"></span>media/</td>
+              <td class="bar" style="--bar: var(--c-media)"><b>■■■■■</b>■■■</td><td class="n">12</td></tr>
+          <tr><td><span class="sq" style="background: var(--c-context)"></span>context/</td>
+              <td class="bar" style="--bar: var(--c-context)"><b>■■■■</b>■■■■</td><td class="n">10</td></tr>
+        </table>
+
+        <div class="stat-line">institutions <b>9</b> · disciplines <b>6</b></div>
+        <div class="stat-line">oldest artifact <b>2017</b> · newest <b>2026</b></div>
+        <div class="stat-line">status <b style="color: var(--green)">● accumulating</b></div>
+
+        <div class="legend"><span><i>■</i> shipped</span><span>■ forthcoming</span></div>
+      </aside>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>© CHRIS DIAK — THIS ARCHIVE IS A LIVING DOCUMENT</span>
+    <span>SET IN IOWAN OLD STYLE &amp; SF MONO</span>
+  </footer>
+
+  <script>
+    // theme toggle
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+      const root = document.documentElement;
+      const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+
+    // tree toggles
+    document.querySelectorAll(".tree .folder > button.label").forEach(btn => {
+      btn.addEventListener("click", () => btn.parentElement.classList.toggle("open"));
+    });
+
+    // timeline scrollspy — active section is the last one whose top has
+    // crossed the reading line; at the bottom of the page the last link
+    // wins outright (an observer band can never reach short final sections)
+    const links = [...document.querySelectorAll("#rail a")];
+    const targets = links.map(a => document.querySelector(a.getAttribute("href")));
+    function updateSpy() {
+      const line = scrollY + innerHeight * 0.35;
+      const max = document.documentElement.scrollHeight - innerHeight;
+      let idx = 0;
+      targets.forEach((t, i) => { if (t && t.offsetTop <= line) idx = i; });
+      if (scrollY >= max - 4) idx = targets.length - 1;
+      links.forEach((a, i) => a.classList.toggle("active", i === idx));
+    }
+    addEventListener("scroll", updateSpy, { passive: true });
+    addEventListener("resize", updateSpy);
+    updateSpy();
+  </script>
+</body>
+</html>
