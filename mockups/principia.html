@@ -204,6 +204,7 @@
     .plate .grp      { font-family: var(--serif); font-size: 12.5px; letter-spacing: 0.32em;
                        fill: var(--muted); text-transform: uppercase; }
     .plate .cee      { font-family: var(--serif); font-style: italic; font-size: 15px; fill: var(--muted); }
+    .spin-arrow      { fill: var(--muted); }
 
     .plate.tracing .chord:not(.lit),
     .plate.tracing .node:not(.lit),
@@ -259,6 +260,7 @@
       .treenav { display: none; }
       .figcol { grid-column: 1; }
       .key { columns: 1; }
+      .plate svg { touch-action: pan-y; }
     }
   </style>
 </head>
@@ -519,6 +521,10 @@
     cee.textContent = "C";
     SVG.appendChild(cee);
 
+    // everything that revolves (the mobile spin) rides on the wheel
+    const WHEEL = el("g", {});
+    const uprights = [];   // texts counter-rotated to stay upright
+
     // place nodes: groups in arcs, in order
     const groups = ["research","software","writing","design","media","context"];
     const arcTotal = 360 - GAP * groups.length;
@@ -539,15 +545,16 @@
       const [gx, gy] = pol(mid, anchor === "middle" ? R + 72 : R + 52);
       const t = el("text", { x: gx, y: gy + 4, class: "grp", "text-anchor": anchor });
       t.textContent = g;
-      SVG.appendChild(t);
+      WHEEL.appendChild(t);
+      uprights.push({ el: t, x: gx, y: gy + 4 });
       angle += GAP;
     });
 
     const [ax, ay] = pol(nodes["A"].deg, R);
-    SVG.appendChild(el("line", { x1: CX, y1: CY, x2: ax, y2: ay, class: "constr" }));
+    WHEEL.appendChild(el("line", { x1: CX, y1: CY, x2: ax, y2: ay, class: "constr" }));
 
     const ring = el("circle", { cx: CX, cy: CY, r: R, class: "ring", pathLength: 1 });
-    SVG.appendChild(ring);
+    WHEEL.appendChild(ring);
 
     // chords
     const adj = {};
@@ -565,7 +572,7 @@
         class: "chord" + (primary ? "" : " faintlink"),
         pathLength: 1,
       });
-      SVG.appendChild(p);
+      WHEEL.appendChild(p);
       chordEls.push([p, a, b]);
       (adj[a] = adj[a] || new Set()).add(b);
       (adj[b] = adj[b] || new Set()).add(a);
@@ -579,16 +586,18 @@
       const [sx, sy] = pol(n.deg, R + 22);
       const sig = el("text", { x: sx, y: sy + 7, class: "sig", "text-anchor": "middle" });
       sig.textContent = n.sym;
-      SVG.appendChild(dot); SVG.appendChild(sig);
+      WHEEL.appendChild(dot); WHEEL.appendChild(sig);
+      uprights.push({ el: sig, x: sx, y: sy + 7 });
       // one big transparent target covering dot and sigil
       const [hx, hy] = pol(n.deg, R + 11);
       const hit = el("circle", { cx: hx, cy: hy, r: 17, class: "hit" });
       hit.addEventListener("mouseenter", () => trace(n.lt));
       hit.addEventListener("mouseleave", untrace);
       hit.addEventListener("click", () => window.open(n.url, "_blank"));
-      SVG.appendChild(hit);
+      WHEEL.appendChild(hit);
       nodeEls[n.lt] = dot; sigEls[n.lt] = sig;
     });
+    SVG.appendChild(WHEEL);
 
     // the index, under the plate
     const KEY = document.getElementById("key");
@@ -703,6 +712,117 @@
         [...Object.values(nodeEls), ...Object.values(sigEls)].forEach(e => { e.style.opacity = "1"; });
         setTimeout(finishInk, 4500);   // hand control back once the ink is dry
       }));
+    }
+
+    /* ============================================================
+       THE WHEEL — on a touch screen there is no hover, so the
+       plate spins. Drag it round; the artifact that clicks into
+       place at the pointer (three o'clock) lights, with its kin.
+       Desktop is untouched; add ?spin to the URL to try it there.
+    ============================================================ */
+    const spinMode = (matchMedia("(pointer: coarse)").matches &&
+                      matchMedia("(max-width: 920px)").matches) ||
+                     location.search.includes("spin");
+    if (spinMode) {
+      // the pointer at three o'clock
+      SVG.appendChild(el("path", {
+        d: `M ${CX + R + 36} ${CY} l 15 -9 v 18 z`,
+        class: "spin-arrow",
+      }));
+
+      const norm = d => ((d % 360) + 360) % 360;
+      let theta = 0, current = null, raf = null;
+
+      function setRotation(t) {
+        theta = t;
+        WHEEL.setAttribute("transform", `rotate(${t} ${CX} ${CY})`);
+        uprights.forEach(u =>
+          u.el.setAttribute("transform", `rotate(${-t} ${u.x} ${u.y})`));
+      }
+      function nearest() {
+        let best = null, bd = 1e9;
+        Object.values(nodes).forEach(n => {
+          const a = norm(n.deg + theta);
+          const d = Math.min(a, 360 - a);
+          if (d < bd) { bd = d; best = n; }
+        });
+        return best;
+      }
+      function highlight() {
+        const n = nearest();
+        if (n && n.lt !== current) { current = n.lt; trace(n.lt); }
+      }
+
+      const angleAt = ev => {
+        const r = SVG.getBoundingClientRect();
+        const x = r.left + r.width * (CX / 900);
+        const y = r.top + r.height * (CY / 810);
+        return Math.atan2(ev.clientY - y, ev.clientX - x) * 180 / Math.PI;
+      };
+
+      let dragging = false, lastA = 0, lastT = 0, vel = 0, moved = 0;
+      SVG.addEventListener("pointerdown", ev => {
+        dragging = true; moved = 0;
+        cancelAnimationFrame(raf);
+        lastA = angleAt(ev); lastT = ev.timeStamp; vel = 0;
+      });
+      SVG.addEventListener("pointermove", ev => {
+        if (!dragging) return;
+        const a = angleAt(ev);
+        let d = a - lastA;
+        if (d > 180) d -= 360; else if (d < -180) d += 360;
+        moved += Math.abs(d);
+        const dt = Math.max(ev.timeStamp - lastT, 1);
+        vel = 0.8 * vel + 0.2 * (d / dt);
+        setRotation(theta + d);
+        highlight();
+        lastA = a; lastT = ev.timeStamp;
+      });
+      // a real drag must not fire a node's link as the thumb lifts
+      SVG.addEventListener("click", ev => {
+        if (moved > 3) { ev.stopPropagation(); ev.preventDefault(); }
+      }, true);
+
+      function release() {
+        if (!dragging) return;
+        dragging = false;
+        if (reduceMotion) {
+          const n = nearest();
+          if (n) { setRotation(norm(-n.deg + 180) - 180); current = n.lt; trace(n.lt); }
+          return;
+        }
+        coast();
+      }
+      SVG.addEventListener("pointerup", release);
+      SVG.addEventListener("pointercancel", release);
+      SVG.addEventListener("pointerleave", release);
+
+      function coast() {
+        let prev = performance.now();
+        const step = now => {
+          const dt = now - prev; prev = now;
+          setRotation(theta + vel * dt);
+          vel *= Math.pow(0.994, dt);
+          highlight();
+          if (Math.abs(vel) > 0.02) raf = requestAnimationFrame(step);
+          else snap();
+        };
+        raf = requestAnimationFrame(step);
+      }
+      function snap() {
+        const n = nearest();
+        if (!n) return;
+        const d = norm(-n.deg - theta + 180) - 180;   // shortest way round
+        const from = theta, t0 = performance.now(), DUR = 260;
+        const step = now => {
+          const p = Math.min((now - t0) / DUR, 1);
+          const e = 1 - Math.pow(1 - p, 3);
+          setRotation(from + d * e);
+          if (p < 1) raf = requestAnimationFrame(step);
+          else { current = n.lt; trace(n.lt); }
+        };
+        raf = requestAnimationFrame(step);
+      }
     }
   </script>
 </body>
