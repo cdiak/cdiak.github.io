@@ -14,16 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
      - defaults to system preference
   ============================================================ */
 
+  // Theme is applied pre-paint by an inline script in <head>;
+  // this only needs to handle toggling.
   const root = document.documentElement;
-  const storedTheme = localStorage.getItem("theme");
-
-  if (storedTheme) {
-    root.setAttribute("data-theme", storedTheme);
-  } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-    root.setAttribute("data-theme", "dark");
-  } else {
-    root.setAttribute("data-theme", "light");
-  }
 
   // Create toggle button (injected into nav)
   const toggle = document.createElement("button");
@@ -75,60 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
-
-  /* ============================================================
-     NAME ↔ SIGNATURE HOVER (MODIFIED)
-     - Light Mode: No change (stays signature)
-     - Dark Mode: Hover turns signature Blue
-  ============================================================ */
-
-  const titleText = document.getElementById("title-text");
-  const titleLogo = document.getElementById("title-logo");
-
-  // EDIT THIS: Set this to the exact Blue hex code of your portfolio/toggle
-  const HOVER_BLUE = "#2979ff"; 
-
-  if (titleText && titleLogo) {
-    // 1. Initial State: Hide text completely, show logo
-    titleText.style.display = "none"; 
-    titleText.style.opacity = "0";
-    titleLogo.style.opacity = "1";
-    
-    // Add a transition to the logo for smooth color changing
-    titleLogo.style.transition = "color 0.3s ease, fill 0.3s ease, stroke 0.3s ease";
-
-    const setBlue = () => {
-      // Only change color if we are in Dark Mode
-      const currentTheme = root.getAttribute("data-theme");
-      if (currentTheme === "dark") {
-        titleLogo.style.color = HOVER_BLUE;
-        titleLogo.style.fill = HOVER_BLUE;
-        
-        // If the logo is complex SVG paths, target them specifically
-        const paths = titleLogo.querySelectorAll("path, circle, rect, polygon");
-        paths.forEach(p => {
-            p.style.fill = HOVER_BLUE;
-            p.style.stroke = HOVER_BLUE;
-        });
-      }
-    };
-
-    const resetColor = () => {
-      // Clear inline styles to revert to CSS defaults (white/black)
-      titleLogo.style.color = "";
-      titleLogo.style.fill = "";
-      
-      const paths = titleLogo.querySelectorAll("path, circle, rect, polygon");
-      paths.forEach(p => {
-          p.style.fill = "";
-          p.style.stroke = "";
-      });
-    };
-
-    // Apply listeners only to the logo
-    titleLogo.addEventListener("mouseenter", setBlue);
-    titleLogo.addEventListener("mouseleave", resetColor);
-  }
 
   /* ============================================================
      CONTINUOUS COLOR SPECTRUM ACROSS FOLDER TREE

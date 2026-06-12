@@ -39,6 +39,7 @@
 ============================================================ */
 
 :root {
+  color-scheme: light;
   --bg: #ffffff;
   --text: #1a1a1a;
   --muted: #6e6e6e;
@@ -82,6 +83,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg: #000000;
   --text: #e0e0e0;
   --muted: #888888;
@@ -190,10 +192,13 @@ body {
 #title-logo {
   width: 140px;
   opacity: 1;
+  /* signature.png is transparent ink; multiply lets it sit into any light bg */
+  mix-blend-mode: multiply;
 }
 
 [data-theme="dark"] #title-logo {
   filter: invert(1);
+  mix-blend-mode: screen;
 }
 
 #menu-bar nav {
