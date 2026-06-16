@@ -18,8 +18,8 @@
   <style>
     /* ============================================================
        AFTERSLOP — a private leaf, set in the Principia idiom.
-       Black ink on warm paper. The hero is a narrative figure that
-       walks one turn from ingest → description → matching.
+       Text on the left; the figure holds on the right, walking one
+       turn from ingest → description → matching.
     ============================================================ */
 
     :root {
@@ -30,10 +30,10 @@
       --faint: #ddd3bd;
       --panel: #f1ead9;
 
-      --g-grok:    hsl(210, 70%, 42%);   /* providers, colour-coded */
+      --g-grok:    hsl(210, 70%, 42%);
       --g-chatgpt: hsl(142, 55%, 34%);
       --g-claude:  hsl(28, 85%, 42%);
-      --accent:    hsl(28, 85%, 42%);    /* the debugging archetype */
+      --accent:    hsl(28, 85%, 42%);
 
       --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
       --sans:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -55,26 +55,18 @@
 
     * { box-sizing: border-box; }
     html { background: var(--paper); color: var(--ink); scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: var(--serif);
-      font-size: 18px;
-      line-height: 1.58;
-    }
+    body { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.58; }
 
-    /* white line-art brand → invert onto the paper in light mode */
+    /* white-on-transparent brand art → invert onto the paper in light mode */
     .brand { display: block; }
     [data-theme="light"] .brand { filter: invert(1) sepia(0.18) saturate(0.7); }
 
     header {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
       padding: 1.2rem 2.2rem 0;
     }
     .running-head {
-      grid-column: 2;
-      font-size: 0.72rem; letter-spacing: 0.42em; text-transform: uppercase;
+      grid-column: 2; font-size: 0.72rem; letter-spacing: 0.42em; text-transform: uppercase;
       color: var(--muted); text-align: center;
     }
     #theme-toggle {
@@ -108,22 +100,31 @@
     [data-theme="dark"] .gate-error { color: #f87171; }
 
     /* ---------- the leaf ---------- */
-    .wrap { max-width: 820px; margin: 0 auto; padding: 1.5rem 2.2rem 4rem; }
-    .hero-logo { width: min(340px, 80%); margin: 0.6rem 0 1.6rem; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 1.4rem 2.2rem 4rem; }
+    .hero-logo { width: min(330px, 78%); margin: 0.4rem 0 1.5rem; }
+    .intro-lead { font-size: 1.12em; margin: 0 0 0.9rem; max-width: 40rem; }
+    .citation { font-size: 0.92rem; color: var(--muted); margin: 0 0 1.8rem; max-width: 40rem; }
 
-    .intro-lead { font-size: 1.12em; margin: 0 0 0.9rem; }
-    .citation { font-size: 0.92rem; color: var(--muted); margin: 0 0 2rem; }
+    .leaf {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 470px;
+      gap: 3.2rem;
+      align-items: start;
+      margin-top: 1.6rem;
+    }
+    .col-text { min-width: 0; }
     p { margin: 0 0 1.15rem; }
-    .wrap > p, .wrap > ul, .wrap > ol { max-width: 42rem; }
+    .col-text p, .col-text ul, .col-text ol { max-width: 40rem; }
     ul, ol { padding-left: 1.5rem; }
     li { margin-bottom: 0.4rem; }
     a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
     a:hover { text-decoration-thickness: 2px; }
     strong { font-weight: 600; }
     code { font-family: var(--mono); font-size: 0.82em; background: color-mix(in oklab, var(--faint) 55%, transparent); padding: 1px 5px; border-radius: 3px; }
-    .section-title { font-family: var(--serif); font-weight: 600; font-size: 1.5rem; margin: 2.6rem 0 1rem; }
+    .section-title { font-family: var(--serif); font-weight: 600; font-size: 1.5rem; margin: 0 0 1rem; }
+    .col-text .section-title:not(:first-child) { margin-top: 2.4rem; }
 
-    .downloads { display: flex; gap: 12px; flex-wrap: wrap; margin: 1.8rem 0 0.5rem; }
+    .downloads { display: flex; gap: 12px; flex-wrap: wrap; margin: 0 0 2.2rem; }
     .download-btn {
       display: inline-flex; align-items: center; gap: 10px; padding: 0.6rem 1.1rem;
       border: 1px solid var(--ink); border-radius: 5px; text-decoration: none; color: var(--ink);
@@ -139,60 +140,51 @@
     }
 
     /* ============================================================
-       THE FIGURE — how the feather reads a conversation
+       THE FIGURE — sticky on the right
     ============================================================ */
+    .figcol { min-width: 0; }
+    .figcol .stick { position: sticky; top: 1.2rem; }
     .diagram {
-      margin: 2.6rem 0 1rem;
+      margin: 0;
       border: 1px solid var(--ink);
       border-radius: 8px;
-      padding: 1.6rem 1.8rem 2rem;
+      padding: 1.3rem 1.4rem 1.5rem;
       background: color-mix(in oklab, var(--panel) 60%, transparent);
     }
-    .band { position: relative; }
     .band-label {
-      font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem;
+      font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 0.7rem;
     }
     .flow { text-align: center; color: var(--muted); font-family: var(--mono);
-            font-size: 0.66rem; letter-spacing: 0.04em; margin: 0.9rem 0; }
+            font-size: 0.62rem; letter-spacing: 0.03em; margin: 0.8rem 0; line-height: 1.5; }
     .flow::before { content: "↓  "; }
 
     /* --- ingest row --- */
-    .ingest { display: flex; align-items: center; justify-content: center; gap: 0.7rem; flex-wrap: wrap; }
+    .ingest { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
     .chip {
-      font-family: var(--mono); font-size: 0.74rem; padding: 0.3rem 0.7rem;
-      border: 1px solid var(--c, var(--ink)); border-radius: 999px; color: var(--c, var(--ink));
-      white-space: nowrap;
+      font-family: var(--mono); font-size: 0.72rem; padding: 0.28rem 0.6rem;
+      border: 1px solid var(--c, var(--ink)); border-radius: 999px; color: var(--c, var(--ink)); white-space: nowrap;
     }
     .ingest .to { color: var(--muted); font-family: var(--mono); font-size: 0.9rem; }
-    .feather { width: 40px; height: 54px; }
-    .feather path { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+    .feather { width: 30px; height: auto; }
 
-    /* --- the turn: chat + structural description --- */
-    .turn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; align-items: start; }
-    .chat { display: flex; flex-direction: column; gap: 0.5rem; font-family: var(--sans); }
-    .bubble {
-      max-width: 92%; padding: 0.5rem 0.75rem; border-radius: 14px;
-      font-size: 0.82rem; line-height: 1.45;
-    }
-    .bubble .who { display:block; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+    /* --- the turn: chat, then its structural description --- */
+    .chat { display: flex; flex-direction: column; gap: 0.45rem; font-family: var(--sans); }
+    .bubble { max-width: 88%; padding: 0.5rem 0.7rem; border-radius: 14px; font-size: 0.8rem; line-height: 1.45; }
+    .bubble .who { display: block; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase;
                    color: var(--muted); margin-bottom: 2px; font-family: var(--mono); }
     .bubble.user { align-self: flex-end; background: color-mix(in oklab, var(--ink) 12%, transparent); border-bottom-right-radius: 4px; }
     .bubble.asst { align-self: flex-start; border: 1px solid var(--faint); border-bottom-left-radius: 4px; }
 
-    .sd { font-family: var(--mono); }
+    .sd { font-family: var(--mono); margin-top: 0.2rem; }
     .sd .tag {
-      display: inline-block; font-size: 0.66rem; letter-spacing: 0.04em;
-      padding: 0.18rem 0.55rem; border-radius: 4px; margin-bottom: 0.7rem;
+      display: inline-block; font-size: 0.64rem; letter-spacing: 0.04em;
+      padding: 0.16rem 0.5rem; border-radius: 4px; margin-bottom: 0.6rem;
       background: var(--ink); color: var(--paper);
     }
-    .sd pre {
-      margin: 0; font-size: 0.7rem; line-height: 1.65; white-space: pre-wrap;
-      color: var(--ink);
-    }
-    /* the cross-highlight between prose and structure */
-    .tok, .span { border-radius: 3px; cursor: help; transition: background 0.15s, color 0.15s; }
-    .tok { color: var(--ink); text-decoration: underline dotted color-mix(in oklab, var(--muted) 70%, transparent); text-underline-offset: 2px; }
+    .sd pre { margin: 0; font-size: 0.68rem; line-height: 1.6; white-space: pre-wrap; color: var(--ink); }
+    .tok, .span { border-radius: 3px; cursor: help; transition: background 0.15s; }
+    .tok { text-decoration: underline dotted color-mix(in oklab, var(--muted) 70%, transparent); text-underline-offset: 2px; }
     .hl { background: color-mix(in oklab, var(--accent) 26%, transparent); }
     [data-theme="dark"] .hl { background: color-mix(in oklab, var(--accent) 34%, transparent); }
 
@@ -211,17 +203,22 @@
     .m-edge.lit { opacity: 1; stroke-width: 1.7; }
     .m-weak.lit { opacity: .9; }
 
-    figcaption { margin-top: 1rem; font-style: italic; font-size: 0.88rem; color: var(--ink); min-height: 2.4em; }
+    figcaption { margin-top: 0.9rem; font-style: italic; font-size: 0.84rem; color: var(--ink); min-height: 3em; }
     figcaption .figno { font-style: normal; font-variant: small-caps; letter-spacing: 0.08em; }
 
     /* ---------- responsive ---------- */
-    @media (max-width: 720px) {
+    @media (max-width: 1080px) {
+      .leaf { grid-template-columns: 1fr; gap: 2rem; }
+      .figcol { order: -1; }                 /* figure rises above the prose on narrow screens */
+      .figcol .stick { position: static; max-width: 560px; }
+    }
+    @media (max-width: 600px) {
       .wrap { padding: 1rem 1.25rem 3rem; }
       body { font-size: 17px; }
-      .turn-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .hero-logo { width: min(300px, 86%); }
       .downloads { flex-direction: column; }
       .download-btn { width: 100%; justify-content: center; }
-      .diagram { padding: 1.2rem 1rem 1.5rem; }
+      .diagram { padding: 1.1rem 1rem 1.3rem; }
     }
   </style>
 </head>
@@ -266,46 +263,96 @@
       </a>
     </div>
 
-    <!-- ============ THE FIGURE ============ -->
-    <figure class="diagram" id="plate">
+    <div class="leaf">
 
-      <!-- 1 · ingest -->
-      <div class="band">
-        <div class="band-label">1 · Ingest</div>
-        <div class="ingest">
-          <span class="chip" style="--c: var(--g-grok)">Grok</span>
-          <span class="chip" style="--c: var(--g-chatgpt)">ChatGPT</span>
-          <span class="chip" style="--c: var(--g-claude)">Claude</span>
-          <span class="to">→</span>
-          <svg class="feather" viewBox="0 0 40 54" aria-label="the feather">
-            <path d="M30 5 C 13 16 9 36 19 51 C 30 38 39 19 30 5 Z"/>
-            <path d="M27 11 C 21 26 19 40 19 50"/>
-            <path d="M25 17 L 16 21 M26 24 L 15 28 M24 31 L 16 35 M22 38 L 17 42"/>
-            <path d="M19 51 L 17 54"/>
-          </svg>
+      <!-- ---------- text column (left) ---------- -->
+      <div class="col-text">
+        <h2 class="section-title">Getting Started</h2>
+        <ol>
+          <li>Download and open Afterslop.</li>
+          <li>Export your tutoring sessions (ChatGPT, Claude, or Grok) and put the zip files in one folder.</li>
+          <li>Drag the zips into the app window.</li>
+          <li>Choose <strong>donny</strong> (local Llama via proxy) and click <strong>Start Local Proxy</strong>.</li>
+          <li>Run the pipeline and wait for it to finish.</li>
+          <li>Press <strong>Cmd + L</strong> to open the agent chat and start exploring.</li>
+        </ol>
+
+        <h2 class="section-title">Background</h2>
+        <p><strong>Afterslop is a tool for collecting and organizing model behaviors from LLM export data.</strong></p>
+        <p>It turns your exported conversations into a usable knowledge base in the following way:</p>
+        <ul>
+          <li>It creates an Obsidian-style vault from all the conversations you import, across ChatGPT, Claude, and Grok.</li>
+          <li>Each individual exchange (a turn) gets its own file and a formal description that captures the underlying structure of what happened.</li>
+          <li>These structured descriptions allow a conceptual matching algorithm to run across your data. Instead of relying on keywords or embedding similarity, the system can find turns that are related at the level of their logical structure.</li>
+          <li>The matching approach is inspired by David E. Shaw's doctoral thesis on knowledge-based retrieval on relational databases.</li>
+        </ul>
+        <p>The key idea behind the system is that the <strong>turn</strong>, not the full conversation thread, is the right unit of analysis for analyzing user-LLM interactions. Tasking usually happens at the level of individual turns. Because the real value in most tutoring work lives at that granular level, giving each turn a structured description makes certain conceptual patterns visible and comparable in ways that would otherwise be hard to find.</p>
+        <p>A useful way to understand how the matching works is "description implies description." For example, if a turn is described as the model breaking a hard problem into smaller steps and solving them one by one, the matching rules can recognize that this turn also counts as an example of structured reasoning — even if those exact words were never used. The formal descriptions let the system draw these connections automatically.</p>
+
+        <h2 class="section-title">Workflow</h2>
+        <p>Here's a practical way most tutors use Afterslop:</p>
+        <ol>
+          <li><strong>Export your data</strong> — Export the conversations you want to work with from any provider and put the zip files in one folder.</li>
+          <li><strong>Open Afterslop and drop the files</strong> — Drag the zips into the app window. It will detect the providers automatically.</li>
+          <li><strong>Choose a description provider</strong> — <strong>donny</strong> (local Llama 3.1-8B via the built-in proxy) is the easiest and cheapest way to start. Grok models generally give sharper descriptions but cost tokens.</li>
+          <li><strong>Start the local proxy</strong> (if using donny) — Click the button to launch the local model server.</li>
+          <li><strong>Run the pipeline</strong> — Let the app process your files. This is the longest step.</li>
+          <li><strong>Use the agent chat (<code>Cmd + L</code>)</strong> to explore and organize what you found.</li>
+        </ol>
+        <p><strong>Using the agent chat effectively</strong></p>
+        <p>Grok 4.3 is currently one of the strongest models for writing good search patterns in the agent. When asking it to find examples or create collections, give it clear instructions so it doesn't overly restrict the results. Useful prompts often include lines like:</p>
+        <ul>
+          <li>"Write a broad pattern that catches as many relevant cases as possible, even if some results are noisy."</li>
+          <li>"Prioritize recall over precision for now — I can refine afterward."</li>
+          <li>"Avoid adding too many extra constraints that would make the results too narrow."</li>
+          <li>"Return the full list of matches rather than summarizing or truncating."</li>
+        </ul>
+
+        <h2 class="section-title">Notes</h2>
+        <ul>
+          <li>The normal Grok models (especially Grok 4.3 and Grok 4 Fast) work reliably in the agent chat for finding patterns and saving collections.</li>
+          <li>The deeper "Grok Build" integration inside the desktop app is currently not working well. If you want the full visible-reasoning experience, it's currently better to use the main Grok Build interface together with the CLI tools.</li>
+          <li>The local model (<code>donny</code>) is the lowest-friction way to get started. The quality is good enough for a lot of collection-building work.</li>
+          <li>You can always re-run the pipeline later with a stronger model if you want higher-quality descriptions on the same data.</li>
+        </ul>
+
+        <div class="afterslop-footer">
+          Built by <a href="https://cdiak.github.io">Chris Diak</a>.
         </div>
       </div>
 
-      <div class="flow">every conversation you've exported, one turn at a time</div>
+      <!-- ---------- the figure (right, sticky) ---------- -->
+      <div class="figcol">
+        <div class="stick">
+          <figure class="diagram" id="plate">
 
-      <!-- 2 · a turn, described -->
-      <div class="band">
-        <div class="band-label">2 · A turn, described</div>
-        <div class="turn-grid">
-          <div class="chat">
-            <div class="bubble user">
-              <span class="who">You</span>
-              Help me <span class="span" data-k="debug">debug</span> this crash on startup.
+            <div class="band-label">1 · Ingest</div>
+            <div class="ingest">
+              <span class="chip" style="--c: var(--g-grok)">Grok</span>
+              <span class="chip" style="--c: var(--g-chatgpt)">ChatGPT</span>
+              <span class="chip" style="--c: var(--g-claude)">Claude</span>
+              <span class="to">→</span>
+              <img src="./feather.png" alt="the feather" class="feather brand">
             </div>
-            <div class="bubble asst">
-              <span class="who">Assistant</span>
-              Certainly. Let's read the <span class="span" data-k="frame">top frame</span> of the
-              <span class="span" data-k="trace">stack trace</span> — it's a null dereference in
-              <span class="span" data-k="init">init()</span>. Can you share that method?
+
+            <div class="flow">every conversation you've exported, one turn at a time</div>
+
+            <div class="band-label">2 · A turn, described</div>
+            <div class="chat">
+              <div class="bubble user">
+                <span class="who">You</span>
+                Help me <span class="span" data-k="debug">debug</span> this crash on startup.
+              </div>
+              <div class="bubble asst">
+                <span class="who">Assistant</span>
+                Certainly. Let's read the <span class="span" data-k="frame">top frame</span> of the
+                <span class="span" data-k="trace">stack trace</span> — it's a null dereference in
+                <span class="span" data-k="init">init()</span>. Can you share that method?
+              </div>
             </div>
-          </div>
-          <div class="sd">
-            <span class="tag">code-first debugging</span>
+            <div class="flow">the feather reads its structure</div>
+            <div class="sd">
+              <span class="tag">code-first debugging</span>
 <pre>((a TURN
   (role ASSISTANT)
   (move (a <span class="tok" data-k="debug">DEBUGGING</span>
@@ -313,74 +360,22 @@
     (reads (<span class="tok" data-k="trace">STACK-TRACE</span>
             <span class="tok" data-k="frame">TOP-FRAME</span>))
     (asks (SOURCE <span class="tok" data-k="init">init</span>))))))</pre>
-          </div>
+            </div>
+
+            <div class="flow">LSEC matches it against every other described turn</div>
+
+            <div class="band-label">3 · Grouped emergent behaviors</div>
+            <div class="match" id="match">
+              <svg id="fig" viewBox="0 0 440 300" role="img" aria-label="The matching constellation"></svg>
+            </div>
+
+            <figcaption>
+              <span class="figno">Fig.</span> <span id="cap">One turn becomes a formal description, then finds its structural kin. Hover the description, or any turn.</span>
+            </figcaption>
+          </figure>
         </div>
       </div>
 
-      <div class="flow">LSEC matches it against every other described turn — across providers, in any words</div>
-
-      <!-- 3 · matched -->
-      <div class="band match" id="match">
-        <div class="band-label">3 · Grouped emergent behaviors</div>
-        <svg id="fig" viewBox="0 0 760 300" role="img" aria-label="The matching constellation"></svg>
-      </div>
-
-      <figcaption>
-        <span class="figno">Fig.</span> <span id="cap">One turn becomes a formal description, then finds its structural kin. Hover the description, or any turn below.</span>
-      </figcaption>
-    </figure>
-
-    <h2 class="section-title">Getting Started</h2>
-    <ol>
-      <li>Download and open Afterslop.</li>
-      <li>Export your tutoring sessions (ChatGPT, Claude, or Grok) and put the zip files in one folder.</li>
-      <li>Drag the zips into the app window.</li>
-      <li>Choose <strong>donny</strong> (local Llama via proxy) and click <strong>Start Local Proxy</strong>.</li>
-      <li>Run the pipeline and wait for it to finish.</li>
-      <li>Press <strong>Cmd + L</strong> to open the agent chat and start exploring.</li>
-    </ol>
-
-    <h2 class="section-title">Background</h2>
-    <p><strong>Afterslop is a tool for collecting and organizing model behaviors from LLM export data.</strong></p>
-    <p>It turns your exported conversations into a usable knowledge base in the following way:</p>
-    <ul>
-      <li>It creates an Obsidian-style vault from all the conversations you import, across ChatGPT, Claude, and Grok.</li>
-      <li>Each individual exchange (a turn) gets its own file and a formal description that captures the underlying structure of what happened.</li>
-      <li>These structured descriptions allow a conceptual matching algorithm to run across your data. Instead of relying on keywords or embedding similarity, the system can find turns that are related at the level of their logical structure.</li>
-      <li>The matching approach is inspired by David E. Shaw's doctoral thesis on knowledge-based retrieval on relational databases.</li>
-    </ul>
-    <p>The key idea behind the system is that the <strong>turn</strong>, not the full conversation thread, is the right unit of analysis for analyzing user-LLM interactions. Tasking usually happens at the level of individual turns. Because the real value in most tutoring work lives at that granular level, giving each turn a structured description makes certain conceptual patterns visible and comparable in ways that would otherwise be hard to find.</p>
-    <p>A useful way to understand how the matching works is "description implies description." For example, if a turn is described as the model breaking a hard problem into smaller steps and solving them one by one, the matching rules can recognize that this turn also counts as an example of structured reasoning — even if those exact words were never used. The formal descriptions let the system draw these connections automatically.</p>
-
-    <h2 class="section-title">Workflow</h2>
-    <p>Here's a practical way most tutors use Afterslop:</p>
-    <ol>
-      <li><strong>Export your data</strong> — Export the conversations you want to work with from any provider and put the zip files in one folder.</li>
-      <li><strong>Open Afterslop and drop the files</strong> — Drag the zips into the app window. It will detect the providers automatically.</li>
-      <li><strong>Choose a description provider</strong> — <strong>donny</strong> (local Llama 3.1-8B via the built-in proxy) is the easiest and cheapest way to start. Grok models generally give sharper descriptions but cost tokens.</li>
-      <li><strong>Start the local proxy</strong> (if using donny) — Click the button to launch the local model server.</li>
-      <li><strong>Run the pipeline</strong> — Let the app process your files. This is the longest step.</li>
-      <li><strong>Use the agent chat (<code>Cmd + L</code>)</strong> to explore and organize what you found.</li>
-    </ol>
-    <p><strong>Using the agent chat effectively</strong></p>
-    <p>Grok 4.3 is currently one of the strongest models for writing good search patterns in the agent. When asking it to find examples or create collections, give it clear instructions so it doesn't overly restrict the results. Useful prompts often include lines like:</p>
-    <ul>
-      <li>"Write a broad pattern that catches as many relevant cases as possible, even if some results are noisy."</li>
-      <li>"Prioritize recall over precision for now — I can refine afterward."</li>
-      <li>"Avoid adding too many extra constraints that would make the results too narrow."</li>
-      <li>"Return the full list of matches rather than summarizing or truncating."</li>
-    </ul>
-
-    <h2 class="section-title">Notes</h2>
-    <ul>
-      <li>The normal Grok models (especially Grok 4.3 and Grok 4 Fast) work reliably in the agent chat for finding patterns and saving collections.</li>
-      <li>The deeper "Grok Build" integration inside the desktop app is currently not working well. If you want the full visible-reasoning experience, it's currently better to use the main Grok Build interface together with the CLI tools.</li>
-      <li>The local model (<code>donny</code>) is the lowest-friction way to get started. The quality is good enough for a lot of collection-building work.</li>
-      <li>You can always re-run the pipeline later with a stronger model if you want higher-quality descriptions on the same data.</li>
-    </ul>
-
-    <div class="afterslop-footer">
-      Built by <a href="https://cdiak.github.io">Chris Diak</a>.
     </div>
   </div>
 
@@ -395,8 +390,6 @@
 
     /* ============================================================
        CROSS-HIGHLIGHT — the feather translates prose into structure.
-       Hovering a clause of the description lights the words it
-       abstracts, and the reverse.
     ============================================================ */
     function linkPair(k, on) {
       document.querySelectorAll(`.tok[data-k="${k}"], .span[data-k="${k}"]`)
@@ -410,9 +403,6 @@
 
     /* ============================================================
        THE MATCH CONSTELLATION — our turn finds its structural kin.
-       Turns from three providers, grouped by archetype; LSEC edges
-       link structural matches across providers. Our specimen turn
-       (code-first debugging) is ringed. Hover any turn to trace.
     ============================================================ */
     const SVG = document.getElementById("fig");
     const NS = "http://www.w3.org/2000/svg";
@@ -422,13 +412,12 @@
     const PROV = { grok:{name:"Grok",v:"--g-grok"}, chatgpt:{name:"ChatGPT",v:"--g-chatgpt"}, claude:{name:"Claude",v:"--g-claude"} };
     const provColor = p => css(PROV[p].v);
 
-    // five archetype clusters spread across a wide field
     const ARCH = {
-      reasoning: { cx:110, cy:90,  label:"structured reasoning", plain:"decomposes a hard problem into steps" },
-      routing:   { cx:300, cy:70,  label:"ambiguous routing",    plain:"routes an ambiguous question" },
-      debug:     { cx:235, cy:200, label:"code-first debugging",  plain:"debugs by writing code first" },
-      search:    { cx:470, cy:120, label:"domain search",         plain:"runs a domain-specific search" },
-      jtbd:      { cx:640, cy:200, label:"literal JTBD",          plain:"takes a job-to-be-done literally" },
+      reasoning: { cx:88,  cy:84,  label:"structured reasoning", plain:"decomposes a hard problem into steps" },
+      routing:   { cx:350, cy:74,  label:"ambiguous routing",    plain:"routes an ambiguous question" },
+      debug:     { cx:108, cy:212, label:"code-first debugging",  plain:"debugs by writing code first" },
+      search:    { cx:352, cy:198, label:"domain search",         plain:"runs a domain-specific search" },
+      jtbd:      { cx:222, cy:262, label:"literal JTBD",          plain:"takes a job-to-be-done literally" },
     };
     const TURNS = [
       {id:"r1",prov:"grok",arch:"reasoning"},{id:"r2",prov:"claude",arch:"reasoning"},{id:"r3",prov:"chatgpt",arch:"reasoning"},
@@ -442,13 +431,12 @@
     const byArch = {};
     TURNS.forEach(t => (byArch[t.arch] = byArch[t.arch] || []).push(t));
     Object.values(byArch).forEach(list => list.forEach((t,i) => {
-      const a = (-90 + i*120) * Math.PI/180, r = 30;
+      const a = (-90 + i*120) * Math.PI/180, r = 26;
       t.x = ARCH[t.arch].cx + r*Math.cos(a);
       t.y = ARCH[t.arch].cy + r*Math.sin(a);
     }));
     const T = Object.fromEntries(TURNS.map(t => [t.id, t]));
 
-    // edges
     const edgeEls = [];
     Object.values(byArch).forEach(list => {
       for (let i=0;i<list.length;i++) for (let j=i+1;j<list.length;j++) {
@@ -462,21 +450,18 @@
       SVG.appendChild(e); edgeEls.push({el:e,a,b,weak:true});
     });
 
-    // turns
     const turnEls = {};
     TURNS.forEach(t => {
       if (t.focus) SVG.appendChild(el("circle",{cx:t.x,cy:t.y,r:8,class:"m-focus-ring"}));
       const dot = el("circle",{cx:t.x,cy:t.y,r:t.focus?5:4,class:"m-turn"});
       SVG.appendChild(dot); turnEls[t.id]=dot;
     });
-    // labels
     Object.values(ARCH).forEach(ar => {
-      const lb = el("text",{x:ar.cx,y:ar.cy-42,class:"m-lbl","text-anchor":"middle"});
+      const lb = el("text",{x:ar.cx,y:ar.cy-38,class:"m-lbl","text-anchor":"middle"});
       lb.textContent = ar.label; SVG.appendChild(lb);
     });
-    // hit targets
     TURNS.forEach(t => {
-      const hit = el("circle",{cx:t.x,cy:t.y,r:16,class:"m-hit"});
+      const hit = el("circle",{cx:t.x,cy:t.y,r:15,class:"m-hit"});
       hit.addEventListener("mouseenter",()=>traceTurn(t.id));
       hit.addEventListener("mouseleave",untrace);
       hit.addEventListener("click",()=>traceTurn(t.id));
@@ -508,7 +493,7 @@
       CAP.textContent = DEFAULT_CAP;
     }
 
-    /* ---------- the constellation draws itself once, then rests ---------- */
+    /* ---------- draws itself once, then rests ---------- */
     let inkDone = reduceMotion, inked = [];
     function finishInk() {
       if (inkDone) return; inkDone = true;
