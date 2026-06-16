@@ -265,29 +265,42 @@
       touch-action: pan-y;
     }
 
-    .pl-spine    { stroke: var(--ink); stroke-width: 1.3; fill: none; }
-    .pl-arrow    { fill: var(--muted); }
-    .pl-glyph    { stroke: var(--ink); stroke-width: 1.3; fill: none; transition: stroke .25s, opacity .25s; }
-    .pl-glyph-f  { fill: var(--ink); stroke: none; transition: fill .25s, opacity .25s; }
-    .pl-num      { font-family: var(--serif); font-style: italic; font-size: 22px; fill: var(--ink); transition: fill .25s, opacity .25s; }
-    .pl-name     { font-family: var(--serif); font-size: 15.5px; fill: var(--ink); transition: fill .25s, opacity .25s; }
-    .pl-sub      { font-family: var(--mono); font-size: 9px; letter-spacing: 0.04em; fill: var(--muted); text-transform: uppercase; transition: opacity .25s; }
-    .pl-token    { fill: var(--ink); }
-    .pl-hit      { fill: transparent; cursor: pointer; }
+    .pl-strand { stroke: var(--faint); stroke-width: 1; fill: none; transition: stroke .25s, opacity .25s; }
+    .pl-edge   { stroke: var(--ink); stroke-width: 1; fill: none; opacity: .42; transition: opacity .25s, stroke-width .25s; }
+    .pl-weak   { stroke: var(--muted); stroke-width: .8; stroke-dasharray: 3 4; fill: none; opacity: .4; transition: opacity .25s; }
+    .pl-flow   { stroke: var(--faint); stroke-width: 1; fill: none; transition: stroke .25s, opacity .25s; }
+    .pl-arrow  { fill: var(--muted); transition: fill .25s, opacity .25s; }
+    .pl-turn   { fill: var(--ink); transition: fill .25s, opacity .25s; }
+    .pl-prov   { fill: none; stroke: var(--ink); stroke-width: 1.3; transition: stroke .25s, opacity .25s; }
+    .pl-model  { fill: none; stroke: var(--ink); stroke-width: 1.3; transition: stroke .25s, opacity .25s; }
+    .pl-name   { font-family: var(--serif); font-size: 13px; fill: var(--ink); transition: fill .25s, opacity .25s; }
+    .pl-lbl    { font-family: var(--mono); font-size: 8px; letter-spacing: .05em; text-transform: uppercase; fill: var(--muted); transition: opacity .25s; }
+    .pl-hit    { fill: transparent; cursor: pointer; }
 
-    .pipeline.tracing .station:not(.lit) { opacity: 0.14; }
-    .pipeline.tracing .station.lit .pl-glyph   { stroke: var(--hl, var(--ink)); }
-    .pipeline.tracing .station.lit .pl-glyph-f { fill: var(--hl, var(--ink)); }
-    .pipeline.tracing .station.lit .pl-num,
-    .pipeline.tracing .station.lit .pl-name    { fill: var(--hl, var(--ink)); }
+    .pipeline.tracing .t:not(.lit) { opacity: .1; }
+    .pl-edge.lit   { opacity: 1; stroke-width: 1.7; }
+    .pl-weak.lit   { opacity: .9; }
+    .pl-strand.lit, .pl-flow.lit, .pl-arrow.lit { stroke: var(--ink); }
+    .pl-prov.lit, .pl-model.lit { stroke: var(--hl, var(--ink)); }
+    .pl-name.lit { fill: var(--hl, var(--ink)); }
+    /* lit turns take their provider colour inline, set in JS */
 
     figcaption {
       margin-top: 0.6rem;
       font-style: italic;
       font-size: 0.88rem;
       color: var(--ink);
+      min-height: 3.4em;
     }
     figcaption .figno { font-style: normal; font-variant: small-caps; letter-spacing: 0.08em; }
+    .sexpr {
+      font-family: var(--mono);
+      font-style: normal;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      min-height: 1.1em;
+    }
 
     /* the stage index, beneath the schematic (the one scrolling part) */
     .key {
@@ -447,8 +460,11 @@
     <div class="figcol">
       <div class="stick">
         <figure class="pipeline" id="plate">
-          <svg id="fig" viewBox="0 0 470 700" role="img" aria-label="The Afterslop pipeline"></svg>
-          <figcaption><span class="figno">Fig.</span> — The Afterslop pipeline.</figcaption>
+          <svg id="fig" viewBox="0 0 470 700" role="img" aria-label="The Afterslop matching engine"></svg>
+          <figcaption>
+            <span class="figno">Fig.</span> <span id="cap">Turns from every provider, described and matched. Hover to explore.</span>
+            <div class="sexpr" id="sexpr"></div>
+          </figcaption>
         </figure>
         <div class="key" id="key"></div>
       </div>
@@ -466,176 +482,298 @@
     });
 
     /* ============================================================
-       THE PIPELINE — an interactive ink schematic.
-       Four stations descend a spine. A token of data flows down it.
-       Hover a station (or its entry in the index) to trace the
-       stage in the colour of its kind; the rest dims to a ghost.
+       THE MATCHING ENGINE — what Afterslop actually does.
+       Conversations from three providers (Grok · ChatGPT · Claude)
+       are ingested at the top; every turn earns a formal structural
+       description; LSEC (Logical Satisfaction by Extensional
+       Constraint) draws an edge between turns that match in
+       structure — across providers; matched groups flow out the
+       bottom as RLHF data campaigns. Hover a turn to read its
+       description and light its structural matches.
     ============================================================ */
-
-    const STAGES = [
-      { key:"submissions",  n:"I.",   name:"Dataset Submissions",      sub:"Prompt-completion JSONs",
-        items:["Individual — submit your conversations","Team — aggregate from members","Org — label an entire golden dataset"] },
-      { key:"pipeline",     n:"II.",  name:"The Afterslop Pipeline",   sub:"Parse · normalize · structure",
-        items:["Parsers — ChatGPT, Claude, Grok, web, artifacts","Canonical objects — turn, page, entity, rule","Description language — lexer, parser, validator","Normalization — stable IDs, tuples, provenance","Extensional database — relations, indexes, snapshots","Relational algebra + LSEC — 26 axioms, closure","Knowledge-base lifecycle — authored, induced, promoted rules","Projections — vault, agent environment, UI"] },
-      { key:"descriptions", n:"III.", name:"S-Descriptions",           sub:"Structured descriptions at scale",
-        items:["Each turn earns a formal symbolic description","Sources, shares, response styles, purposes","Description implies description — conceptual matching"] },
-      { key:"behaviors",    n:"IV.",  name:"Grouped Emergent Behaviors", sub:"A knowledge graph of behavior",
-        items:["Linked behavior graph","Behavior collections","Evaluations & metrics","Rule induction","Model improvement — reward models, SFT, RLHF, guardrails"] },
-    ];
 
     const SVG = document.getElementById("fig");
     const NS = "http://www.w3.org/2000/svg";
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const el = (n, at) => { const e = document.createElementNS(NS, n); for (const k in at) e.setAttribute(k, at[k]); return e; };
+    const groupColor = v => getComputedStyle(document.documentElement).getPropertyValue("--g-" + v).trim();
 
-    const SX = 132;                          // spine x
-    const ys = [120, 300, 470, 610];         // station y positions
-    const groupColor = key =>
-      getComputedStyle(document.documentElement).getPropertyValue("--g-" + key).trim();
+    // the three providers (colour-coded the way the portfolio traces)
+    const PROV = {
+      grok:    { name: "Grok",    hue: "submissions" },  // blue
+      chatgpt: { name: "ChatGPT", hue: "behaviors"   },  // green
+      claude:  { name: "Claude",  hue: "pipeline"    },  // orange
+    };
+    const provColor = p => groupColor(PROV[p].hue);
 
-    // the spine
-    SVG.appendChild(el("line", { x1: SX, y1: ys[0], x2: SX, y2: ys[3], class: "pl-spine" }));
+    // structural archetypes — the formal descriptions turns can share
+    const ARCH = {
+      reasoning: { cx: 118, cy: 232, label: "structured reasoning", plain: "decomposes a hard problem into steps",
+                   sexpr: "(a REASONING (breaks (PROBLEM into STEPS)))" },
+      routing:   { cx: 352, cy: 220, label: "ambiguous routing",    plain: "routes an ambiguous question",
+                   sexpr: "(a ROUTING (when ((QUESTION AMBIGUOUS))))" },
+      debug:     { cx: 110, cy: 388, label: "code-first debugging", plain: "debugs by writing code first",
+                   sexpr: "(a DEBUGGING (with ((RESPONSE CODE))))" },
+      search:    { cx: 356, cy: 382, label: "domain search",        plain: "runs a domain-specific search",
+                   sexpr: "(a SEARCH (over ((DOMAIN SPECIFIC))))" },
+      jtbd:      { cx: 235, cy: 480, label: "literal JTBD",         plain: "takes a job-to-be-done literally",
+                   sexpr: "(a MISMATCH (reads ((JTBD LITERAL))))" },
+    };
 
-    // downward chevrons between stations
-    for (let i = 0; i < ys.length - 1; i++) {
-      const my = (ys[i] + ys[i + 1]) / 2;
-      const a = el("path", { d: `M ${SX - 5} ${my - 4} L ${SX} ${my + 3} L ${SX + 5} ${my - 4}`,
-        class: "pl-spine" });
-      SVG.appendChild(a);
-    }
+    // turns — three per archetype, mixed across providers, so LSEC
+    // matches reach across Grok / ChatGPT / Claude
+    const TURNS = [
+      { id:"t1",  prov:"grok",    arch:"reasoning" },
+      { id:"t2",  prov:"claude",  arch:"reasoning" },
+      { id:"t3",  prov:"chatgpt", arch:"reasoning" },
+      { id:"t4",  prov:"chatgpt", arch:"routing"   },
+      { id:"t5",  prov:"grok",    arch:"routing"   },
+      { id:"t6",  prov:"claude",  arch:"routing"   },
+      { id:"t7",  prov:"grok",    arch:"debug"     },
+      { id:"t8",  prov:"chatgpt", arch:"debug"     },
+      { id:"t9",  prov:"claude",  arch:"debug"     },
+      { id:"t10", prov:"claude",  arch:"search"    },
+      { id:"t11", prov:"grok",    arch:"search"    },
+      { id:"t12", prov:"chatgpt", arch:"search"    },
+      { id:"t13", prov:"claude",  arch:"jtbd"      },
+      { id:"t14", prov:"chatgpt", arch:"jtbd"      },
+      { id:"t15", prov:"grok",    arch:"jtbd"      },
+    ];
+    // a couple of faint cross-archetype "weak" matches, for texture
+    const WEAK = [["t2","t9"], ["t5","t11"]];
 
-    // ---- per-station glyphs, drawn by hand in the ink style ----
-    function glyph(key, cx, cy) {
-      const g = el("g", {});
-      if (key === "submissions") {
-        // three sources converging
-        [[-13,-8],[13,-8],[0,11]].forEach(([dx,dy]) =>
-          g.appendChild(el("circle", { cx: cx+dx, cy: cy+dy, r: 5, class: "pl-glyph" })));
-        g.appendChild(el("path", { d:`M ${cx-13} ${cy-3} Q ${cx} ${cy} ${cx} ${cy+6} M ${cx+13} ${cy-3} Q ${cx} ${cy} ${cx} ${cy+6}`, class:"pl-glyph" }));
-      } else if (key === "pipeline") {
-        // a funnel — parse & narrow
-        g.appendChild(el("path", { d:`M ${cx-16} ${cy-13} L ${cx+16} ${cy-13} L ${cx+4} ${cy+3} L ${cx+4} ${cy+15} L ${cx-4} ${cy+15} L ${cx-4} ${cy+3} Z`, class:"pl-glyph" }));
-      } else if (key === "descriptions") {
-        // nested brackets — a symbolic description
-        g.appendChild(el("path", { d:`M ${cx-6} ${cy-15} Q ${cx-17} ${cy} ${cx-6} ${cy+15}`, class:"pl-glyph" }));
-        g.appendChild(el("path", { d:`M ${cx+6} ${cy-15} Q ${cx+17} ${cy} ${cx+6} ${cy+15}`, class:"pl-glyph" }));
-        g.appendChild(el("path", { d:`M ${cx-1.5} ${cy-9} Q ${cx-7} ${cy} ${cx-1.5} ${cy+9}`, class:"pl-glyph" }));
-        g.appendChild(el("path", { d:`M ${cx+1.5} ${cy-9} Q ${cx+7} ${cy} ${cx+1.5} ${cy+9}`, class:"pl-glyph" }));
-      } else {
-        // a small constellation of behaviors
-        const pts = [[0,-15],[15,-6],[12,11],[-4,16],[-16,4],[-9,-11],[2,1]];
-        const edges = [[6,0],[6,1],[6,3],[6,4],[0,1],[1,2],[2,3],[4,5],[5,0]];
-        edges.forEach(([a,b]) =>
-          g.appendChild(el("line", { x1:cx+pts[a][0], y1:cy+pts[a][1], x2:cx+pts[b][0], y2:cy+pts[b][1], class:"pl-glyph" })));
-        pts.forEach(([dx,dy],i) =>
-          g.appendChild(el("circle", { cx:cx+dx, cy:cy+dy, r: i===6?3.2:2.4, class:"pl-glyph-f" })));
-      }
-      return g;
-    }
+    // place each turn in a small triangle around its archetype centre
+    const byArch = {};
+    TURNS.forEach(t => (byArch[t.arch] = byArch[t.arch] || []).push(t));
+    Object.values(byArch).forEach(list => {
+      list.forEach((t, i) => {
+        const a = (-90 + i * 120) * Math.PI / 180, r = 24;
+        t.x = ARCH[t.arch].cx + r * Math.cos(a);
+        t.y = ARCH[t.arch].cy + r * Math.sin(a);
+      });
+    });
+    const T = Object.fromEntries(TURNS.map(t => [t.id, t]));
 
-    // ---- stations ----
-    const stationEls = {}, keyEls = {};
-    STAGES.forEach((s, i) => {
-      const cy = ys[i];
-      const g = el("g", { class: "station" });
-      g.appendChild(glyph(s.key, SX, cy));
-      const num = el("text", { x: SX - 44, y: cy + 7, class: "pl-num", "text-anchor": "middle" });
-      num.textContent = s.n; g.appendChild(num);
-      const name = el("text", { x: SX + 34, y: cy - 3, class: "pl-name" });
-      name.textContent = s.name; g.appendChild(name);
-      const sub = el("text", { x: SX + 34, y: cy + 13, class: "pl-sub" });
-      sub.textContent = s.sub; g.appendChild(sub);
-      // generous invisible hit target
-      const hit = el("rect", { x: SX - 60, y: cy - 28, width: 420, height: 56, class: "pl-hit" });
-      hit.addEventListener("mouseenter", () => trace(s.key));
-      hit.addEventListener("mouseleave", untrace);
-      hit.addEventListener("click", () => trace(s.key));
-      g.appendChild(hit);
-      SVG.appendChild(g);
-      stationEls[s.key] = g;
+    // ---- providers across the top, with ingest strands into the field ----
+    const provX = { grok: 95, chatgpt: 235, claude: 375 };
+    const PY = 56, INTAKE = [235, 150];
+    const provEls = {}, strandEls = {};
+    Object.keys(PROV).forEach(p => {
+      const x = provX[p];
+      const strand = el("path", { d:`M ${x} ${PY+12} C ${x} ${PY+70} ${INTAKE[0]} ${INTAKE[1]-60} ${INTAKE[0]} ${INTAKE[1]}`, class:"pl-strand t" });
+      SVG.appendChild(strand); strandEls[p] = strand;
     });
 
-    // ---- the flowing token ----
-    const token = el("circle", { cx: SX, cy: ys[0], r: 4, class: "pl-token" });
-    SVG.appendChild(token);
+    // ---- LSEC edges (intra-archetype structural matches) ----
+    const edgeEls = [];
+    Object.values(byArch).forEach(list => {
+      for (let i = 0; i < list.length; i++)
+        for (let j = i + 1; j < list.length; j++) {
+          const a = list[i], b = list[j];
+          const e = el("line", { x1:a.x, y1:a.y, x2:b.x, y2:b.y, class:"pl-edge t" });
+          SVG.appendChild(e);
+          edgeEls.push({ el:e, a:a.id, b:b.id, arch:a.arch });
+        }
+    });
+    WEAK.forEach(([a,b]) => {
+      const e = el("line", { x1:T[a].x, y1:T[a].y, x2:T[b].x, y2:T[b].y, class:"pl-weak t" });
+      SVG.appendChild(e);
+      edgeEls.push({ el:e, a, b, weak:true });
+    });
 
-    // ---- the index, beneath the schematic ----
+    // ---- campaign flows: each archetype cluster → a campaign node → the model ----
+    const CAMP = [235, 588], MODEL = [235, 650];
+    const flowEls = [];
+    Object.values(ARCH).forEach(ar => {
+      const f = el("path", { d:`M ${ar.cx} ${ar.cy+30} Q ${(ar.cx+CAMP[0])/2} ${(ar.cy+CAMP[1])/2+20} ${CAMP[0]} ${CAMP[1]}`, class:"pl-flow t" });
+      SVG.appendChild(f); flowEls.push(f);
+    });
+    const campArrow = el("path", { d:`M ${CAMP[0]} ${CAMP[1]+4} L ${MODEL[0]} ${MODEL[1]-16}`, class:"pl-flow t" });
+    SVG.appendChild(campArrow); flowEls.push(campArrow);
+    const arrowHead = el("path", { d:`M ${MODEL[0]-5} ${MODEL[1]-20} L ${MODEL[0]} ${MODEL[1]-13} L ${MODEL[0]+5} ${MODEL[1]-20}`, class:"pl-flow t" });
+    SVG.appendChild(arrowHead); flowEls.push(arrowHead);
+    const campNode = el("circle", { cx:CAMP[0], cy:CAMP[1], r:4, class:"pl-turn t" });
+    SVG.appendChild(campNode);
+
+    // the model (RLHF) at the foot
+    const modelG = el("g", { class:"t mdl" });
+    modelG.appendChild(el("rect", { x:MODEL[0]-46, y:MODEL[1]-12, width:92, height:30, rx:6, class:"pl-model" }));
+    const mt = el("text", { x:MODEL[0], y:MODEL[1]+8, class:"pl-name", "text-anchor":"middle" });
+    mt.textContent = "RLHF"; modelG.appendChild(mt);
+    SVG.appendChild(modelG);
+    const mlbl = el("text", { x:MODEL[0], y:MODEL[1]+34, class:"pl-lbl t", "text-anchor":"middle" });
+    mlbl.textContent = "data campaigns"; SVG.appendChild(mlbl);
+
+    // ---- turn dots + generous hit targets ----
+    const turnEls = {};
+    TURNS.forEach(t => {
+      const dot = el("circle", { cx:t.x, cy:t.y, r:4, class:"pl-turn t" });
+      SVG.appendChild(dot); turnEls[t.id] = dot;
+    });
+    // archetype labels (faint), placed just outside each cluster
+    Object.entries(ARCH).forEach(([k, ar]) => {
+      const below = ar.cy > 300 || k === "jtbd";
+      const lb = el("text", { x:ar.cx, y: below ? ar.cy+46 : ar.cy-40, class:"pl-lbl t", "text-anchor":"middle" });
+      lb.textContent = ar.label; SVG.appendChild(lb);
+    });
+
+    // ---- providers drawn last (on top), with labels + hit targets ----
+    Object.keys(PROV).forEach(p => {
+      const x = provX[p];
+      const g = el("g", { class:"t pgrp" });
+      g.appendChild(el("circle", { cx:x, cy:PY, r:6, class:"pl-prov" }));
+      const nm = el("text", { x:x, y:PY-13, class:"pl-name", "text-anchor":"middle" });
+      nm.textContent = PROV[p].name; g.appendChild(nm);
+      SVG.appendChild(g); provEls[p] = g;
+      const hit = el("circle", { cx:x, cy:PY, r:26, class:"pl-hit" });
+      hit.addEventListener("mouseenter", () => traceProvider(p));
+      hit.addEventListener("mouseleave", untrace);
+      hit.addEventListener("click", () => traceProvider(p));
+      SVG.appendChild(hit);
+    });
+
+    // turn hit targets last (largest priority)
+    TURNS.forEach(t => {
+      const hit = el("circle", { cx:t.x, cy:t.y, r:15, class:"pl-hit" });
+      hit.addEventListener("mouseenter", () => traceTurn(t.id));
+      hit.addEventListener("mouseleave", untrace);
+      hit.addEventListener("click", () => traceTurn(t.id));
+      SVG.appendChild(hit);
+    });
+
+    /* ============================================================
+       THE FOUR BEATS — the index beneath the figure
+    ============================================================ */
+    const BEATS = [
+      { key:"ingest",   n:"I.",   name:"Ingest",
+        body:"Your exports from Grok, ChatGPT, and Claude — every conversation, every turn." },
+      { key:"describe", n:"II.",  name:"Describe",
+        body:"Each turn earns a formal structural description in a small symbolic language — not keywords, but shape." },
+      { key:"compare",  n:"III.", name:"Compare · LSEC",
+        body:"Logical Satisfaction by Extensional Constraint matches turns whose descriptions imply one another — even across providers, even in different words." },
+      { key:"campaign", n:"IV.",  name:"Campaign",
+        body:"Matched groups become the basis of RLHF data campaigns — reward models, SFT, guardrails." },
+    ];
     const KEY = document.getElementById("key");
-    STAGES.forEach(s => {
+    const beatEls = {};
+    BEATS.forEach(b => {
       const d = document.createElement("div");
       d.className = "stage";
-      d.innerHTML = `<h3><span class="n">${s.n}</span>${s.name}</h3>` +
-        `<p>${s.items.map(x => "↳ " + x).join("<br>")}</p>`;
-      d.addEventListener("mouseenter", () => trace(s.key));
+      d.innerHTML = `<h3><span class="n">${b.n}</span>${b.name}</h3><p>${b.body}</p>`;
+      d.addEventListener("mouseenter", () => traceBeat(b.key));
       d.addEventListener("mouseleave", untrace);
       KEY.appendChild(d);
-      keyEls[s.key] = d;
+      beatEls[b.key] = d;
     });
 
     /* ---------- tracing ---------- */
     const PLATE = document.getElementById("plate");
-    function trace(key) {
+    const CAP = document.getElementById("cap");
+    const SEXPR = document.getElementById("sexpr");
+    const DEFAULT_CAP = "Turns from every provider, described and matched. Hover to explore.";
+    const all = () => SVG.querySelectorAll(".t");
+
+    function begin(hl) {
       finishInk();
-      const color = groupColor(key);
-      PLATE.style.setProperty("--hl", color);
-      KEY.style.setProperty("--hl", color);
+      if (hl) PLATE.style.setProperty("--hl", hl);
       PLATE.classList.add("tracing");
-      KEY.classList.add("tracing");
-      STAGES.forEach(s => {
-        const on = s.key === key;
-        stationEls[s.key].classList.toggle("lit", on);
-        keyEls[s.key].classList.toggle("lit", on);
-      });
+      all().forEach(e => e.classList.remove("lit"));
     }
+    function litTurn(id) {
+      const t = T[id];
+      turnEls[id].classList.add("lit");
+      turnEls[id].style.fill = provColor(t.prov);
+    }
+
+    // hover a turn → its description + its LSEC matches (same archetype)
+    function traceTurn(id) {
+      begin();
+      const t = T[id];
+      const siblings = byArch[t.arch].map(x => x.id);
+      siblings.forEach(litTurn);
+      edgeEls.forEach(e => {
+        if (!e.weak && e.arch === t.arch) e.el.classList.add("lit");
+      });
+      const others = siblings.filter(s => s !== id);
+      const provs = [...new Set(others.map(s => PROV[T[s].prov].name))];
+      CAP.textContent = `A ${PROV[t.prov].name} turn that ${ARCH[t.arch].plain}. ` +
+        `LSEC matches ${others.length} more` + (provs.length ? ` (${provs.join(", ")}).` : ".");
+      SEXPR.textContent = ARCH[t.arch].sexpr;
+      KEY.classList.add("tracing");
+      Object.entries(beatEls).forEach(([k, e]) => e.classList.toggle("lit", k === "compare"));
+    }
+
+    // hover a provider → everything it contributed
+    function traceProvider(p) {
+      begin(provColor(p));
+      provEls[p].classList.add("lit");
+      strandEls[p].classList.add("lit");
+      const ids = TURNS.filter(t => t.prov === p).map(t => t.id);
+      ids.forEach(litTurn);
+      CAP.textContent = `${PROV[p].name} — ${ids.length} turns ingested from your exports, then described and matched alongside the rest.`;
+      SEXPR.textContent = "";
+      KEY.classList.add("tracing");
+      Object.entries(beatEls).forEach(([k, e]) => e.classList.toggle("lit", k === "ingest"));
+    }
+
+    // hover a beat → light the part of the figure it names
+    function traceBeat(key) {
+      begin();
+      KEY.classList.add("tracing");
+      Object.entries(beatEls).forEach(([k, e]) => e.classList.toggle("lit", k === key));
+      const beat = BEATS.find(b => b.key === key);
+      CAP.textContent = beat.body;
+      SEXPR.textContent = key === "describe" ? "(a TURN (described-as ((…))))" : "";
+      if (key === "ingest") {
+        Object.keys(PROV).forEach(p => { provEls[p].classList.add("lit"); strandEls[p].classList.add("lit"); });
+        TURNS.forEach(t => litTurn(t.id));
+      } else if (key === "describe") {
+        TURNS.forEach(t => litTurn(t.id));
+      } else if (key === "compare") {
+        TURNS.forEach(t => litTurn(t.id));
+        edgeEls.forEach(e => e.el.classList.add("lit"));
+      } else if (key === "campaign") {
+        TURNS.forEach(t => litTurn(t.id));
+        flowEls.forEach(f => f.classList.add("lit"));
+        campNode.classList.add("lit"); modelG.classList.add("lit"); mlbl.classList.add("lit");
+      }
+    }
+
     function untrace() {
       PLATE.classList.remove("tracing");
       KEY.classList.remove("tracing");
-      document.querySelectorAll(".lit").forEach(e => e.classList.remove("lit"));
+      all().forEach(e => { e.classList.remove("lit"); });
+      Object.values(turnEls).forEach(d => d.style.fill = "");
+      Object.values(beatEls).forEach(e => e.classList.remove("lit"));
+      CAP.textContent = DEFAULT_CAP;
+      SEXPR.textContent = "";
     }
 
-    /* ---------- the schematic draws itself, then the token flows ---------- */
+    /* ---------- the figure draws itself once, then rests ---------- */
     let inkDone = reduceMotion, inked = [];
     function finishInk() {
       if (inkDone) return;
       inkDone = true;
       inked.forEach(e => { e.style.opacity = ""; e.style.transition = ""; });
     }
-
-    if (reduceMotion) {
-      token.style.display = "none";
-    } else {
-      // fade the stations in, in sequence
-      const fades = [...SVG.querySelectorAll(".station")];
-      fades.forEach((e, i) => {
+    if (!reduceMotion) {
+      // reveal in conceptual order: strands, then turns, then edges, then campaign
+      const order = [
+        [Object.values(strandEls), 0.2],
+        [Object.values(provEls), 0.2],
+        [Object.values(turnEls), 0.7],
+        [edgeEls.map(e => e.el), 1.5],
+        [[...flowEls, campNode, modelG, mlbl], 2.2],
+      ];
+      order.forEach(([els, delay]) => els.forEach((e, i) => {
         e.style.opacity = "0";
-        e.style.transition = `opacity .6s ease ${0.5 + i * 0.35}s`;
-      });
-      token.style.opacity = "0";
-      token.style.transition = "opacity .6s ease 2.2s";
-      inked = [...fades, token];
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        fades.forEach(e => e.style.opacity = "1");
-        token.style.opacity = "1";
-        setTimeout(finishInk, 3200);
+        e.style.transition = `opacity .7s ease ${delay + i * 0.03}s`;
+        inked.push(e);
       }));
-
-      // a single drop of data descends the spine once, then the
-      // schematic rests — interaction is by hover thereafter
-      const top = ys[0], bottom = ys[3], span = bottom - top;
-      const START = 2400, DOWN = 3600;       // begin after the stations arrive
-      const ease = p => p < .5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2;
-      let t0 = null;
-      function frame(now) {
-        if (t0 === null) t0 = now;
-        const t = now - t0;
-        if (t < START) { token.setAttribute("opacity", 0); requestAnimationFrame(frame); return; }
-        const p = (t - START) / DOWN;
-        if (p >= 1) { token.setAttribute("opacity", 0); return; }   // settled
-        token.setAttribute("cy", top + span * ease(p));
-        token.setAttribute("opacity", p < 0.9 ? 1 : (1 - p) / 0.1);  // fade out at the foot
-        requestAnimationFrame(frame);
-      }
-      requestAnimationFrame(frame);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        inked.forEach(e => e.style.opacity = "1");
+        setTimeout(finishInk, 3400);
+      }));
     }
 
     /* ============================================================
