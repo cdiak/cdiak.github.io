@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Afterslop · Chris Diak</title>
+  <!-- Set theme before first paint (matches portfolio + desktop app) -->
+  <script>
+    (function () {
+      var theme = localStorage.getItem("theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
   <link rel="stylesheet" href="../style.css">
   <style>
     /* ============================================================
@@ -98,6 +106,15 @@
       padding: 40px 24px 100px;
     }
 
+    /* Brand assets are light-on-transparent (desktop default: dark).
+       Invert fully on light backgrounds — same rule as server/static/index.html */
+    [data-theme="light"] .brand-feather,
+    [data-theme="light"] .brand-wordmark,
+    [data-theme="light"] img.brand-feather,
+    [data-theme="light"] img.brand-wordmark {
+      filter: invert(1) !important;
+    }
+
     /* Hero logo — oversized, bleeds left */
     .hero-logo {
       width: 720px;
@@ -105,7 +122,13 @@
       margin-left: -252px;
       margin-bottom: 12px;
       display: block;
-      border-radius: 4px;
+    }
+
+    .gate-brand {
+      width: min(300px, 88vw);
+      height: auto;
+      margin: 0 auto 20px;
+      display: block;
     }
 
     .intro-lead {
@@ -311,7 +334,7 @@
   <!-- Password Gate -->
   <div id="gate">
     <div class="gate-inner">
-      <h1>Afterslop</h1>
+      <img src="./logo.png" alt="Afterslop" class="gate-brand brand-wordmark">
       <p>Private link. Enter access code.</p>
       <form class="gate-form" onsubmit="checkPassword(event)">
         <input type="password" id="pw" placeholder="access code" autocomplete="off" autofocus>
@@ -324,7 +347,7 @@
   <!-- Main Content (hidden until unlocked) -->
   <div id="content" style="display:none;">
 
-    <img src="./logo.png" alt="Afterslop" class="hero-logo">
+    <img src="./logo.png" alt="Afterslop" class="hero-logo brand-wordmark">
 
     <p class="intro-lead">
       A deterministic symbolic knowledge system for LLM conversation exports. Turns chat histories from ChatGPT, Claude, and Grok into a cross-linked Obsidian vault backed by a symbolic extensional database.
