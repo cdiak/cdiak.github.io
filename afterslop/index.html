@@ -18,8 +18,9 @@
   <style>
     /* ============================================================
        AFTERSLOP — a private leaf, set in the Principia idiom.
-       Text on the left; the figure holds on the right, walking one
-       turn from ingest → description → matching.
+       The frame holds still: the text column scrolls, the figure
+       stays pinned to the right. The figure reads left → right:
+       a turn is DESCRIBED, then MATCHED against its structural kin.
     ============================================================ */
 
     :root {
@@ -28,7 +29,6 @@
       --ink:   #211c14;
       --muted: #7c7263;
       --faint: #ddd3bd;
-      --panel: #f1ead9;
 
       --g-grok:    hsl(210, 70%, 42%);
       --g-chatgpt: hsl(142, 55%, 34%);
@@ -45,7 +45,6 @@
       --ink:   #e9e2d0;
       --muted: #93897a;
       --faint: #322c20;
-      --panel: #1d180f;
 
       --g-grok:    hsl(210, 80%, 66%);
       --g-chatgpt: hsl(142, 58%, 58%);
@@ -54,21 +53,44 @@
     }
 
     * { box-sizing: border-box; }
-    html { background: var(--paper); color: var(--ink); scroll-behavior: smooth; }
-    body { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.58; }
+    html { background: var(--paper); color: var(--ink); }
+    body {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 18px;
+      line-height: 1.58;
+      max-width: 1320px;
+      margin-inline: auto;
+      padding: 0 2.2rem;
+      /* the frame holds still; only the text column scrolls */
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* no scrollbars, anywhere — the panes scroll silently */
+    main, .figcol {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    main::-webkit-scrollbar, .figcol::-webkit-scrollbar { display: none; }
 
     /* white-on-transparent brand art → invert onto the paper in light mode */
     .brand { display: block; }
     [data-theme="light"] .brand { filter: invert(1) sepia(0.18) saturate(0.7); }
 
+    /* ---------- head of the page ---------- */
     header {
-      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-      padding: 1.2rem 2.2rem 0;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 1.1rem 0 0.1rem;
+      flex-shrink: 0;
     }
-    .running-head {
-      grid-column: 2; font-size: 0.72rem; letter-spacing: 0.42em; text-transform: uppercase;
-      color: var(--muted); text-align: center;
-    }
+    .signature { width: 106px; mix-blend-mode: multiply; justify-self: start; }
+    [data-theme="dark"] .signature { filter: invert(1); mix-blend-mode: screen; }
+    .head-logo { height: 23px; width: auto; }
     #theme-toggle {
       all: unset; position: fixed; top: 1.2rem; right: 1.3rem; z-index: 60;
       cursor: pointer; color: var(--muted); font-size: 1.05rem; padding: 0.25rem;
@@ -99,32 +121,31 @@
     .gate-error { font-family: var(--mono); font-size: 0.72rem; color: #c0392b; margin-top: 14px; min-height: 1.2em; }
     [data-theme="dark"] .gate-error { color: #f87171; }
 
-    /* ---------- the leaf ---------- */
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 1.4rem 2.2rem 4rem; }
-    .hero-logo { width: min(330px, 78%); margin: 0.4rem 0 1.5rem; }
-    .intro-lead { font-size: 1.12em; margin: 0 0 0.9rem; max-width: 40rem; }
-    .citation { font-size: 0.92rem; color: var(--muted); margin: 0 0 1.8rem; max-width: 40rem; }
-
+    /* ---------- the leaf: text scrolls, figure pinned ---------- */
     .leaf {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 470px;
-      gap: 3.2rem;
-      align-items: start;
-      margin-top: 1.6rem;
+      grid-template-columns: minmax(0, 1fr) minmax(540px, 660px);
+      gap: 3rem;
+      margin-top: 0.7rem;
+      flex: 1;
+      min-height: 0;
     }
-    .col-text { min-width: 0; }
-    p { margin: 0 0 1.15rem; }
-    .col-text p, .col-text ul, .col-text ol { max-width: 40rem; }
-    ul, ol { padding-left: 1.5rem; }
-    li { margin-bottom: 0.4rem; }
+    .leaf.hidden { display: none; }
+
+    /* ---------- the one pane that scrolls ---------- */
+    main { overflow-y: auto; min-height: 0; padding-right: 0.8rem; padding-bottom: 2.5rem; }
+    .col-inner { max-width: 620px; }
+    main p { margin: 0 0 1.15rem; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+    main ul, main ol { margin: 0 0 1.15rem; padding-left: 1.5rem; }
+    main li { margin-bottom: 0.4rem; }
     a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
     a:hover { text-decoration-thickness: 2px; }
     strong { font-weight: 600; }
     code { font-family: var(--mono); font-size: 0.82em; background: color-mix(in oklab, var(--faint) 55%, transparent); padding: 1px 5px; border-radius: 3px; }
-    .section-title { font-family: var(--serif); font-weight: 600; font-size: 1.5rem; margin: 0 0 1rem; }
-    .col-text .section-title:not(:first-child) { margin-top: 2.4rem; }
 
-    .downloads { display: flex; gap: 12px; flex-wrap: wrap; margin: 0 0 2.2rem; }
+    .intro-lead { font-size: 1.1em; margin: 0 0 0.9rem; }
+    .citation { font-size: 0.92rem; color: var(--muted); margin: 0 0 1.6rem; text-align: left; }
+    .downloads { display: flex; gap: 12px; flex-wrap: wrap; margin: 0 0 0.4rem; }
     .download-btn {
       display: inline-flex; align-items: center; gap: 10px; padding: 0.6rem 1.1rem;
       border: 1px solid var(--ink); border-radius: 5px; text-decoration: none; color: var(--ink);
@@ -134,62 +155,93 @@
     .download-btn .arch { opacity: 0.6; font-size: 0.74rem; }
     .download-btn:hover .arch { opacity: 0.85; }
 
+    .section-title { font-family: var(--serif); font-weight: 600; font-size: 1.42rem; margin: 2.4rem 0 1rem; }
+
     .afterslop-footer {
       margin-top: 3rem; padding-top: 1.4rem; border-top: 1px solid var(--faint);
       font-family: var(--mono); font-size: 0.74rem; color: var(--muted);
     }
 
     /* ============================================================
-       THE FIGURE — sticky on the right
+       THE FIGURE — pinned on the right, read left → right
     ============================================================ */
-    .figcol { min-width: 0; }
-    .figcol .stick { position: sticky; top: 1.2rem; }
-    .diagram {
-      margin: 0;
-      border: 1px solid var(--ink);
-      border-radius: 8px;
-      padding: 1.3rem 1.4rem 1.5rem;
-      background: color-mix(in oklab, var(--panel) 60%, transparent);
+    .figcol { min-width: 0; min-height: 0; overflow-y: auto; }
+    .figcol .stick {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-    .band-label {
-      font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 0.7rem;
-    }
-    .flow { text-align: center; color: var(--muted); font-family: var(--mono);
-            font-size: 0.62rem; letter-spacing: 0.03em; margin: 0.8rem 0; line-height: 1.5; }
-    .flow::before { content: "↓  "; }
+    .diagram { margin: 0; }
 
-    /* --- ingest row --- */
-    .ingest { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .figbody {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 0.7rem;
+      align-items: center;
+    }
+    .station-label {
+      font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; text-align: center;
+    }
+
+    /* the bold connector */
+    .arrow { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; color: var(--muted); }
+    .arrow .glyph { font-size: 2.1rem; line-height: 1; }
+    .arrow .lsec { font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.16em;
+                   text-transform: uppercase; writing-mode: vertical-rl; }
+
+    /* --- ingest --- */
+    .ingest { display: flex; align-items: center; justify-content: center; gap: 0.4rem; flex-wrap: wrap; }
     .chip {
-      font-family: var(--mono); font-size: 0.72rem; padding: 0.28rem 0.6rem;
+      font-family: var(--mono); font-size: 0.66rem; padding: 0.22rem 0.5rem;
       border: 1px solid var(--c, var(--ink)); border-radius: 999px; color: var(--c, var(--ink)); white-space: nowrap;
     }
-    .ingest .to { color: var(--muted); font-family: var(--mono); font-size: 0.9rem; }
-    .feather { width: 30px; height: auto; }
+    .ingest .to { color: var(--muted); font-family: var(--mono); font-size: 0.85rem; }
+    .feather { width: 24px; height: auto; }
 
-    /* --- the turn: chat, then its structural description --- */
-    .chat { display: flex; flex-direction: column; gap: 0.45rem; font-family: var(--sans); }
-    .bubble { max-width: 88%; padding: 0.5rem 0.7rem; border-radius: 14px; font-size: 0.8rem; line-height: 1.45; }
-    .bubble .who { display: block; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase;
+    .flow { text-align: center; color: var(--muted); font-family: var(--mono);
+            font-size: 0.58rem; letter-spacing: 0.02em; margin: 0.6rem 0; line-height: 1.5; }
+
+    /* --- the turn --- */
+    .chat { display: flex; flex-direction: column; gap: 0.4rem; font-family: var(--sans); }
+    .bubble { max-width: 92%; padding: 0.45rem 0.65rem; border-radius: 13px; font-size: 0.76rem; line-height: 1.42; }
+    .bubble .who { display: block; font-size: 0.54rem; letter-spacing: 0.1em; text-transform: uppercase;
                    color: var(--muted); margin-bottom: 2px; font-family: var(--mono); }
     .bubble.user { align-self: flex-end; background: color-mix(in oklab, var(--ink) 12%, transparent); border-bottom-right-radius: 4px; }
     .bubble.asst { align-self: flex-start; border: 1px solid var(--faint); border-bottom-left-radius: 4px; }
 
     .sd { font-family: var(--mono); margin-top: 0.2rem; }
     .sd .tag {
-      display: inline-block; font-size: 0.64rem; letter-spacing: 0.04em;
-      padding: 0.16rem 0.5rem; border-radius: 4px; margin-bottom: 0.6rem;
+      display: inline-block; font-size: 0.62rem; letter-spacing: 0.04em;
+      padding: 0.14rem 0.45rem; border-radius: 4px; margin-bottom: 0.55rem;
       background: var(--ink); color: var(--paper);
     }
-    .sd pre { margin: 0; font-size: 0.68rem; line-height: 1.6; white-space: pre-wrap; color: var(--ink); }
-    .tok, .span { border-radius: 3px; cursor: help; transition: background 0.15s; }
-    .tok { text-decoration: underline dotted color-mix(in oklab, var(--muted) 70%, transparent); text-underline-offset: 2px; }
+    .sd pre { margin: 0; font-size: 0.64rem; line-height: 1.6; white-space: pre-wrap; color: var(--ink); }
+    .tok, .span { border-radius: 3px; transition: background 0.15s; }
+    .tok { text-decoration: underline dotted color-mix(in oklab, var(--muted) 70%, transparent); text-underline-offset: 2px; cursor: help; }
     .hl { background: color-mix(in oklab, var(--accent) 26%, transparent); }
     [data-theme="dark"] .hl { background: color-mix(in oklab, var(--accent) 34%, transparent); }
 
+    /* --- the LSEC rule: description implies description --- */
+    .rule {
+      margin-top: 0.85rem; padding: 0.6rem 0.55rem; border: 1px solid var(--faint); border-radius: 6px;
+      cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    }
+    .rule:hover { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 8%, transparent); }
+    .rule .rline { display: flex; align-items: center; justify-content: center; gap: 0.4rem; flex-wrap: wrap; }
+    .rule .term {
+      font-family: var(--mono); font-size: 0.6rem; padding: 0.16rem 0.4rem;
+      border: 1px solid var(--ink); border-radius: 4px; white-space: nowrap;
+    }
+    .rule .ent { font-family: var(--mono); font-size: 0.95rem; color: var(--accent); }
+    .rule .rcap { display: block; text-align: center; margin-top: 0.45rem;
+                  font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.12em;
+                  text-transform: uppercase; color: var(--muted); }
+
     /* --- the match constellation --- */
-    .match svg { width: 100%; height: auto; display: block; touch-action: pan-y; }
+    .match { text-align: center; }
+    .match svg { width: 100%; max-width: 300px; height: auto; display: block; margin: 0 auto; touch-action: pan-y; }
     .m-edge { stroke: var(--ink); stroke-width: 1; fill: none; opacity: .4; transition: opacity .25s, stroke-width .25s; }
     .m-weak { stroke: var(--muted); stroke-width: .8; stroke-dasharray: 3 4; fill: none; opacity: .35; transition: opacity .25s; }
     .m-turn { fill: var(--ink); transition: fill .25s, opacity .25s; }
@@ -203,28 +255,37 @@
     .m-edge.lit { opacity: 1; stroke-width: 1.7; }
     .m-weak.lit { opacity: .9; }
 
-    figcaption { margin-top: 0.9rem; font-style: italic; font-size: 0.84rem; color: var(--ink); min-height: 3em; }
+    figcaption { margin-top: 1rem; font-style: italic; font-size: 0.84rem; color: var(--ink); min-height: 3em; text-align: center; }
     figcaption .figno { font-style: normal; font-variant: small-caps; letter-spacing: 0.08em; }
 
-    /* ---------- responsive ---------- */
+    /* ---------- responsive: release the frame ---------- */
     @media (max-width: 1080px) {
-      .leaf { grid-template-columns: 1fr; gap: 2rem; }
-      .figcol { order: -1; }                 /* figure rises above the prose on narrow screens */
-      .figcol .stick { position: static; max-width: 560px; }
+      body { height: auto; overflow-x: hidden; overflow-y: visible; display: block; padding: 0 1.4rem 3rem; }
+      .leaf { grid-template-columns: 1fr; gap: 1.8rem; }
+      main { overflow: visible; }
+      .col-inner { max-width: none; }
+      .figcol { order: -1; overflow: visible; }
+      .figcol .stick { height: auto; display: block; max-width: 560px; margin: 0 auto; }
+      .figbody { grid-template-columns: 1fr; gap: 1rem; }
+      .arrow { flex-direction: row; }
+      .arrow .glyph { transform: rotate(90deg); }
+      .arrow .lsec { writing-mode: horizontal-tb; }
     }
     @media (max-width: 600px) {
-      .wrap { padding: 1rem 1.25rem 3rem; }
       body { font-size: 17px; }
-      .hero-logo { width: min(300px, 86%); }
+      .signature { width: 92px; }
       .downloads { flex-direction: column; }
       .download-btn { width: 100%; justify-content: center; }
-      .diagram { padding: 1.1rem 1rem 1.3rem; }
     }
   </style>
 </head>
 <body>
 
-  <header><div class="running-head">Private</div></header>
+  <header>
+    <a href="/" aria-label="Home"><img src="../signature.png" class="signature" alt="Chris Diak"></a>
+    <img src="./logo.png" alt="Afterslop" class="head-logo brand">
+    <span></span>
+  </header>
   <button id="theme-toggle" aria-label="Toggle dark mode">◐</button>
 
   <!-- ============ Password Gate ============ -->
@@ -241,32 +302,30 @@
   </div>
 
   <!-- ============ Content (hidden until unlocked) ============ -->
-  <div class="wrap" id="content" style="display:none;">
+  <div class="leaf hidden" id="content">
 
-    <img src="./logo.png" alt="Afterslop" class="hero-logo brand">
+    <!-- ---------- text column (left, scrolls) ---------- -->
+    <main>
+      <div class="col-inner">
 
-    <p class="intro-lead">
-      A deterministic symbolic knowledge system for LLM conversation exports. Turns chat histories from ChatGPT, Claude, and Grok into a cross-linked Obsidian vault backed by a symbolic extensional database.
-    </p>
-    <p class="citation">
-      Based on David E. Shaw's 1980 dissertation on conceptual matching:
-      <a href="https://dl.acm.org/doi/10.5555/909640" target="_blank" rel="noreferrer">Knowledge-Based Retrieval on a Relational Database Machine</a>.
-    </p>
+        <p class="intro-lead">
+          A deterministic symbolic knowledge system for LLM conversation exports. Turns chat histories from ChatGPT, Claude, and Grok into a cross-linked Obsidian vault backed by a symbolic extensional database.
+        </p>
+        <p class="citation">
+          Based on David E. Shaw's 1980 dissertation on conceptual matching:
+          <a href="https://dl.acm.org/doi/10.5555/909640" target="_blank" rel="noreferrer">Knowledge-Based Retrieval on a Relational Database Machine</a>.
+        </p>
 
-    <div class="downloads">
-      <!-- DMGs live on PUBLIC cdiak.github.io releases (private afterslop repo assets 404 for guests) -->
-      <a href="https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.0/afterslop_0.2.0_aarch64.dmg" class="download-btn">
-        Download for Apple Silicon <span class="arch">v0.2.0 · aarch64</span>
-      </a>
-      <a href="https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.0/afterslop_0.2.0_x86_64.dmg" class="download-btn">
-        Download for Intel <span class="arch">v0.2.0 · x86_64</span>
-      </a>
-    </div>
+        <div class="downloads">
+          <!-- DMGs live on PUBLIC cdiak.github.io releases (private afterslop repo assets 404 for guests) -->
+          <a href="https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.0/afterslop_0.2.0_aarch64.dmg" class="download-btn">
+            Download for Apple Silicon <span class="arch">v0.2.0 · aarch64</span>
+          </a>
+          <a href="https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.0/afterslop_0.2.0_x86_64.dmg" class="download-btn">
+            Download for Intel <span class="arch">v0.2.0 · x86_64</span>
+          </a>
+        </div>
 
-    <div class="leaf">
-
-      <!-- ---------- text column (left) ---------- -->
-      <div class="col-text">
         <h2 class="section-title">Getting Started</h2>
         <ol>
           <li>Download and open Afterslop.</li>
@@ -287,7 +346,7 @@
           <li>The matching approach is inspired by David E. Shaw's doctoral thesis on knowledge-based retrieval on relational databases.</li>
         </ul>
         <p>The key idea behind the system is that the <strong>turn</strong>, not the full conversation thread, is the right unit of analysis for analyzing user-LLM interactions. Tasking usually happens at the level of individual turns. Because the real value in most tutoring work lives at that granular level, giving each turn a structured description makes certain conceptual patterns visible and comparable in ways that would otherwise be hard to find.</p>
-        <p>A useful way to understand how the matching works is "description implies description." For example, if a turn is described as the model breaking a hard problem into smaller steps and solving them one by one, the matching rules can recognize that this turn also counts as an example of structured reasoning — even if those exact words were never used. The formal descriptions let the system draw these connections automatically.</p>
+        <p>A useful way to understand how the matching works is "description implies description." For example, if a turn is described as the model breaking a hard problem into smaller steps and solving them one by one, the matching rules can recognize that this turn also counts as an example of structured reasoning — even if those exact words were never used. The formal descriptions let the system draw these connections automatically. <em>The figure walks one turn through exactly this path.</em></p>
 
         <h2 class="section-title">Workflow</h2>
         <p>Here's a practical way most tutors use Afterslop:</p>
@@ -320,63 +379,82 @@
           Built by <a href="https://cdiak.github.io">Chris Diak</a>.
         </div>
       </div>
+    </main>
 
-      <!-- ---------- the figure (right, sticky) ---------- -->
-      <div class="figcol">
-        <div class="stick">
-          <figure class="diagram" id="plate">
+    <!-- ---------- the figure (right, pinned) ---------- -->
+    <div class="figcol">
+      <div class="stick">
+        <figure class="diagram" id="plate">
+          <div class="figbody">
 
-            <div class="band-label">1 · Ingest</div>
-            <div class="ingest">
-              <span class="chip" style="--c: var(--g-grok)">Grok</span>
-              <span class="chip" style="--c: var(--g-chatgpt)">ChatGPT</span>
-              <span class="chip" style="--c: var(--g-claude)">Claude</span>
-              <span class="to">→</span>
-              <img src="./feather.png" alt="the feather" class="feather brand">
-            </div>
-
-            <div class="flow">every conversation you've exported, one turn at a time</div>
-
-            <div class="band-label">2 · A turn, described</div>
-            <div class="chat">
-              <div class="bubble user">
-                <span class="who">You</span>
-                Help me <span class="span" data-k="debug">debug</span> this crash on startup.
+            <!-- station 1: DESCRIBED -->
+            <div class="describe">
+              <div class="station-label">Described</div>
+              <div class="ingest">
+                <span class="chip" style="--c: var(--g-grok)">Grok</span>
+                <span class="chip" style="--c: var(--g-chatgpt)">ChatGPT</span>
+                <span class="chip" style="--c: var(--g-claude)">Claude</span>
+                <span class="to">→</span>
+                <img src="./feather.png" alt="the feather" class="feather brand">
               </div>
-              <div class="bubble asst">
-                <span class="who">Assistant</span>
-                Certainly. Let's read the <span class="span" data-k="frame">top frame</span> of the
-                <span class="span" data-k="trace">stack trace</span> — it's a null dereference in
-                <span class="span" data-k="init">init()</span>. Can you share that method?
+              <div class="flow">↓ any turn, any provider</div>
+
+              <div class="chat">
+                <div class="bubble user">
+                  <span class="who">You</span>
+                  This proof is too hard — can you help?
+                </div>
+                <div class="bubble asst">
+                  <span class="who">Assistant</span>
+                  Sure. Let's <span class="span" data-k="decompose">break it into three lemmas</span> and
+                  <span class="span" data-k="each">prove each in turn</span>. First, the base case…
+                </div>
               </div>
-            </div>
-            <div class="flow">the feather reads its structure</div>
-            <div class="sd">
-              <span class="tag">code-first debugging</span>
+
+              <div class="flow">↓ the feather writes its structure</div>
+              <div class="sd">
+                <span class="tag">structured reasoning</span>
 <pre>((a TURN
   (role ASSISTANT)
-  (move (a <span class="tok" data-k="debug">DEBUGGING</span>
-    (strategy CODE-FIRST)
-    (reads (<span class="tok" data-k="trace">STACK-TRACE</span>
-            <span class="tok" data-k="frame">TOP-FRAME</span>))
-    (asks (SOURCE <span class="tok" data-k="init">init</span>))))))</pre>
+  (move (a REASONING
+    (strategy <span class="tok" data-k="decompose">DECOMPOSE</span>)
+    (into (LEMMAS 3))
+    (<span class="tok" data-k="each">proves</span> EACH))))))</pre>
+              </div>
+
+              <div class="rule" id="rule">
+                <div class="rline">
+                  <span class="term">DECOMPOSE</span>
+                  <span class="ent">⊨</span>
+                  <span class="term">STRUCTURED-REASONING</span>
+                </div>
+                <span class="rcap">LSEC · description implies description</span>
+              </div>
             </div>
 
-            <div class="flow">LSEC matches it against every other described turn</div>
-
-            <div class="band-label">3 · Grouped emergent behaviors</div>
-            <div class="match" id="match">
-              <svg id="fig" viewBox="0 0 440 300" role="img" aria-label="The matching constellation"></svg>
+            <!-- the bold connector -->
+            <div class="arrow" aria-hidden="true">
+              <span class="glyph">→</span>
+              <span class="lsec">extensional match</span>
             </div>
 
-            <figcaption>
-              <span class="figno">Fig.</span> <span id="cap">One turn becomes a formal description, then finds its structural kin. Hover the description, or any turn.</span>
-            </figcaption>
-          </figure>
-        </div>
+            <!-- station 2: MATCHED -->
+            <div class="matchcol">
+              <div class="station-label">Matched</div>
+              <div class="match" id="match">
+                <svg id="fig" viewBox="0 0 300 330" role="img" aria-label="The matching constellation"></svg>
+              </div>
+            </div>
+
+          </div>
+
+          <figcaption>
+            <span class="figno">Fig.</span> <span id="cap">One turn, described and matched. Hover the rule — or any turn — to trace its structural kin.</span>
+          </figcaption>
+        </figure>
       </div>
-
     </div>
+
   </div>
 
   <script>
@@ -413,25 +491,25 @@
     const provColor = p => css(PROV[p].v);
 
     const ARCH = {
-      reasoning: { cx:88,  cy:84,  label:"structured reasoning", plain:"decomposes a hard problem into steps" },
-      routing:   { cx:350, cy:74,  label:"ambiguous routing",    plain:"routes an ambiguous question" },
-      debug:     { cx:108, cy:212, label:"code-first debugging",  plain:"debugs by writing code first" },
-      search:    { cx:352, cy:198, label:"domain search",         plain:"runs a domain-specific search" },
-      jtbd:      { cx:222, cy:262, label:"literal JTBD",          plain:"takes a job-to-be-done literally" },
+      reasoning: { cx:150, cy:62,  label:"structured reasoning", plain:"decomposes a hard proof into lemmas" },
+      debug:     { cx:245, cy:140, label:"code-first debugging",  plain:"debugs by writing code first" },
+      routing:   { cx:58,  cy:158, label:"ambiguous routing",     plain:"routes an ambiguous question" },
+      jtbd:      { cx:208, cy:262, label:"literal JTBD",          plain:"takes a job-to-be-done literally" },
+      search:    { cx:84,  cy:262, label:"domain search",         plain:"runs a domain-specific search" },
     };
     const TURNS = [
-      {id:"r1",prov:"grok",arch:"reasoning"},{id:"r2",prov:"claude",arch:"reasoning"},{id:"r3",prov:"chatgpt",arch:"reasoning"},
-      {id:"o1",prov:"chatgpt",arch:"routing"},{id:"o2",prov:"grok",arch:"routing"},{id:"o3",prov:"claude",arch:"routing"},
-      {id:"d0",prov:"claude",arch:"debug",focus:true},{id:"d1",prov:"grok",arch:"debug"},{id:"d2",prov:"chatgpt",arch:"debug"},
-      {id:"s1",prov:"claude",arch:"search"},{id:"s2",prov:"grok",arch:"search"},{id:"s3",prov:"chatgpt",arch:"search"},
-      {id:"j1",prov:"claude",arch:"jtbd"},{id:"j2",prov:"chatgpt",arch:"jtbd"},{id:"j3",prov:"grok",arch:"jtbd"},
+      {id:"r0",prov:"claude",arch:"reasoning",focus:true},{id:"r1",prov:"grok",arch:"reasoning"},{id:"r2",prov:"chatgpt",arch:"reasoning"},
+      {id:"d0",prov:"claude",arch:"debug"},{id:"d1",prov:"grok",arch:"debug"},{id:"d2",prov:"chatgpt",arch:"debug"},
+      {id:"o0",prov:"chatgpt",arch:"routing"},{id:"o1",prov:"grok",arch:"routing"},{id:"o2",prov:"claude",arch:"routing"},
+      {id:"j0",prov:"chatgpt",arch:"jtbd"},{id:"j1",prov:"claude",arch:"jtbd"},{id:"j2",prov:"grok",arch:"jtbd"},
+      {id:"s0",prov:"grok",arch:"search"},{id:"s1",prov:"chatgpt",arch:"search"},{id:"s2",prov:"claude",arch:"search"},
     ];
-    const WEAK = [["r2","d1"],["o2","s2"],["s3","j2"]];
+    const WEAK = [["r1","d0"],["o1","s0"],["s2","j1"]];
 
     const byArch = {};
     TURNS.forEach(t => (byArch[t.arch] = byArch[t.arch] || []).push(t));
     Object.values(byArch).forEach(list => list.forEach((t,i) => {
-      const a = (-90 + i*120) * Math.PI/180, r = 26;
+      const a = (-90 + i*120) * Math.PI/180, r = 22;
       t.x = ARCH[t.arch].cx + r*Math.cos(a);
       t.y = ARCH[t.arch].cy + r*Math.sin(a);
     }));
@@ -457,11 +535,11 @@
       SVG.appendChild(dot); turnEls[t.id]=dot;
     });
     Object.values(ARCH).forEach(ar => {
-      const lb = el("text",{x:ar.cx,y:ar.cy-38,class:"m-lbl","text-anchor":"middle"});
+      const lb = el("text",{x:ar.cx,y:ar.cy-34,class:"m-lbl","text-anchor":"middle"});
       lb.textContent = ar.label; SVG.appendChild(lb);
     });
     TURNS.forEach(t => {
-      const hit = el("circle",{cx:t.x,cy:t.y,r:15,class:"m-hit"});
+      const hit = el("circle",{cx:t.x,cy:t.y,r:14,class:"m-hit"});
       hit.addEventListener("mouseenter",()=>traceTurn(t.id));
       hit.addEventListener("mouseleave",untrace);
       hit.addEventListener("click",()=>traceTurn(t.id));
@@ -484,7 +562,7 @@
       const others = sibs.filter(s=>s!==id);
       const provs = [...new Set(others.map(s=>PROV[T[s].prov].name))];
       CAP.textContent = `A ${PROV[t.prov].name} turn that ${ARCH[t.arch].plain}. ` +
-        `LSEC matches ${others.length} more` + (provs.length?` (${provs.join(", ")}).`:".");
+        `LSEC matches ${others.length} more by structure` + (provs.length?` (${provs.join(", ")}).`:".");
     }
     function untrace() {
       MATCH.classList.remove("tracing");
@@ -492,6 +570,12 @@
       edgeEls.forEach(e => e.el.classList.remove("lit"));
       CAP.textContent = DEFAULT_CAP;
     }
+
+    /* hovering the LSEC rule fires the match on our specimen turn */
+    const RULE = document.getElementById("rule");
+    RULE.addEventListener("mouseenter", () => traceTurn("r0"));
+    RULE.addEventListener("mouseleave", untrace);
+    RULE.addEventListener("click", () => traceTurn("r0"));
 
     /* ---------- draws itself once, then rests ---------- */
     let inkDone = reduceMotion, inked = [];
@@ -530,11 +614,11 @@
     }
     function unlock() {
       document.getElementById('gate').classList.add('hidden');
-      document.getElementById('content').style.display = 'block';
+      document.getElementById('content').classList.remove('hidden');
     }
     if (sessionStorage.getItem('afterslop_unlocked') === '1') {
       document.getElementById('gate').classList.add('hidden');
-      document.getElementById('content').style.display = 'block';
+      document.getElementById('content').classList.remove('hidden');
     }
     document.getElementById('pw').addEventListener('input', () => {
       document.getElementById('error').textContent = '';
