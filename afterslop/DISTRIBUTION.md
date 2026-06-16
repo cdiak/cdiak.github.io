@@ -17,8 +17,7 @@ cd ~/Development/Projects/xAI/afterslop-v2
 Then verify (logged out or private window):
 
 - https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.0/afterslop_0.2.0_aarch64.dmg
-
-Intel (x86_64) remains on v0.1.8 until a 0.2.0 Intel build is published.
+- https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.0/afterslop_0.2.0_x86_64.dmg
 
 Update `afterslop/index.html` if the tag or filenames change.
 
