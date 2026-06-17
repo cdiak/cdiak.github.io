@@ -59,7 +59,7 @@
       font-family: var(--serif);
       font-size: 18px;
       line-height: 1.58;
-      max-width: 1320px;
+      max-width: 1560px;
       margin-inline: auto;
       padding: 0 2.2rem;
       /* the frame holds still; only the text column scrolls */
@@ -124,8 +124,8 @@
     /* ---------- the leaf: text scrolls, figure pinned ---------- */
     .leaf {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(540px, 660px);
-      gap: 3rem;
+      grid-template-columns: minmax(0, 600px) minmax(0, 1fr);
+      gap: 3.2rem;
       margin-top: 0.7rem;
       flex: 1;
       min-height: 0;
@@ -163,55 +163,58 @@
     }
 
     /* ============================================================
-       THE FIGURE — pinned on the right, read left → right
+       THE FIGURE — pinned on the right, read top → bottom:
+       INGEST  ↓  SLOPTIMIZATION  ↓  OUTPUT
     ============================================================ */
     .figcol { min-width: 0; min-height: 0; overflow-y: auto; }
     .figcol .stick {
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
     }
     .diagram { margin: 0; }
+    .figbody { display: flex; flex-direction: column; align-items: stretch; }
 
-    .figbody {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-      gap: 0.7rem;
-      align-items: center;
+    /* station heads — INGEST / SLOPTIMIZATION / OUTPUT */
+    .band-head { text-align: center; margin-bottom: 0.55rem; }
+    .band-head .bname {
+      font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.26em;
+      text-transform: uppercase; color: var(--ink);
     }
-    .station-label {
-      font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; text-align: center;
+    .band-head .bsub {
+      display: block; margin-top: 0.18rem;
+      font-family: var(--serif); font-style: italic; font-size: 0.8rem; color: var(--muted);
     }
+    .band-head .feather { width: 26px; height: auto; margin: 0 auto 0.35rem; }
 
-    /* the bold connector */
-    .arrow { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; color: var(--muted); }
-    .arrow .glyph { font-size: 2.1rem; line-height: 1; }
-    .arrow .lsec { font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.16em;
-                   text-transform: uppercase; writing-mode: vertical-rl; }
+    /* vertical connectors between stations */
+    .varrow { text-align: center; color: var(--muted); font-size: 1.3rem; line-height: 1;
+              margin: 0.3rem 0; }
 
-    /* --- ingest --- */
-    .ingest { display: flex; align-items: center; justify-content: center; gap: 0.4rem; flex-wrap: wrap; }
-    .chip {
-      font-family: var(--mono); font-size: 0.66rem; padding: 0.22rem 0.5rem;
-      border: 1px solid var(--c, var(--ink)); border-radius: 999px; color: var(--c, var(--ink)); white-space: nowrap;
+    /* --- INGEST: provider cards --- */
+    .providers { display: flex; gap: 0.6rem; }
+    .prov {
+      flex: 1; border: 1px solid var(--c, var(--ink)); border-radius: 8px;
+      padding: 0.5rem 0.4rem; text-align: center; min-width: 0;
     }
-    .ingest .to { color: var(--muted); font-family: var(--mono); font-size: 0.85rem; }
-    .feather { width: 24px; height: auto; }
+    .prov .pname { font-family: var(--mono); font-size: 0.78rem; color: var(--c, var(--ink)); }
+    .prov small { display: block; margin-top: 2px; font-family: var(--mono);
+                  font-size: 0.56rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .flow { text-align: center; color: var(--muted); font-family: var(--mono);
-            font-size: 0.58rem; letter-spacing: 0.02em; margin: 0.6rem 0; line-height: 1.5; }
+    /* --- SLOPTIMIZATION: chat | structural description --- */
+    .slopt-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; align-items: start; }
+    .micro { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.16em;
+             text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
 
-    /* --- the turn --- */
     .chat { display: flex; flex-direction: column; gap: 0.4rem; font-family: var(--sans); }
-    .bubble { max-width: 92%; padding: 0.45rem 0.65rem; border-radius: 13px; font-size: 0.76rem; line-height: 1.42; }
+    .bubble { max-width: 96%; padding: 0.45rem 0.65rem; border-radius: 13px; font-size: 0.76rem; line-height: 1.42; }
     .bubble .who { display: block; font-size: 0.54rem; letter-spacing: 0.1em; text-transform: uppercase;
                    color: var(--muted); margin-bottom: 2px; font-family: var(--mono); }
     .bubble.user { align-self: flex-end; background: color-mix(in oklab, var(--ink) 12%, transparent); border-bottom-right-radius: 4px; }
     .bubble.asst { align-self: flex-start; border: 1px solid var(--faint); border-bottom-left-radius: 4px; }
 
-    .sd { font-family: var(--mono); margin-top: 0.2rem; }
+    .sd { font-family: var(--mono); }
     .sd .tag {
       display: inline-block; font-size: 0.62rem; letter-spacing: 0.04em;
       padding: 0.14rem 0.45rem; border-radius: 4px; margin-bottom: 0.55rem;
@@ -223,25 +226,32 @@
     .hl { background: color-mix(in oklab, var(--accent) 26%, transparent); }
     [data-theme="dark"] .hl { background: color-mix(in oklab, var(--accent) 34%, transparent); }
 
-    /* --- the LSEC rule: description implies description --- */
+    /* the LSEC rule: description implies description */
     .rule {
-      margin-top: 0.85rem; padding: 0.6rem 0.55rem; border: 1px solid var(--faint); border-radius: 6px;
+      margin-top: 0.75rem; padding: 0.55rem 0.5rem; border: 1px solid var(--faint); border-radius: 6px;
       cursor: pointer; transition: border-color 0.2s, background 0.2s;
     }
     .rule:hover { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 8%, transparent); }
-    .rule .rline { display: flex; align-items: center; justify-content: center; gap: 0.4rem; flex-wrap: wrap; }
+    .rule .rline { display: flex; align-items: center; justify-content: center; gap: 0.35rem; flex-wrap: wrap; }
     .rule .term {
-      font-family: var(--mono); font-size: 0.6rem; padding: 0.16rem 0.4rem;
+      font-family: var(--mono); font-size: 0.56rem; padding: 0.16rem 0.36rem;
       border: 1px solid var(--ink); border-radius: 4px; white-space: nowrap;
     }
-    .rule .ent { font-family: var(--mono); font-size: 0.95rem; color: var(--accent); }
-    .rule .rcap { display: block; text-align: center; margin-top: 0.45rem;
-                  font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.12em;
+    .rule .ent { font-family: var(--mono); font-size: 0.9rem; color: var(--accent); }
+    .rule .rcap { display: block; text-align: center; margin-top: 0.4rem;
+                  font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.12em;
                   text-transform: uppercase; color: var(--muted); }
 
-    /* --- the match constellation --- */
+    /* the four process steps, as one quiet line */
+    .steps { margin-top: 0.65rem; text-align: center; font-family: var(--mono);
+             font-size: 0.56rem; letter-spacing: 0.04em; color: var(--muted); line-height: 1.7; }
+    .steps b { color: var(--ink); font-weight: 600; }
+
+    /* --- OUTPUT: the structure graph --- */
     .match { text-align: center; }
-    .match svg { width: 100%; max-width: 300px; height: auto; display: block; margin: 0 auto; touch-action: pan-y; }
+    .match svg { width: 100%; max-width: 470px; height: auto; display: block; margin: 0 auto; touch-action: pan-y; }
+    .seen { margin-top: 0.4rem; font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.06em;
+            text-transform: uppercase; color: var(--muted); text-align: center; }
     .m-edge { stroke: var(--ink); stroke-width: 1; fill: none; opacity: .4; transition: opacity .25s, stroke-width .25s; }
     .m-weak { stroke: var(--muted); stroke-width: .8; stroke-dasharray: 3 4; fill: none; opacity: .35; transition: opacity .25s; }
     .m-turn { fill: var(--ink); transition: fill .25s, opacity .25s; }
@@ -261,15 +271,16 @@
     /* ---------- responsive: release the frame ---------- */
     @media (max-width: 1080px) {
       body { height: auto; overflow-x: hidden; overflow-y: visible; display: block; padding: 0 1.4rem 3rem; }
-      .leaf { grid-template-columns: 1fr; gap: 1.8rem; }
+      .leaf { grid-template-columns: minmax(0, 1fr); gap: 1.8rem; }
       main { overflow: visible; }
       .col-inner { max-width: none; }
-      .figcol { order: -1; overflow: visible; }
-      .figcol .stick { height: auto; display: block; max-width: 560px; margin: 0 auto; }
-      .figbody { grid-template-columns: 1fr; gap: 1rem; }
-      .arrow { flex-direction: row; }
-      .arrow .glyph { transform: rotate(90deg); }
-      .arrow .lsec { writing-mode: horizontal-tb; }
+      .figcol { order: -1; overflow: visible; min-width: 0; }
+      .figbody, .match, .slopt-cols, .providers { min-width: 0; }
+      .figcol .stick { height: auto; display: block; max-width: 600px; margin: 0 auto; }
+    }
+    @media (max-width: 520px) {
+      .slopt-cols { grid-template-columns: 1fr; gap: 1.2rem; }
+      .providers { flex-wrap: wrap; }
     }
     @media (max-width: 600px) {
       body { font-size: 17px; }
@@ -387,69 +398,90 @@
         <figure class="diagram" id="plate">
           <div class="figbody">
 
-            <!-- station 1: DESCRIBED -->
-            <div class="describe">
-              <div class="station-label">Described</div>
-              <div class="ingest">
-                <span class="chip" style="--c: var(--g-grok)">Grok</span>
-                <span class="chip" style="--c: var(--g-chatgpt)">ChatGPT</span>
-                <span class="chip" style="--c: var(--g-claude)">Claude</span>
-                <span class="to">→</span>
+            <!-- ===== station 1 · INGEST ===== -->
+            <div class="band ingest-band">
+              <div class="band-head">
+                <span class="bname">Ingest</span>
+                <span class="bsub">raw conversation data from every provider</span>
+              </div>
+              <div class="providers">
+                <div class="prov" style="--c: var(--g-grok)"><div class="pname">Grok</div><small>conversation.json</small></div>
+                <div class="prov" style="--c: var(--g-chatgpt)"><div class="pname">ChatGPT</div><small>conversation.json</small></div>
+                <div class="prov" style="--c: var(--g-claude)"><div class="pname">Claude</div><small>conversation.json</small></div>
+              </div>
+            </div>
+
+            <div class="varrow" aria-hidden="true">↓</div>
+
+            <!-- ===== station 2 · SLOPTIMIZATION ===== -->
+            <div class="band slopt-band">
+              <div class="band-head">
                 <img src="./feather.png" alt="the feather" class="feather brand">
-              </div>
-              <div class="flow">↓ any turn, any provider</div>
-
-              <div class="chat">
-                <div class="bubble user">
-                  <span class="who">You</span>
-                  This proof is too hard — can you help?
-                </div>
-                <div class="bubble asst">
-                  <span class="who">Assistant</span>
-                  Sure. Let's <span class="span" data-k="decompose">break it into three lemmas</span> and
-                  <span class="span" data-k="each">prove each in turn</span>. First, the base case…
-                </div>
+                <span class="bname">Sloptimization</span>
+                <span class="bsub">LSEC + structural description — turns become canonical structures</span>
               </div>
 
-              <div class="flow">↓ the feather writes its structure</div>
-              <div class="sd">
-                <span class="tag">structured reasoning</span>
+              <div class="slopt-cols">
+                <div class="chatcol">
+                  <div class="micro">Chat · raw turn</div>
+                  <div class="chat">
+                    <div class="bubble user">
+                      <span class="who">You</span>
+                      This proof is too hard — can you help?
+                    </div>
+                    <div class="bubble asst">
+                      <span class="who">Assistant</span>
+                      Sure. Let's <span class="span" data-k="decompose">break it into three lemmas</span> and
+                      <span class="span" data-k="each">prove each in turn</span>. First, the base case…
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sdcol">
+                  <div class="micro">Structural description</div>
+                  <div class="sd">
+                    <span class="tag">structured reasoning</span>
 <pre>((a TURN
   (role ASSISTANT)
   (move (a REASONING
     (strategy <span class="tok" data-k="decompose">DECOMPOSE</span>)
     (into (LEMMAS 3))
     (<span class="tok" data-k="each">proves</span> EACH))))))</pre>
-              </div>
-
-              <div class="rule" id="rule">
-                <div class="rline">
-                  <span class="term">DECOMPOSE</span>
-                  <span class="ent">⊨</span>
-                  <span class="term">STRUCTURED-REASONING</span>
+                  </div>
+                  <div class="rule" id="rule">
+                    <div class="rline">
+                      <span class="term">DECOMPOSE</span>
+                      <span class="ent">⊨</span>
+                      <span class="term">STRUCTURED-REASONING</span>
+                    </div>
+                    <span class="rcap">LSEC · description implies description</span>
+                  </div>
                 </div>
-                <span class="rcap">LSEC · description implies description</span>
+              </div>
+
+              <div class="steps">
+                <b>LSEC extraction</b> · normalization &amp; canonicalization · structural pattern matching · indexing &amp; compression
               </div>
             </div>
 
-            <!-- the bold connector -->
-            <div class="arrow" aria-hidden="true">
-              <span class="glyph">→</span>
-              <span class="lsec">extensional match</span>
-            </div>
+            <div class="varrow" aria-hidden="true">↓</div>
 
-            <!-- station 2: MATCHED -->
-            <div class="matchcol">
-              <div class="station-label">Matched</div>
+            <!-- ===== station 3 · OUTPUT ===== -->
+            <div class="band output-band">
+              <div class="band-head">
+                <span class="bname">Output</span>
+                <span class="bsub">the structure vault — canonical structures at scale</span>
+              </div>
               <div class="match" id="match">
-                <svg id="fig" viewBox="0 0 300 330" role="img" aria-label="The matching constellation"></svg>
+                <svg id="fig" viewBox="0 0 480 270" role="img" aria-label="The structure graph"></svg>
               </div>
+              <div class="seen" id="seen">one vault, every provider — Claude · ChatGPT · Grok</div>
             </div>
 
           </div>
 
           <figcaption>
-            <span class="figno">Fig.</span> <span id="cap">One turn, described and matched. Hover the rule — or any turn — to trace its structural kin.</span>
+            <span class="figno">Fig.</span> <span id="cap">One turn, from ingest to a canonical structure in the vault. Hover the rule — or any structure — to trace its kin.</span>
           </figcaption>
         </figure>
       </div>
@@ -491,11 +523,11 @@
     const provColor = p => css(PROV[p].v);
 
     const ARCH = {
-      reasoning: { cx:150, cy:62,  label:"structured reasoning", plain:"decomposes a hard proof into lemmas" },
-      debug:     { cx:245, cy:140, label:"code-first debugging",  plain:"debugs by writing code first" },
-      routing:   { cx:58,  cy:158, label:"ambiguous routing",     plain:"routes an ambiguous question" },
-      jtbd:      { cx:208, cy:262, label:"literal JTBD",          plain:"takes a job-to-be-done literally" },
-      search:    { cx:84,  cy:262, label:"domain search",         plain:"runs a domain-specific search" },
+      reasoning: { cx:118, cy:80,  label:"structured reasoning", plain:"decomposes a hard proof into lemmas" },
+      debug:     { cx:262, cy:64,  label:"code-first debugging",  plain:"debugs by writing code first" },
+      routing:   { cx:398, cy:104, label:"ambiguous routing",     plain:"routes an ambiguous question" },
+      search:    { cx:148, cy:206, label:"domain search",         plain:"runs a domain-specific search" },
+      jtbd:      { cx:336, cy:212, label:"literal JTBD",          plain:"takes a job-to-be-done literally" },
     };
     const TURNS = [
       {id:"r0",prov:"claude",arch:"reasoning",focus:true},{id:"r1",prov:"grok",arch:"reasoning"},{id:"r2",prov:"chatgpt",arch:"reasoning"},
@@ -548,7 +580,9 @@
 
     const MATCH = document.getElementById("match");
     const CAP = document.getElementById("cap");
+    const SEEN = document.getElementById("seen");
     const DEFAULT_CAP = CAP.textContent;
+    const DEFAULT_SEEN = SEEN.textContent;
     function traceTurn(id) {
       finishInk();
       const t = T[id];
@@ -560,15 +594,17 @@
       sibs.forEach(s => { turnEls[s].classList.add("lit"); turnEls[s].style.fill = provColor(T[s].prov); });
       edgeEls.forEach(e => { if (!e.weak && e.arch===t.arch) e.el.classList.add("lit"); });
       const others = sibs.filter(s=>s!==id);
-      const provs = [...new Set(others.map(s=>PROV[T[s].prov].name))];
+      const provNames = [...new Set(sibs.map(s=>PROV[T[s].prov].name))];
       CAP.textContent = `A ${PROV[t.prov].name} turn that ${ARCH[t.arch].plain}. ` +
-        `LSEC matches ${others.length} more by structure` + (provs.length?` (${provs.join(", ")}).`:".");
+        `LSEC matches ${others.length} more by structure` + (others.length?` (${[...new Set(others.map(s=>PROV[T[s].prov].name))].join(", ")}).`:".");
+      SEEN.textContent = `${ARCH[t.arch].label} · seen across ${provNames.join(" · ")}`;
     }
     function untrace() {
       MATCH.classList.remove("tracing");
       Object.values(turnEls).forEach(d => { d.classList.remove("lit"); d.style.fill=""; });
       edgeEls.forEach(e => e.el.classList.remove("lit"));
       CAP.textContent = DEFAULT_CAP;
+      SEEN.textContent = DEFAULT_SEEN;
     }
 
     /* hovering the LSEC rule fires the match on our specimen turn */
