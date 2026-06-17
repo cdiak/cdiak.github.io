@@ -18,9 +18,8 @@
   <style>
     /* ============================================================
        AFTERSLOP — a private leaf, set in the Principia idiom.
-       The frame holds still: the text column scrolls, the figure
-       stays pinned to the right. The figure reads left → right:
-       a turn is DESCRIBED, then MATCHED against its structural kin.
+       Text on the left; the pipeline plate (INGEST → SLOPTIMIZATION
+       → OUTPUT) holds the right column.
     ============================================================ */
 
     :root {
@@ -30,13 +29,7 @@
       --muted: #7c7263;
       --faint: #ddd3bd;
 
-      --g-grok:    hsl(210, 70%, 42%);
-      --g-chatgpt: hsl(142, 55%, 34%);
-      --g-claude:  hsl(28, 85%, 42%);
-      --accent:    hsl(28, 85%, 42%);
-
       --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
-      --sans:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     }
     [data-theme="dark"] {
@@ -45,36 +38,18 @@
       --ink:   #e9e2d0;
       --muted: #93897a;
       --faint: #322c20;
-
-      --g-grok:    hsl(210, 80%, 66%);
-      --g-chatgpt: hsl(142, 58%, 58%);
-      --g-claude:  hsl(28, 90%, 62%);
-      --accent:    hsl(28, 90%, 62%);
     }
 
     * { box-sizing: border-box; }
-    html { background: var(--paper); color: var(--ink); }
+    html { background: var(--paper); color: var(--ink); scroll-behavior: smooth; }
     body {
-      margin: 0;
+      margin: 0 auto;
+      max-width: 1560px;
+      padding: 0 2.2rem 4rem;
       font-family: var(--serif);
       font-size: 18px;
       line-height: 1.58;
-      max-width: 1560px;
-      margin-inline: auto;
-      padding: 0 2.2rem;
-      /* the frame holds still; only the text column scrolls */
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
     }
-
-    /* no scrollbars, anywhere — the panes scroll silently */
-    main, .figcol {
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-    main::-webkit-scrollbar, .figcol::-webkit-scrollbar { display: none; }
 
     /* white-on-transparent brand art → invert onto the paper in light mode */
     .brand { display: block; }
@@ -86,7 +61,6 @@
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
       padding: 1.1rem 0 0.1rem;
-      flex-shrink: 0;
     }
     .signature { width: 106px; mix-blend-mode: multiply; justify-self: start; }
     [data-theme="dark"] .signature { filter: invert(1); mix-blend-mode: screen; }
@@ -121,20 +95,18 @@
     .gate-error { font-family: var(--mono); font-size: 0.72rem; color: #c0392b; margin-top: 14px; min-height: 1.2em; }
     [data-theme="dark"] .gate-error { color: #f87171; }
 
-    /* ---------- the leaf: text scrolls, figure pinned ---------- */
+    /* ---------- the leaf: text left, pipeline plate right ---------- */
     .leaf {
       display: grid;
-      grid-template-columns: minmax(0, 600px) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 600px) minmax(0, 760px);
       gap: 3.2rem;
-      margin-top: 0.7rem;
-      flex: 1;
-      min-height: 0;
+      justify-content: center;
+      align-items: start;
+      margin-top: 1rem;
     }
     .leaf.hidden { display: none; }
 
-    /* ---------- the one pane that scrolls ---------- */
-    main { overflow-y: auto; min-height: 0; padding-right: 0.8rem; padding-bottom: 2.5rem; }
-    .col-inner { max-width: 620px; }
+    .col-inner { max-width: 600px; }
     main p { margin: 0 0 1.15rem; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
     main ul, main ol { margin: 0 0 1.15rem; padding-left: 1.5rem; }
     main li { margin-bottom: 0.4rem; }
@@ -162,128 +134,23 @@
       font-family: var(--mono); font-size: 0.74rem; color: var(--muted);
     }
 
-    /* ============================================================
-       THE FIGURE — pinned on the right, read top → bottom:
-       INGEST  ↓  SLOPTIMIZATION  ↓  OUTPUT
-    ============================================================ */
-    .figcol { min-width: 0; min-height: 0; overflow-y: auto; }
-    .figcol .stick {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
-    .diagram { margin: 0; }
-    .figbody { display: flex; flex-direction: column; align-items: stretch; }
-
-    /* station heads — INGEST / SLOPTIMIZATION / OUTPUT */
-    .band-head { text-align: center; margin-bottom: 0.55rem; }
-    .band-head .bname {
-      font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.26em;
-      text-transform: uppercase; color: var(--ink);
-    }
-    .band-head .bsub {
-      display: block; margin-top: 0.18rem;
-      font-family: var(--serif); font-style: italic; font-size: 0.8rem; color: var(--muted);
-    }
-    .band-head .feather { width: 26px; height: auto; margin: 0 auto 0.35rem; }
-
-    /* vertical connectors between stations */
-    .varrow { text-align: center; color: var(--muted); font-size: 1.3rem; line-height: 1;
-              margin: 0.3rem 0; }
-
-    /* --- INGEST: provider cards --- */
-    .providers { display: flex; gap: 0.6rem; }
-    .prov {
-      flex: 1; border: 1px solid var(--c, var(--ink)); border-radius: 8px;
-      padding: 0.5rem 0.4rem; text-align: center; min-width: 0;
-    }
-    .prov .pname { font-family: var(--mono); font-size: 0.78rem; color: var(--c, var(--ink)); }
-    .prov small { display: block; margin-top: 2px; font-family: var(--mono);
-                  font-size: 0.56rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* --- SLOPTIMIZATION: chat | structural description --- */
-    .slopt-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; align-items: start; }
-    .micro { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.16em;
-             text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
-
-    .chat { display: flex; flex-direction: column; gap: 0.4rem; font-family: var(--sans); }
-    .bubble { max-width: 96%; padding: 0.45rem 0.65rem; border-radius: 13px; font-size: 0.76rem; line-height: 1.42; }
-    .bubble .who { display: block; font-size: 0.54rem; letter-spacing: 0.1em; text-transform: uppercase;
-                   color: var(--muted); margin-bottom: 2px; font-family: var(--mono); }
-    .bubble.user { align-self: flex-end; background: color-mix(in oklab, var(--ink) 12%, transparent); border-bottom-right-radius: 4px; }
-    .bubble.asst { align-self: flex-start; border: 1px solid var(--faint); border-bottom-left-radius: 4px; }
-
-    .sd { font-family: var(--mono); }
-    .sd .tag {
-      display: inline-block; font-size: 0.62rem; letter-spacing: 0.04em;
-      padding: 0.14rem 0.45rem; border-radius: 4px; margin-bottom: 0.55rem;
-      background: var(--ink); color: var(--paper);
-    }
-    .sd pre { margin: 0; font-size: 0.64rem; line-height: 1.6; white-space: pre-wrap; color: var(--ink); }
-    .tok, .span { border-radius: 3px; transition: background 0.15s; }
-    .tok { text-decoration: underline dotted color-mix(in oklab, var(--muted) 70%, transparent); text-underline-offset: 2px; cursor: help; }
-    .hl { background: color-mix(in oklab, var(--accent) 26%, transparent); }
-    [data-theme="dark"] .hl { background: color-mix(in oklab, var(--accent) 34%, transparent); }
-
-    /* the LSEC rule: description implies description */
-    .rule {
-      margin-top: 0.75rem; padding: 0.55rem 0.5rem; border: 1px solid var(--faint); border-radius: 6px;
-      cursor: pointer; transition: border-color 0.2s, background 0.2s;
-    }
-    .rule:hover { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 8%, transparent); }
-    .rule .rline { display: flex; align-items: center; justify-content: center; gap: 0.35rem; flex-wrap: wrap; }
-    .rule .term {
-      font-family: var(--mono); font-size: 0.56rem; padding: 0.16rem 0.36rem;
-      border: 1px solid var(--ink); border-radius: 4px; white-space: nowrap;
-    }
-    .rule .ent { font-family: var(--mono); font-size: 0.9rem; color: var(--accent); }
-    .rule .rcap { display: block; text-align: center; margin-top: 0.4rem;
-                  font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.12em;
-                  text-transform: uppercase; color: var(--muted); }
-
-    /* the four process steps, as one quiet line */
-    .steps { margin-top: 0.65rem; text-align: center; font-family: var(--mono);
-             font-size: 0.56rem; letter-spacing: 0.04em; color: var(--muted); line-height: 1.7; }
-    .steps b { color: var(--ink); font-weight: 600; }
-
-    /* --- OUTPUT: the structure graph --- */
-    .match { text-align: center; }
-    .match svg { width: 100%; max-width: 470px; height: auto; display: block; margin: 0 auto; touch-action: pan-y; }
-    .seen { margin-top: 0.4rem; font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.06em;
-            text-transform: uppercase; color: var(--muted); text-align: center; }
-    .m-edge { stroke: var(--ink); stroke-width: 1; fill: none; opacity: .4; transition: opacity .25s, stroke-width .25s; }
-    .m-weak { stroke: var(--muted); stroke-width: .8; stroke-dasharray: 3 4; fill: none; opacity: .35; transition: opacity .25s; }
-    .m-turn { fill: var(--ink); transition: fill .25s, opacity .25s; }
-    .m-focus-ring { fill: none; stroke: var(--accent); stroke-width: 1.4; transition: opacity .25s; }
-    .m-lbl { font-family: var(--mono); font-size: 8px; letter-spacing: .04em; text-transform: uppercase; fill: var(--muted); transition: opacity .25s; }
-    .m-hit { fill: transparent; cursor: pointer; }
-    .match.tracing .m-turn:not(.lit),
-    .match.tracing .m-edge:not(.lit),
-    .match.tracing .m-weak:not(.lit),
-    .match.tracing .m-lbl:not(.lit) { opacity: .1; }
-    .m-edge.lit { opacity: 1; stroke-width: 1.7; }
-    .m-weak.lit { opacity: .9; }
-
-    figcaption { margin-top: 1rem; font-style: italic; font-size: 0.84rem; color: var(--ink); min-height: 3em; text-align: center; }
+    /* ---------- the pipeline plate ---------- */
+    .figcol { min-width: 0; }
+    .figimg { width: 100%; height: auto; display: block; }
+    .fig-dark { display: none; }
+    [data-theme="dark"] .fig-light { display: none; }
+    [data-theme="dark"] .fig-dark { display: block; }
+    figcaption { margin-top: 0.9rem; font-style: italic; font-size: 0.84rem; color: var(--muted); text-align: center; }
     figcaption .figno { font-style: normal; font-variant: small-caps; letter-spacing: 0.08em; }
 
-    /* ---------- responsive: release the frame ---------- */
+    /* ---------- responsive ---------- */
     @media (max-width: 1080px) {
-      body { height: auto; overflow-x: hidden; overflow-y: visible; display: block; padding: 0 1.4rem 3rem; }
-      .leaf { grid-template-columns: minmax(0, 1fr); gap: 1.8rem; }
-      main { overflow: visible; }
+      .leaf { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
       .col-inner { max-width: none; }
-      .figcol { order: -1; overflow: visible; min-width: 0; }
-      .figbody, .match, .slopt-cols, .providers { min-width: 0; }
-      .figcol .stick { height: auto; display: block; max-width: 600px; margin: 0 auto; }
-    }
-    @media (max-width: 520px) {
-      .slopt-cols { grid-template-columns: 1fr; gap: 1.2rem; }
-      .providers { flex-wrap: wrap; }
+      .figcol { max-width: 680px; margin: 0.5rem auto 0; }
     }
     @media (max-width: 600px) {
-      body { font-size: 17px; }
+      body { font-size: 17px; padding: 0 1.25rem 3rem; }
       .signature { width: 92px; }
       .downloads { flex-direction: column; }
       .download-btn { width: 100%; justify-content: center; }
@@ -315,7 +182,7 @@
   <!-- ============ Content (hidden until unlocked) ============ -->
   <div class="leaf hidden" id="content">
 
-    <!-- ---------- text column (left, scrolls) ---------- -->
+    <!-- ---------- text column (left) ---------- -->
     <main>
       <div class="col-inner">
 
@@ -357,7 +224,7 @@
           <li>The matching approach is inspired by David E. Shaw's doctoral thesis on knowledge-based retrieval on relational databases.</li>
         </ul>
         <p>The key idea behind the system is that the <strong>turn</strong>, not the full conversation thread, is the right unit of analysis for analyzing user-LLM interactions. Tasking usually happens at the level of individual turns. Because the real value in most tutoring work lives at that granular level, giving each turn a structured description makes certain conceptual patterns visible and comparable in ways that would otherwise be hard to find.</p>
-        <p>A useful way to understand how the matching works is "description implies description." For example, if a turn is described as the model breaking a hard problem into smaller steps and solving them one by one, the matching rules can recognize that this turn also counts as an example of structured reasoning — even if those exact words were never used. The formal descriptions let the system draw these connections automatically. <em>The figure walks one turn through exactly this path.</em></p>
+        <p>A useful way to understand how the matching works is "description implies description." For example, if a turn is described as the model breaking a hard problem into smaller steps and solving them one by one, the matching rules can recognize that this turn also counts as an example of structured reasoning — even if those exact words were never used. The formal descriptions let the system draw these connections automatically. <em>The plate at right walks one turn through exactly this path: ingest, sloptimization, and out into the Structure Vault.</em></p>
 
         <h2 class="section-title">Workflow</h2>
         <p>Here's a practical way most tutors use Afterslop:</p>
@@ -392,99 +259,15 @@
       </div>
     </main>
 
-    <!-- ---------- the figure (right, pinned) ---------- -->
+    <!-- ---------- the pipeline plate (right) ---------- -->
     <div class="figcol">
-      <div class="stick">
-        <figure class="diagram" id="plate">
-          <div class="figbody">
-
-            <!-- ===== station 1 · INGEST ===== -->
-            <div class="band ingest-band">
-              <div class="band-head">
-                <span class="bname">Ingest</span>
-                <span class="bsub">raw conversation data from every provider</span>
-              </div>
-              <div class="providers">
-                <div class="prov" style="--c: var(--g-grok)"><div class="pname">Grok</div><small>conversation.json</small></div>
-                <div class="prov" style="--c: var(--g-chatgpt)"><div class="pname">ChatGPT</div><small>conversation.json</small></div>
-                <div class="prov" style="--c: var(--g-claude)"><div class="pname">Claude</div><small>conversation.json</small></div>
-              </div>
-            </div>
-
-            <div class="varrow" aria-hidden="true">↓</div>
-
-            <!-- ===== station 2 · SLOPTIMIZATION ===== -->
-            <div class="band slopt-band">
-              <div class="band-head">
-                <img src="./feather.png" alt="the feather" class="feather brand">
-                <span class="bname">Sloptimization</span>
-                <span class="bsub">LSEC + structural description — turns become canonical structures</span>
-              </div>
-
-              <div class="slopt-cols">
-                <div class="chatcol">
-                  <div class="micro">Chat · raw turn</div>
-                  <div class="chat">
-                    <div class="bubble user">
-                      <span class="who">You</span>
-                      This proof is too hard — can you help?
-                    </div>
-                    <div class="bubble asst">
-                      <span class="who">Assistant</span>
-                      Sure. Let's <span class="span" data-k="decompose">break it into three lemmas</span> and
-                      <span class="span" data-k="each">prove each in turn</span>. First, the base case…
-                    </div>
-                  </div>
-                </div>
-
-                <div class="sdcol">
-                  <div class="micro">Structural description</div>
-                  <div class="sd">
-                    <span class="tag">structured reasoning</span>
-<pre>((a TURN
-  (role ASSISTANT)
-  (move (a REASONING
-    (strategy <span class="tok" data-k="decompose">DECOMPOSE</span>)
-    (into (LEMMAS 3))
-    (<span class="tok" data-k="each">proves</span> EACH))))))</pre>
-                  </div>
-                  <div class="rule" id="rule">
-                    <div class="rline">
-                      <span class="term">DECOMPOSE</span>
-                      <span class="ent">⊨</span>
-                      <span class="term">STRUCTURED-REASONING</span>
-                    </div>
-                    <span class="rcap">LSEC · description implies description</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="steps">
-                <b>LSEC extraction</b> · normalization &amp; canonicalization · structural pattern matching · indexing &amp; compression
-              </div>
-            </div>
-
-            <div class="varrow" aria-hidden="true">↓</div>
-
-            <!-- ===== station 3 · OUTPUT ===== -->
-            <div class="band output-band">
-              <div class="band-head">
-                <span class="bname">Output</span>
-                <span class="bsub">the structure vault — canonical structures at scale</span>
-              </div>
-              <div class="match" id="match">
-                <svg id="fig" viewBox="0 0 480 270" role="img" aria-label="The structure graph"></svg>
-              </div>
-              <div class="seen" id="seen">one vault, every provider — Claude · ChatGPT · Grok</div>
-            </div>
-
-          </div>
-
-          <figcaption>
-            <span class="figno">Fig.</span> <span id="cap">One turn, from ingest to a canonical structure in the vault. Hover the rule — or any structure — to trace its kin.</span>
-          </figcaption>
-        </figure>
-      </div>
+      <figure style="margin:0">
+        <img src="./sloptima-light.png" alt="Afterslop pipeline — INGEST (raw conversation exports from ChatGPT, Grok, Claude), SLOPTIMIZATION (LSEC + structural description), OUTPUT (the Structure Vault)." class="figimg fig-light">
+        <img src="./sloptima-dark.png"  alt="Afterslop pipeline — INGEST (raw conversation exports from ChatGPT, Grok, Claude), SLOPTIMIZATION (LSEC + structural description), OUTPUT (the Structure Vault)." class="figimg fig-dark">
+        <figcaption>
+          <span class="figno">Fig.</span> — Ingest, sloptimization, and out into the Structure Vault.
+        </figcaption>
+      </figure>
     </div>
 
   </div>
@@ -497,138 +280,6 @@
       root.setAttribute("data-theme", next);
       localStorage.setItem("theme", next);
     });
-
-    /* ============================================================
-       CROSS-HIGHLIGHT — the feather translates prose into structure.
-    ============================================================ */
-    function linkPair(k, on) {
-      document.querySelectorAll(`.tok[data-k="${k}"], .span[data-k="${k}"]`)
-        .forEach(e => e.classList.toggle("hl", on));
-    }
-    document.querySelectorAll(".tok, .span").forEach(e => {
-      const k = e.getAttribute("data-k");
-      e.addEventListener("mouseenter", () => linkPair(k, true));
-      e.addEventListener("mouseleave", () => linkPair(k, false));
-    });
-
-    /* ============================================================
-       THE MATCH CONSTELLATION — our turn finds its structural kin.
-    ============================================================ */
-    const SVG = document.getElementById("fig");
-    const NS = "http://www.w3.org/2000/svg";
-    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const el = (n, at) => { const e = document.createElementNS(NS, n); for (const k in at) e.setAttribute(k, at[k]); return e; };
-    const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-    const PROV = { grok:{name:"Grok",v:"--g-grok"}, chatgpt:{name:"ChatGPT",v:"--g-chatgpt"}, claude:{name:"Claude",v:"--g-claude"} };
-    const provColor = p => css(PROV[p].v);
-
-    const ARCH = {
-      reasoning: { cx:118, cy:80,  label:"structured reasoning", plain:"decomposes a hard proof into lemmas" },
-      debug:     { cx:262, cy:64,  label:"code-first debugging",  plain:"debugs by writing code first" },
-      routing:   { cx:398, cy:104, label:"ambiguous routing",     plain:"routes an ambiguous question" },
-      search:    { cx:148, cy:206, label:"domain search",         plain:"runs a domain-specific search" },
-      jtbd:      { cx:336, cy:212, label:"literal JTBD",          plain:"takes a job-to-be-done literally" },
-    };
-    const TURNS = [
-      {id:"r0",prov:"claude",arch:"reasoning",focus:true},{id:"r1",prov:"grok",arch:"reasoning"},{id:"r2",prov:"chatgpt",arch:"reasoning"},
-      {id:"d0",prov:"claude",arch:"debug"},{id:"d1",prov:"grok",arch:"debug"},{id:"d2",prov:"chatgpt",arch:"debug"},
-      {id:"o0",prov:"chatgpt",arch:"routing"},{id:"o1",prov:"grok",arch:"routing"},{id:"o2",prov:"claude",arch:"routing"},
-      {id:"j0",prov:"chatgpt",arch:"jtbd"},{id:"j1",prov:"claude",arch:"jtbd"},{id:"j2",prov:"grok",arch:"jtbd"},
-      {id:"s0",prov:"grok",arch:"search"},{id:"s1",prov:"chatgpt",arch:"search"},{id:"s2",prov:"claude",arch:"search"},
-    ];
-    const WEAK = [["r1","d0"],["o1","s0"],["s2","j1"]];
-
-    const byArch = {};
-    TURNS.forEach(t => (byArch[t.arch] = byArch[t.arch] || []).push(t));
-    Object.values(byArch).forEach(list => list.forEach((t,i) => {
-      const a = (-90 + i*120) * Math.PI/180, r = 22;
-      t.x = ARCH[t.arch].cx + r*Math.cos(a);
-      t.y = ARCH[t.arch].cy + r*Math.sin(a);
-    }));
-    const T = Object.fromEntries(TURNS.map(t => [t.id, t]));
-
-    const edgeEls = [];
-    Object.values(byArch).forEach(list => {
-      for (let i=0;i<list.length;i++) for (let j=i+1;j<list.length;j++) {
-        const a=list[i], b=list[j];
-        const e = el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:"m-edge"});
-        SVG.appendChild(e); edgeEls.push({el:e,a:a.id,b:b.id,arch:a.arch});
-      }
-    });
-    WEAK.forEach(([a,b]) => {
-      const e = el("line",{x1:T[a].x,y1:T[a].y,x2:T[b].x,y2:T[b].y,class:"m-weak"});
-      SVG.appendChild(e); edgeEls.push({el:e,a,b,weak:true});
-    });
-
-    const turnEls = {};
-    TURNS.forEach(t => {
-      if (t.focus) SVG.appendChild(el("circle",{cx:t.x,cy:t.y,r:8,class:"m-focus-ring"}));
-      const dot = el("circle",{cx:t.x,cy:t.y,r:t.focus?5:4,class:"m-turn"});
-      SVG.appendChild(dot); turnEls[t.id]=dot;
-    });
-    Object.values(ARCH).forEach(ar => {
-      const lb = el("text",{x:ar.cx,y:ar.cy-34,class:"m-lbl","text-anchor":"middle"});
-      lb.textContent = ar.label; SVG.appendChild(lb);
-    });
-    TURNS.forEach(t => {
-      const hit = el("circle",{cx:t.x,cy:t.y,r:14,class:"m-hit"});
-      hit.addEventListener("mouseenter",()=>traceTurn(t.id));
-      hit.addEventListener("mouseleave",untrace);
-      hit.addEventListener("click",()=>traceTurn(t.id));
-      SVG.appendChild(hit);
-    });
-
-    const MATCH = document.getElementById("match");
-    const CAP = document.getElementById("cap");
-    const SEEN = document.getElementById("seen");
-    const DEFAULT_CAP = CAP.textContent;
-    const DEFAULT_SEEN = SEEN.textContent;
-    function traceTurn(id) {
-      finishInk();
-      const t = T[id];
-      MATCH.classList.add("tracing");
-      Object.values(turnEls).forEach(d => { d.classList.remove("lit"); d.style.fill=""; });
-      edgeEls.forEach(e => e.el.classList.remove("lit"));
-      SVG.querySelectorAll(".m-lbl").forEach(l => l.classList.remove("lit"));
-      const sibs = byArch[t.arch].map(x=>x.id);
-      sibs.forEach(s => { turnEls[s].classList.add("lit"); turnEls[s].style.fill = provColor(T[s].prov); });
-      edgeEls.forEach(e => { if (!e.weak && e.arch===t.arch) e.el.classList.add("lit"); });
-      const others = sibs.filter(s=>s!==id);
-      const provNames = [...new Set(sibs.map(s=>PROV[T[s].prov].name))];
-      CAP.textContent = `A ${PROV[t.prov].name} turn that ${ARCH[t.arch].plain}. ` +
-        `LSEC matches ${others.length} more by structure` + (others.length?` (${[...new Set(others.map(s=>PROV[T[s].prov].name))].join(", ")}).`:".");
-      SEEN.textContent = `${ARCH[t.arch].label} · seen across ${provNames.join(" · ")}`;
-    }
-    function untrace() {
-      MATCH.classList.remove("tracing");
-      Object.values(turnEls).forEach(d => { d.classList.remove("lit"); d.style.fill=""; });
-      edgeEls.forEach(e => e.el.classList.remove("lit"));
-      CAP.textContent = DEFAULT_CAP;
-      SEEN.textContent = DEFAULT_SEEN;
-    }
-
-    /* hovering the LSEC rule fires the match on our specimen turn */
-    const RULE = document.getElementById("rule");
-    RULE.addEventListener("mouseenter", () => traceTurn("r0"));
-    RULE.addEventListener("mouseleave", untrace);
-    RULE.addEventListener("click", () => traceTurn("r0"));
-
-    /* ---------- draws itself once, then rests ---------- */
-    let inkDone = reduceMotion, inked = [];
-    function finishInk() {
-      if (inkDone) return; inkDone = true;
-      inked.forEach(e => { e.style.opacity=""; e.style.transition=""; });
-    }
-    if (!reduceMotion) {
-      const order = [[edgeEls.map(e=>e.el),0.1],[Object.values(turnEls),0.5],[[...SVG.querySelectorAll(".m-lbl, .m-focus-ring")],0.9]];
-      order.forEach(([els,delay]) => els.forEach((e,i) => {
-        e.style.opacity="0"; e.style.transition=`opacity .6s ease ${delay+i*0.02}s`; inked.push(e);
-      }));
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        inked.forEach(e=>e.style.opacity="1");
-        setTimeout(finishInk, 2400);
-      }));
-    }
 
     /* ============================================================
        PASSWORD GATE
