@@ -16,8 +16,8 @@ cd ~/Development/Projects/xAI/afterslop-v2
 
 Then verify (logged out or private window):
 
-- https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.1/afterslop_0.2.1_aarch64.dmg
-- https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.1/afterslop_0.2.1_x86_64.dmg
+- https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.2/afterslop_0.2.2_aarch64.dmg
+- https://github.com/cdiak/cdiak.github.io/releases/download/v0.2.2/afterslop_0.2.2_x86_64.dmg
 
 Update `afterslop/index.html` if the tag or filenames change.
 
