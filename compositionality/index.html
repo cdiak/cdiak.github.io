@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hold That Thought — seeing a model go off-track from the inside</title>
+<meta name="description" content="Capacity limits, representational interference, and the gap between what a language model computes and what it can report — measured layer by layer with the tuned lens.">
+<style>
+  :root{
+    --paper:#fbfaf3; --ink:#191813; --ink-2:#45443c; --ink-3:#8b897d;
+    --line:#e4e2d4; --line-2:#cfcdbd; --faint:#f1efe3;
+    --green:#00693e; --green-soft:rgba(0,105,62,.10);
+    --cobalt:#1f4dff; --coral:#ff3b1f; --purple:#8a3ffc; --teal:#0e7f74;
+    --heat-lo:238,236,224; --heat-hi:216,90,48;
+    /* subvocal viewer (cobalt lens palette, kept from the instrument) */
+    --sv-accent:#1f4dff; --sv-accent-soft:rgba(31,77,255,0.09); --sv-accent-ink:#1736c4;
+    --sv-heat-lo:226,232,255; --sv-heat-hi:31,77,255;
+    --font-body:Charter,Georgia,'Times New Roman',serif;
+    --font-mono:'SF Mono',ui-monospace,Menlo,monospace;
+  }
+  html[data-theme="dark"]{
+    --paper:#131209; --ink:#f0eee3; --ink-2:#b5b3a6; --ink-3:#726f61;
+    --line:#2b2a1e; --line-2:#403e2e; --faint:#1c1b10;
+    --green:#3fb47f; --green-soft:rgba(63,180,127,.14);
+    --heat-lo:34,33,22; --heat-hi:216,90,48;
+    --sv-accent:#5c7cff; --sv-accent-soft:rgba(92,124,255,0.15); --sv-accent-ink:#a7baff;
+    --sv-heat-lo:20,28,60; --sv-heat-hi:120,150,255;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:16px; line-height:1.62;
+    -webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--font-body); font-weight:600; letter-spacing:-0.01em}
+  #theme-toggle{position:fixed; top:14px; right:16px; z-index:40; font-size:15px;
+    color:var(--ink-3); background:transparent; border:none; cursor:pointer; padding:6px}
+  #theme-toggle:hover{color:var(--ink)}
+
+  #rail{position:fixed; left:14px; top:50%; transform:translateY(-50%); z-index:30;
+    display:flex; flex-direction:column; gap:9px}
+  #rail a{width:7px; height:7px; border-radius:50%; border:1.5px solid var(--ink-3);
+    opacity:.55; display:block; transition:all .2s}
+  #rail a.on{background:var(--green); border-color:var(--green); opacity:1}
+  #rail .rail-sec{font-family:var(--font-mono); font-size:9px; color:var(--ink-3);
+    letter-spacing:1px; margin:5px 0 -3px}
+
+  .story{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.06fr);
+    gap:0 56px; max-width:1340px; margin:0 auto; padding:0 28px 0 48px}
+  .beats{min-width:0; padding:6vh 0 30vh}
+  .beat{min-height:86vh; display:flex; flex-direction:column; justify-content:center; max-width:48ch}
+  .beat .tag{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3); margin-bottom:12px;
+    letter-spacing:.6px}
+  .beat h2{font-size:19.5px; margin:0 0 12px}
+  .beat p{margin:0 0 15px; color:var(--ink-2)}
+  .beat p strong,.beat p b{color:var(--ink); font-weight:600}
+  .beat ul{margin:0 0 15px; padding-left:20px; color:var(--ink-2)}
+  .beat li{margin-bottom:8px}
+  .beat .ivdv{border-left:2px solid var(--line-2); padding-left:14px; font-size:14px; color:var(--ink-3)}
+  .beat .ivdv b{color:var(--ink-2)}
+  .beat.intro{min-height:96vh}
+  .beat.intro .eyebrow{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3); margin-bottom:20px}
+  .beat.intro h1{font-size:37px; margin:0 0 10px; line-height:1.12}
+  .beat.intro .subtitle{font-size:17.5px; color:var(--ink); margin:0 0 6px}
+  .beat.intro .byline{font-size:13.5px; color:var(--ink-3); margin:0 0 22px}
+  sup.cite{font-size:.68em; line-height:0}
+  sup.cite a{color:var(--green); text-decoration:none}
+  sup.cite a:hover{text-decoration:underline}
+
+  .stage-wrap{min-width:0}
+  .stage{position:sticky; top:0; height:100vh; display:flex; align-items:center}
+  .stage-inner{position:relative; width:100%; min-height:78vh}
+  .stage-state{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    gap:13px; opacity:0; visibility:hidden; transform:translateY(8px);
+    transition:opacity .45s ease, transform .45s ease, visibility 0s linear .45s}
+  .stage-state.on{opacity:1; visibility:visible; transform:none;
+    transition:opacity .45s ease, transform .45s ease}
+  @media (prefers-reduced-motion: reduce){ .stage-state,.stage-state.on{transition:none} }
+  .stage-head{font-family:var(--font-mono); font-size:11px; color:var(--ink-3);
+    display:flex; align-items:center; gap:10px}
+  .stage-head .dot{width:8px; height:8px; border-radius:50%; background:var(--green)}
+  .stage-cap{font-size:13.5px; color:var(--ink-3); line-height:1.55; min-height:40px}
+  .stage-cap b{color:var(--ink-2)}
+  .card svg{display:block; width:100%; height:auto}
+  .card img{display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:2px;
+    background:#fff}
+  .lab{font-family:var(--font-mono); font-size:10.5px; fill:var(--ink-3)}
+  .lab2{font-family:var(--font-mono); font-size:10.5px; fill:var(--ink-2)}
+  .tok{font-family:var(--font-mono); font-size:10px}
+  .axis{stroke:var(--line-2); stroke-width:1}
+  .legend{display:flex; flex-wrap:wrap; gap:5px 16px; font-family:var(--font-mono);
+    font-size:10.5px; color:var(--ink-3)}
+  .legend span{display:flex; align-items:center; gap:6px}
+  .legend i{width:15px; height:3px; border-radius:2px; display:inline-block}
+  .legend .ramp{height:8px; width:96px; border-radius:5px; display:inline-block;
+    background:linear-gradient(90deg,rgb(var(--heat-lo)),rgb(var(--heat-hi)))}
+
+  /* the split-flap logit lens (real baked run) */
+  .lensbox{position:relative; padding-left:18px}
+  .lens-spine{position:absolute; left:0; top:24px; bottom:30px; writing-mode:vertical-rl;
+    transform:rotate(180deg); font-family:var(--font-mono); font-size:10px; letter-spacing:2px;
+    color:var(--ink-3); display:flex; align-items:center; justify-content:center}
+  .lensgrid{display:grid; gap:2px 3px; justify-content:center}
+  .flap{height:15px; border-radius:1px; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:10px}
+  .flap.out{height:19px; background:var(--purple)}
+  .lens-rlab{font-family:var(--font-mono); font-size:10px; color:var(--ink-3);
+    display:flex; align-items:center; justify-content:flex-end; padding-right:6px; white-space:nowrap}
+  .lens-in{font-family:var(--font-mono); font-size:10px; color:var(--ink-3); text-align:center; padding-top:4px}
+
+  /* mediation ledger table */
+  .medtab{font-size:12px; border-collapse:collapse; width:100%}
+  .medtab th{font-family:var(--font-mono); font-size:10px; color:var(--ink-3); text-align:left;
+    font-weight:400; letter-spacing:.5px; padding:4px 10px 6px 0; border-bottom:1px solid var(--line-2)}
+  .medtab td{padding:6px 10px 6px 0; border-bottom:1px solid var(--line); color:var(--ink-2);
+    vertical-align:top; line-height:1.45; font-family:var(--font-mono); font-size:11.5px}
+  .medtab td:first-child{color:var(--ink); font-weight:600; font-family:var(--font-body); font-size:12.5px}
+
+  .ledger{font-size:12px; border-collapse:collapse; width:100%}
+  .ledger th{font-family:var(--font-mono); font-size:10px; color:var(--ink-3); text-align:left;
+    font-weight:400; letter-spacing:.5px; padding:4px 8px 6px 0; border-bottom:1px solid var(--line-2)}
+  .ledger td{padding:6px 8px 6px 0; border-bottom:1px solid var(--line); color:var(--ink-2);
+    vertical-align:top; line-height:1.45}
+  .ledger td:first-child{color:var(--ink); font-weight:600}
+  .ledger .st{font-family:var(--font-mono); font-size:10px; white-space:nowrap}
+  .ledger .st.m{color:var(--green)} .ledger .st.c{color:var(--ink-3)} .ledger .st.x{color:var(--coral)}
+
+  /* ============ experimental suite (bottom) ============ */
+  #suite{max-width:1340px; margin:0 auto; padding:8vh 28px 4vh; border-top:1px solid var(--line)}
+  #suite .suite-head{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.6px; color:var(--ink-3)}
+  #suite h2{font-size:23px; margin:8px 0 6px}
+  #suite .suite-sub{max-width:72ch; color:var(--ink-2); font-size:14.5px; margin:0 0 22px}
+  .suite-tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:26px}
+  .suite-tabs button{font-family:var(--font-mono); font-size:12px; color:var(--ink-2);
+    background:transparent; border:1px solid var(--line-2); border-radius:999px; padding:7px 16px; cursor:pointer}
+  .suite-tabs button.on{background:var(--green); color:#fff; border-color:var(--green)}
+  .suite-panel{display:none}
+  .suite-panel.on{display:block}
+
+  /* catalog gallery */
+  .cat{display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:26px}
+  .cat figure{margin:0; border:1px solid var(--line); border-radius:3px; padding:14px; background:var(--faint)}
+  .cat img{display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:2px; background:#fff}
+  .cat figcaption{font-size:12.5px; color:var(--ink-2); line-height:1.55; margin-top:10px}
+  .cat figcaption b{font-family:var(--font-mono); font-size:11px; color:var(--ink); letter-spacing:.4px}
+  .cat figcaption .take{color:var(--ink-3)}
+
+  /* ============ subvocal viewer (ported instrument) ============ */
+  #sv{border:1px solid var(--line); border-radius:3px; padding:16px; background:var(--faint)}
+  #sv .sv-head{font-family:var(--font-mono); font-size:11px; color:var(--ink-3); margin-bottom:10px}
+  #sv-bar{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; padding:4px 0 10px; font-size:12.5px}
+  #sv-bar label{color:var(--ink-3); font-family:var(--font-mono); font-size:11px}
+  #sv select{background:var(--paper); color:var(--ink); border:1px solid var(--line-2);
+    border-radius:6px; padding:3px 6px; font:12px var(--font-mono)}
+  .sv-tabs{display:flex; gap:4px; flex-wrap:wrap}
+  .sv-tabs button{background:none; border:1px solid var(--line-2); border-radius:999px;
+    color:var(--ink-2); padding:3px 11px; font:11px var(--font-mono); cursor:pointer}
+  .sv-tabs button.on{background:var(--sv-accent); border-color:var(--sv-accent); color:#fff}
+  .sv-tabs button.bad{border-style:dashed; opacity:.75}
+  #sv-split{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0 22px; align-items:start}
+  @media (max-width:980px){ #sv-split{grid-template-columns:1fr} }
+  #sv-cube{width:100%; height:520px; display:block}
+  #sv-controls{display:flex; align-items:center; gap:12px; font-size:12px; color:var(--ink-3)}
+  #sv-scrub{flex:1; accent-color:var(--sv-accent)}
+  #sv-play{background:none; border:1px solid var(--line-2); border-radius:6px; color:var(--ink-2);
+    padding:2px 12px; cursor:pointer; font:12px var(--font-mono)}
+  #sv-phase{min-width:170px; font-family:var(--font-mono); font-size:10.5px}
+  #sv .legend{padding:8px 0}
+  #sv .legend i.ring{background:none; border:2px solid; width:9px; height:9px; border-radius:2px}
+  #sv-chatwrap{padding:2px 0 8px}
+  #sv-chat{border:1px solid var(--line-2); border-radius:14px; background:var(--paper);
+    padding:16px 16px 14px; max-height:66vh; overflow-y:auto}
+  #sv-chat .chat-head{font-size:11px; color:var(--ink-3); text-align:center; margin-bottom:10px;
+    font-family:var(--font-mono)}
+  #sv-chat .sysline{font-size:11px; color:var(--ink-3); text-align:center; margin:6px 12px 12px; opacity:.75}
+  .msg{max-width:86%; padding:9px 13px; border-radius:14px; margin:8px 0; font-size:13px;
+    line-height:1.45; white-space:pre-wrap; word-break:break-word}
+  .msg .who{display:block; font-size:10px; color:var(--ink-3); margin-bottom:3px;
+    font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.06em}
+  .msg.user{margin-left:auto; background:var(--sv-accent-soft); border:1px solid var(--line);
+    border-bottom-right-radius:4px}
+  .msg.asst{margin-right:auto; background:var(--faint); border:1px solid var(--line-2);
+    border-bottom-left-radius:4px}
+  .msg.ghost{margin-right:auto; background:none; border:1.5px dashed var(--green);
+    border-bottom-left-radius:4px; opacity:.85}
+  .msg.ghost .who{color:var(--green)}
+  .hl-seq{font-family:var(--font-mono); font-weight:600}
+  .hl-map{font-family:var(--font-mono); color:var(--green); font-weight:600}
+  .tok-digit{font-family:var(--font-mono); color:var(--sv-accent-ink); font-weight:600}
+  .tok-code{font-family:var(--font-mono); color:var(--green); font-weight:600}
+  #sv-verdict{font-size:12px; margin:6px 2px 0; font-family:var(--font-mono)}
+  #sv-verdict.ok{color:var(--green)} #sv-verdict.no{color:var(--coral)}
+  #sv-chatnote{font-size:11.5px; color:var(--ink-3); margin-top:10px; line-height:1.5}
+  #sv-tracewrap{padding:14px 0 4px; max-width:980px}
+  #sv-tracewrap h3{font-size:13px; font-weight:600; margin:14px 0 2px}
+  #sv-tracewrap .note{font-size:12px; color:var(--ink-3); margin:0 0 8px}
+  #sv-trace{width:100%; max-width:980px; height:190px; display:block}
+  #sv-meta{padding:8px 0 0; font-size:11.5px; color:var(--ink-3); font-family:var(--font-mono); white-space:pre-wrap}
+
+  footer{max-width:1340px; margin:0 auto; padding:5vh 28px 16vh; color:var(--ink-3);
+    font-size:12.5px; line-height:1.8; border-top:1px solid var(--line)}
+
+  @media (max-width:1040px){
+    .story{grid-template-columns:1fr; padding-left:28px}
+    .beat{min-height:auto; margin:6vh 0 2vh; max-width:62ch}
+    .stage-wrap{order:2}
+    .stage{position:static; height:auto; display:block; margin:0 0 8vh}
+    .stage-inner{min-height:auto}
+    .stage-state{position:static; opacity:1; visibility:visible; transform:none; display:none}
+    .stage-state.on{display:flex}
+    #rail{display:none}
+  }
+</style>
+</head>
+<body>
+<button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
+<nav id="rail" aria-label="Progress"></nav>
+
+<div class="story">
+<!-- ============================== LEFT ============================== -->
+<div class="beats">
+
+<section class="beat intro" data-beat="0" data-viz="capacity">
+  <div class="eyebrow">HOLD THAT THOUGHT · A RESEARCH SYNTHESIS</div>
+  <h1>Seeing a model go off-track from the inside</h1>
+  <p class="subtitle">Capacity limits, representational interference, and the gap between what a model computes and what it can say</p>
+  <p class="byline">Christopher J. Diak · Dartmouth College</p>
+  <p>A language model can leave its instructions behind for reasons far more mundane than deception or reward hacking. When a task demands more <em>concurrent bindings</em> — this value, in this slot, right now — than the model's medium affords, generation goes off-policy while still looking fluent. This page collates the measurements: where the limit sits, what machinery produces it, the internal warning signature that precedes the visible error, why the model's own report of its state cannot be trusted, and where intervention during generation may be possible.</p>
+</section>
+
+<section class="beat" data-beat="1" data-viz="wall" data-sec="PHENOMENON">
+  <div class="tag">THE PHENOMENON</div>
+  <h2>Off-policy before reward: the wall</h2>
+  <p>Backward digit span is the scalpel. Show the model a short list of digits and ask for it reversed. Nothing has to be remembered — the whole list sits in context, in plain view. Forward span (reprint the list) uses the same information and is essentially free: <strong>≥96% at every length tested</strong>, in every model. Only the backward version requires <em>manipulation</em> — holding every value while walking the positions in reverse.</p>
+  <p>Manipulation collapses. Qwen2.5-3B crosses 50% at length 8, the 1.5B at 6, and the 0.5B never clears 50% at any length. The wall scales with model size; it never goes away. Fifty trials per length, bootstrap confidence intervals, replicated in a second answer format — <strong>the wall is the task, not the formatting</strong>.</p>
+  <p>No adversary. No misaligned objective. A capacity cliff, on a task whose answer is fully in view — and on the far side of the cliff the model is generating confidently off-policy.</p>
+</section>
+
+<section class="beat" data-beat="2" data-viz="lens" data-sec="INSTRUMENTS">
+  <div class="tag">INSTRUMENTS</div>
+  <h2>The logit lens, tuned</h2>
+  <p>The <strong>logit lens</strong> applies the model's own final decoder to its intermediate layers: at every depth, what would the model say if it had to answer right now? The raw lens misfires on this model family, so we trained a <strong>tuned lens</strong> — a learned affine correction per layer, per model<sup class="cite"><a href="https://arxiv.org/abs/2303.08112" target="_blank">1</a></sup> — and every reading below goes through it.</p>
+  <p>The figure on the right is the instrument on a real run: reverse digit span on Qwen2.5-3B, every cell the top-1 token the lens reads at that layer and output position. The answer columns settle <em>late</em> — the digits are re-decided most of the way up the stack.</p>
+  <p>Everything on this page is a linear read of the residual stream. No dataset-specific probe is trained to find the failure; the model's own decoder, gently recalibrated, is enough to see it.</p>
+</section>
+
+<section class="beat" data-beat="3" data-viz="sortflow" data-sec="">
+  <div class="tag">FINDING · INTERFERENCE</div>
+  <h2>Interference, caught in flight</h2>
+  <p>Fix the candidate set and track every candidate's rank at every layer — a per-layer re-sort of the same small field. At the output slots of the reversal, the coarse work is already done: essentially every candidate still in contention is a digit. What the layers keep re-deciding is <em>which</em> digit.</p>
+  <p>Inside that re-sort, the binding problem is caught in the act: the digit belonging to the <em>adjacent</em> slot transiently outranks the correct one through the middle of the stack before losing near the top. This near-miss occurs in <strong>82–88% of trials the model gets right</strong>, in all three models.</p>
+  <p>Two properties make this an early-warning signal rather than a curiosity. It is <strong>linearly decodable</strong> — an affine read of the residual stream, no bespoke probe. And it <strong>leads the behavioral collapse</strong>: as list length climbs toward the wall, the crossing rate is already high and rising while accuracy is still comfortable. The representation degrades before the output does.</p>
+</section>
+
+<section class="beat" data-beat="4" data-viz="mediation" data-sec="MECHANISM">
+  <div class="tag">MECHANISM · AIMS 1.1 &amp; 1.2</div>
+  <h2>The two retrieval modes, localized</h2>
+  <p><strong>Aim 1.1: distinguish the mechanisms of context-based retrieval.</strong> <b>Hypothesis:</b> intermediate-to-late attention heads support context-based retrieval via cue-matching to recently seen tokens.</p>
+  <p><strong>Aim 1.2: find the limits of weight-based retrieval.</strong> <b>Hypothesis:</b> memorized completions emerge from embeddings and feed-forward layers rather than context-driven attention.</p>
+  <p class="ivdv"><b>Method</b>: causal mediation — patch one attention head's activity from a clean run into a minimally-corrupted run and measure how much of the correct answer it restores; then ablate. Every trial carries a matched mismatched-donor null; heads pass only with sign-flip permutation (B=20k), FDR correction across all heads, <em>and</em> a minimum effect size of 0.05.</p>
+  <p>The result is one-sided, and it survived a power analysis. <strong>Which-digit (VALUE) retrieval localizes</strong>: 3–4 late heads per model restore 11–22% of the answer, and mean-ablating them cuts backward accuracy nearly in half while leaving forward span untouched — load-bearing, not just correlated. <strong>Which-slot (INDEX) structure localizes nowhere</strong>: zero passing heads in any model, under a pipeline that detects injected effects half the size we report. The positional bookkeeping is diffuse — spread through the stack — which is exactly what a unified-reservoir memory would look like.</p>
+</section>
+
+<section class="beat" data-beat="5" data-viz="interference" data-sec="">
+  <div class="tag">MECHANISM · AIMS 1.3 &amp; 2</div>
+  <h2>Compositional generalization under load</h2>
+  <p><strong>Aim 1.3: assess compositional generalization.</strong> Symbolic tasks varying complexity systematically. <b>Hypothesis:</b> compositional reasoning requires attention-driven retrieval interacting with feed-forward transformations, and it is the interaction that saturates.</p>
+  <p><strong>Aim 2: characterize the working-memory constraint.</strong> <b>Hypothesis:</b> performance degrades predictably under load, visible as declining accuracy <em>and</em> as interference under the lens, before the accuracy moves.</p>
+  <p>The decisive test holds length fixed and varies <em>interference risk</em>. A repeated digit is one value bound to two slots — shared-feature interference — and accuracy falls with repeat count at constant length (p = 4.5×10⁻⁴ at 1.5B, p = 0.019 at 3B). Making neighboring digits numerically adjacent — which a surface-confusability story says should hurt — makes sequences <em>easier</em>: a monotone run compresses to one rule instead of N independent bindings.</p>
+  <p><strong>At fixed length, the operative variable is the number of independent bindings.</strong> The wall is the binding problem, not a length effect — and a system that fails by confusing which value goes in which slot must have been binding values to slots at all. The failure mode itself certifies the representation as compositional.</p>
+</section>
+
+<section class="beat" data-beat="6" data-viz="jlens" data-sec="SELF-REPORT">
+  <div class="tag">SELF-REPORT</div>
+  <h2>Decodable before reportable</h2>
+  <p>Two instruments read the same residual stream. The <strong>tuned lens</strong> asks: can an external decoder read the correct answer at layer ℓ? The <strong>J-lens</strong><sup class="cite"><a href="https://transformer-circuits.pub/2026/workspace/index.html" target="_blank">2</a></sup> asks: is that content in the subspace that governs what the model can <em>say</em>? The two resolve at different depths — reportability is a late gate, arriving a median of <strong>four layers after</strong> the content is externally decodable, pinned at ~83–89% of network depth in all three models.</p>
+  <p>This is why self-report is not a monitoring channel. Most of even a reportable concept's vector lies outside the reportable subspace; and function vectors — directions that causally <em>induce</em> a task when patched into the stream — are the standing proof that causal potency and verbalizability come fully apart.<sup class="cite"><a href="https://arxiv.org/abs/2310.15213" target="_blank">3</a></sup> A fluent self-description can sit on top of machinery it has no access to. Decodability and access are different things, and only the first is guaranteed to be honest.</p>
+  <p>The registered experiment (detect-versus-report): probe the stream for an impending-failure signal, and separately ask the model to predict its own success, trial by trial. <b>Prediction:</b> the failure is decodable before it is reportable — the monitor sees the cliff before the model does.</p>
+</section>
+
+<section class="beat" data-beat="7" data-viz="subvocal" data-sec="INTERVENTION">
+  <div class="tag">INTERVENTION · PART 1</div>
+  <h2>You can't talk to the layers</h2>
+  <p>If the interesting state lives mid-stack, can an instruction reach it? The <strong>subvocal</strong> experiment asks the model to reverse digits while "thinking" in a substitute code — 1=a, 2=b, … — and <em>never write a letter</em>. Compliance and non-compliance produce identical output; the surface is blind by design. The tuned lens is the only witness.</p>
+  <p>Controls separate instruction from priming (state the map, then say it's irrelevant), calibrate what real letter-use looks like (make the model write letters overtly), test selection of an existing code (think in Spanish number words) against synthesis of a novel one, and break the canonical digit–letter association with a scrambled map.</p>
+  <p>The verdict: instruction <strong>elevates</strong> the alternate code above priming, but never installs it as the working representation — letters are top-1 in ~1% of pre-gate reads during silent reversal, versus ~10% when letters are actually being written. The scrambled map collapses task accuracy outright. <strong>Novel internal codes need externalization</strong>: current evidence says there is no prompt-side channel that redirects what the intermediate layers compute in. The full instrument, on real runs, is in the suite below.</p>
+</section>
+
+<section class="beat" data-beat="8" data-viz="serial" data-sec="">
+  <div class="tag">INTERVENTION · PART 2</div>
+  <h2>Shifting generation when it goes off-track</h2>
+  <p>What <em>does</em> move the wall is changing where the bindings live. Let the model write its intermediate steps — externalize the tape — and manipulation moves toward maintenance: the 0.5B, which never crossed 50% silently, acquires a wall; the 1.5B gains a length. The limit is on <em>silent, concurrent</em> binding, not on the task.</p>
+  <p>Put the pieces together and an engineering surface opens. The failure signature is linearly decodable, mid-stack, <em>before</em> the output commits — earlier than the reportable subspace, and without asking the model anything. A monitor reading that signal during the forward pass knows the generation is going off-track while there is still time to act: pause and externalize, re-route to a checked tool, or intervene at the activation level — the same channel function vectors already prove can steer behavior causally.</p>
+  <p>That is the program: <strong>detect off-policy formation from the inside, earlier than behavior, earlier than self-report — then shift the generation while it is still in flight.</strong></p>
+</section>
+
+<section class="beat" data-beat="9" data-viz="ledger" data-sec="GROUND RULES">
+  <div class="tag">GROUND RULES</div>
+  <h2>The standard of evidence</h2>
+  <p>Every claim above is a measured figure; every construct carries an operational anchor and a named falsifier. Per-trial matched nulls, paired permutation tests, correction for testing hundreds of heads at once, and a minimum-effect floor — which has already earned its keep by catching three "significant" heads with effect sizes of a tenth of a percent: statistically detectable, mechanistically meaningless, reported as nothing.</p>
+  <p>One registered loss is on the books: separable early indexing heads were predicted, and found nowhere. It is logged as a loss, not silently absorbed — the one-sided dissociation became evidence for the unified-reservoir picture only after the original prediction was marked failed.</p>
+</section>
+
+</div>
+
+<!-- ============================== RIGHT ============================== -->
+<div class="stage-wrap">
+  <div class="stage"><div class="stage-inner" id="stage-inner"></div></div>
+</div>
+</div>
+
+<!-- ============================== SUITE ============================== -->
+<section id="suite">
+  <div class="suite-head">THE EXPERIMENTAL SUITE</div>
+  <h2>Instruments and results</h2>
+  <p class="suite-sub">The story above is the short path through a larger measured program. The <b>subvocal instrument</b> below replays real captured runs — every layer of every emitted token, through the tuned lens — and the <b>results catalog</b> holds the full figure set the claims are drawn from. All local-model data: Qwen2.5-Instruct at 0.5B / 1.5B / 3B.</p>
+  <div class="suite-tabs" role="tablist">
+    <button class="on" data-panel="panel-sv">subvocal · the instrument, live</button>
+    <button data-panel="panel-cat">results catalog · the figures</button>
+  </div>
+
+  <!-- ---------- subvocal viewer ---------- -->
+  <div class="suite-panel on" id="panel-sv">
+    <div id="sv">
+      <div class="sv-head">tuned-lens top-K at every layer of every emitted token — does “think in letters” change the internal code? · Qwen2.5-1.5B, captured runs</div>
+      <div id="sv-bar">
+        <label style="display:none" id="sv-runwrap">run <select id="sv-selRun"></select></label>
+        <label>seq <select id="sv-selSeq"></select></label>
+        <label>condition</label><div class="sv-tabs" id="sv-tabsCond"></div>
+        <label>column</label><div class="sv-tabs" id="sv-tabsCol"></div>
+      </div>
+      <div id="sv-split">
+        <div>
+          <canvas id="sv-cube"></canvas>
+          <div id="sv-controls">
+            <button id="sv-play">▶ play</button>
+            <input id="sv-scrub" type="range" min="0" max="1000" value="0">
+            <span id="sv-phase"></span>
+          </div>
+          <div class="legend">
+            <span>front face = the tuned lens (top-1) · one column per emitted token</span>
+            <span>depth = the next-K candidates behind each cell · brighter = more probable</span>
+            <span><i class="ring" style="border-color:var(--sv-accent-ink)"></i>ring = the digit this column emits</span>
+            <span><i class="ring" style="border-color:var(--green)"></i>ring = its mapped code token</span>
+            <span><i style="background:var(--sv-accent)"></i>flash = promoted</span>
+            <span><i style="background:var(--coral)"></i>flash = demoted</span>
+          </div>
+        </div>
+        <div id="sv-chatwrap">
+          <div id="sv-chat"></div>
+          <div id="sv-chatnote"></div>
+        </div>
+      </div>
+      <div id="sv-tracewrap">
+        <h3>rank trace — the focus column, layer by layer</h3>
+        <p class="note">rank of the emitted digit (cobalt) and of its mapped code token (green) in the tuned-lens ordering; log scale.
+          Dashed vertical = the reportability gate measured by the J-lens batteries. Code evidence below the gate that
+          survives the primed-ignore control is the code-switch signature.</p>
+        <canvas id="sv-trace"></canvas>
+      </div>
+      <div id="sv-meta"></div>
+    </div>
+  </div>
+
+  <!-- ---------- results catalog ---------- -->
+  <div class="suite-panel" id="panel-cat">
+    <div class="cat">
+      <figure><img loading="lazy" src="data/figures/01_benchmark.png" alt="Forward vs backward digit span accuracy by length">
+        <figcaption><b>A · THE BEHAVIORAL WALL</b> — forward (maintenance) vs backward (manipulation) exact-match accuracy vs list length, 50 trials/length, bootstrap CIs. <span class="take">Forward ≥96% everywhere; backward T50: 0.5B never crosses · 1.5B = 6 · 3B = 8.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/02_mediation_grid.png" alt="Single-head patch recovery heatmap, layers by heads">
+        <figcaption><b>C1 · CAUSAL MEDIATION</b> — recovery of the clean answer when one attention head is patched, layers × heads. <span class="take">A late sparse band, not a fog: 0.5B ~L16–22, 1.5B ~L22–24, 3B ~L31–35. Retrieval localizes, later as models grow.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/03_dissociation.png" alt="INDEX vs VALUE recovery scatter per head">
+        <figcaption><b>C2 · VALUE vs INDEX</b> — each point one head: x = which-slot recovery, y = which-digit recovery; dotted = 0.05 effect floor. <span class="take">Which-digit heads exist (3–4 per model, effects 0.11–0.22); which-slot heads never dissociate. One-sided — logged against the original prediction.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/11_power_control.png" alt="Detection rate vs injected effect size">
+        <figcaption><b>C3 · POWER CONTROL</b> — inject synthetic INDEX effects into real noise; re-run the full reporting pipeline. <span class="take">MDE80 ≈ 0.06: the INDEX null is a powered null, not a blind pipeline.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/04_necessity.png" alt="Ablation of significant heads vs random heads">
+        <figcaption><b>C4 · NECESSITY</b> — mean-ablate the VALUE heads during generation vs random-head draws; forward span as control. <span class="take">1.5B backward 0.46→0.22 (p=0.032 vs random), forward unchanged. The heads are load-bearing for manipulation only.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/06_binding_crossing.png" alt="Crossing rate on solved trials per model">
+        <figcaption><b>D1 · THE CROSSING</b> — fraction of <i>solved</i> trials where the adjacent slot's digit transiently outranks the correct one mid-stack. <span class="take">0.83 / 0.88 / 0.82 across models: binding interference is visible inside correct answers.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/05_band_overlap.png" alt="Overlap of corruption-sensitive band with mediation layers">
+        <figcaption><b>D2 · TWO INSTRUMENTS, SAME DEPTHS</b> — overlap of the corruption-sensitive (θ) band with the VALUE-head layers, against a random-band null. <span class="take">0.61 / 0.84 / 0.77 vs null 0.24 / 0.18 / 0.09 (p≈2×10⁻⁴ each). Where bindings are read is where the machinery lives.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/09_crossing_vs_N.png" alt="Solve rate and crossing rate vs list length">
+        <figcaption><b>D5 · LEADING INDICATOR</b> — solve rate (black) falls toward the wall; crossing rate (red) is already high and climbing while behavior is still fine. <span class="take">The representational signature leads the behavioral collapse.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/08_interference.png" alt="Accuracy vs repeats and adjacency at fixed length">
+        <figcaption><b>D4 · BINDING, NOT LENGTH</b> — at fixed length: repeated digits (one value, two slots) hurt (1.5B p=4.5×10⁻⁴, 3B p=0.019); monotone runs <i>help</i> (3B 0.37→0.63). <span class="take">The operative variable is independent bindings / compressibility.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/10_serialization.png" alt="Silent vs write-steps reversal accuracy">
+        <figcaption><b>D6 · EXTERNALIZATION</b> — silent reverse vs a write-steps-first arm on paired sequences. <span class="take">0.5B: no silent wall → tape T50=3; 1.5B: 6→7; 3B: 8 with a longer tail. The limit is on silent concurrent binding.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/jlens_battery_qwen-0_5b.png" alt="J-lens battery, Qwen 0.5B">
+        <figcaption><b>E · THE REPORTABILITY GATE</b> — tuned-lens resolve vs J-lens resolve on identical residuals (0.5B battery, n=78 slot-records). <span class="take">J-resolve lags tuned-resolve by a median of ~4 layers and pins late (~0.83–0.89 of depth): content is decodable before it is reportable, and the crossing survives the change of basis.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/f_subvocal_conditions.png" alt="Instructed-code ranks by condition">
+        <figcaption><b>F1 · SUBVOCAL CONDITIONS</b> — median rank of the instructed code token per condition; solid = layers before the reportability gate. <span class="take">Instruction elevates the code above priming (C vs B) but never approaches the working top-1; the overt-writing arm (F) is the calibration ceiling.</span></figcaption></figure>
+      <figure><img loading="lazy" src="data/figures/scaling_combined_perpos_width.png" alt="Peak resolved information vs residual width">
+        <figcaption><b>SCALING · CAPACITY IS WIDTH</b> — peak resolved information vs residual-stream width, 11 models, two families, 18× range. <span class="take">A cross-family collision at width 8192: same width, different family and parameter count, same capacity. Binding is not storage.</span></figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Hold That Thought</strong> — a synthesis of the compositionality program (behavioral walls, causal mediation,
+  tuned-lens interference) and the subvocal program (instructed alternate codes) on shared models and one task family.
+  Every figure is measured data: 22,600 local trials across Qwen2.5-Instruct 0.5B/1.5B/3B plus ~60,000 hosted-API trials
+  across 11 models for the capacity scaling. Tuned lenses trained per model. Statistics: per-trial mismatched-donor nulls,
+  sign-flip permutation tests (B=20k), Benjamini–Hochberg FDR across heads, minimum effect floor 0.05.
+  Christopher J. Diak · christopherjdiak@gmail.com · Built with Claude (Fable 5).</p>
+</footer>
+
+<script src="lib/paper-exemplar.js"></script>
+<script src="viewer-data/conditions.js"></script>
+<script src="viewer-data/run_qwen_1_5b.js"></script>
+<script>
+/* ============================== data ============================== */
+const MEASURED = {
+  l405: {label:"Llama-3.1 405B (w=16384)", pts:[[2,6.6],[6,19.9],[10,33.2],[14,40.8],[18,49.1],[22,66],[26,79.4],[30,83.5],[34,87.2],[38,86.7],[42,88.3],[46,115.8],[50,106.4],[54,105.6],[58,126.2],[62,116.2],[66,95.6],[70,129.7],[74,119],[78,117.9]]},
+  q72:  {label:"Qwen2.5 72B (w=8192)",    pts:[[2,6.6],[6,19.9],[10,32.8],[14,41.7],[18,46.2],[22,47],[26,44],[30,51.2],[34,48.9],[38,40.7],[42,44.7],[46,46.9],[50,30.7],[54,32.1],[58,33],[62,29.8]]},
+  fwd:  {label:"maintenance", pts:[[2,6.6],[10,33.2],[18,59.8],[26,86.4],[34,113],[42,139.5],[50,166.1],[58,192.7],[66,219.3],[74,245.9]]}
+};
+
+/* ============================== stage machinery ============================== */
+const $ = s => document.querySelector(s);
+const stageInner = $('#stage-inner');
+const STATES = {};
+function defState(id, title, capHTML, render){ STATES[id] = {title, capHTML, render, rendered:false}; }
+function mountStates(){
+  for (const [id, st] of Object.entries(STATES)){
+    const el = document.createElement('div');
+    el.className = 'stage-state'; el.id = 'st-' + id;
+    el.innerHTML = `<div class="stage-head"><span class="dot"></span><span>${st.title}</span></div>
+      <div class="card" id="card-${id}"></div><div class="stage-cap">${st.capHTML}</div>`;
+    stageInner.appendChild(el);
+    st.el = el;
+  }
+}
+let current = null;
+function show(id){
+  if (!STATES[id] || id === current) return;
+  const st = STATES[id];
+  if (!st.rendered){ const c = $('#card-' + id); c.innerHTML=''; st.render(c); st.rendered = true; }
+  for (const s of Object.values(STATES)) s.el.classList.remove('on');
+  st.el.classList.add('on');
+  current = id;
+}
+
+/* ============================== helpers ============================== */
+const NS = 'http://www.w3.org/2000/svg';
+function svg(w, h){ const s = document.createElementNS(NS,'svg');
+  s.setAttribute('viewBox',`0 0 ${w} ${h}`); return s; }
+function el(s, tag, attrs, text){ const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text; s.appendChild(e); return e; }
+function poly(pts, X, Y){ return pts.map(p => `${X(p[0])},${Y(p[1])}`).join(' '); }
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function heat(p){ const lo=css('--heat-lo').split(','), hi=css('--heat-hi').split(',');
+  const t=Math.max(0,Math.min(1,p));
+  const c=i=>Math.round(+lo[i]+(+hi[i]-+lo[i])*t);
+  return `rgb(${c(0)},${c(1)},${c(2)})`; }
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function short(t){ t=String(t).replace(/\n/g,'\\n').trim(); if(t==='')t='·'; return t.length>3?t.slice(0,3):t; }
+
+/* ============================== stage renderers ============================== */
+/* capacity, measured (intro) */
+defState('capacity', 'FIG 1 · MAINTENANCE vs MANIPULATION, MEASURED IN BITS',
+  'Resolved information vs binding load, hosted-API runs at temperature 0, bare-answer channel (audited: zero reasoning traces). Maintenance climbs without bound; manipulation saturates at a model-specific plateau. <b>The plateau is the capacity.</b>',
+  card => {
+    const W=640, H=430, m={l:56,r:16,t:18,b:44}, s=svg(W,H); card.appendChild(s);
+    const X=n=>m.l+(n/80)*(W-m.l-m.r), Y=b=>H-m.b-(b/260)*(H-m.t-m.b);
+    el(s,'line',{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,class:'axis'});
+    el(s,'line',{x1:m.l,y1:H-m.b,x2:m.l,y2:m.t,class:'axis'});
+    el(s,'text',{x:W/2,y:H-10,class:'lab','text-anchor':'middle'},'binding load N (digits, with replacement)');
+    const yl=el(s,'text',{x:14,y:(H-m.b+m.t)/2,class:'lab','text-anchor':'middle'},'resolved information (bits)');
+    yl.setAttribute('transform',`rotate(-90 14 ${(H-m.b+m.t)/2})`);
+    el(s,'polyline',{points:poly(MEASURED.fwd.pts,X,Y),fill:'none',stroke:css('--cobalt'),'stroke-width':2});
+    el(s,'polyline',{points:poly(MEASURED.l405.pts,X,Y),fill:'none',stroke:css('--ink'),'stroke-width':1.7,opacity:.9});
+    el(s,'polyline',{points:poly(MEASURED.q72.pts,X,Y),fill:'none',stroke:css('--coral'),'stroke-width':1.7});
+    el(s,'text',{x:W-m.r,y:Y(238),class:'lab2','text-anchor':'end',fill:css('--cobalt')},'maintenance: climbs without bound');
+    el(s,'text',{x:W-m.r,y:Y(140),class:'lab2','text-anchor':'end'},'Llama-405B: plateau ≥126 bits (censored)');
+    el(s,'text',{x:X(40),y:Y(24),class:'lab2'},'Qwen-72B: plateau ≈52 bits');
+    const lg=document.createElement('div'); lg.className='legend';
+    lg.innerHTML=`<span><i style="background:var(--cobalt)"></i>forward (reprint)</span>
+      <span><i style="background:var(--ink)"></i>backward · Llama-3.1 405B</span>
+      <span><i style="background:var(--coral)"></i>backward · Qwen2.5 72B</span>`;
+    card.appendChild(lg);
+  });
+
+/* the behavioral wall (real figure) */
+function imgState(id, title, cap, src){
+  defState(id, title, cap, card => {
+    const i=document.createElement('img'); i.src=src; i.alt=title; card.appendChild(i);
+  });
+}
+imgState('wall', 'FIG 2 · THE BEHAVIORAL WALL — FORWARD vs BACKWARD SPAN',
+  'Exact-match accuracy vs list length, 50 trials/length with bootstrap CIs, replicated in a second answer format. Forward stays ≥96% wherever backward is challenged. <b>T50: 0.5B never crosses · 1.5B = 6 · 3B = 8.</b>',
+  'data/figures/01_benchmark.png');
+
+/* the tuned lens grid — real baked run */
+defState('lens', 'FIG 3 · THE TUNED LENS — QWEN2.5-3B, REVERSE DIGIT SPAN (REAL RUN)',
+  'Every cell: the top-1 token the tuned lens reads at that layer × output position; color = its probability. Purple row = what the model actually emitted. The answer columns settle late.',
+  card => {
+    const L=EXEMPLAR.lens, cols=L.cols, layers=L.layers, R=layers.length, Cn=cols.length;
+    const colW=Math.min(34, Math.floor(560/Cn)-3);
+    let h='<div class="lensbox"><div class="lens-spine">transformer</div>'
+      +`<div class="lensgrid" style="grid-template-columns:34px repeat(${Cn},${colW}px)">`;
+    h+='<div class="lens-rlab" style="color:var(--purple)">output</div>';
+    for(let c=0;c<Cn;c++) h+=`<div class="flap out"><span style="color:#fff">${esc(short(cols[c].toks[R-1]))}</span></div>`;
+    for(let ri=R-1; ri>=0; ri--){
+      const lab=(ri%3===0||ri===R-1)?('L'+layers[ri]):'';
+      h+=`<div class="lens-rlab">${lab}</div>`;
+      for(let c=0;c<Cn;c++){
+        const p=cols[c].probs[ri], t=short(cols[c].toks[ri]);
+        h+=`<div class="flap" style="background:${heat(p)}"><span>${esc(t)}</span></div>`;
+      }
+    }
+    h+='<div class="lens-rlab" style="color:var(--ink-3)">input</div>';
+    for(let c=0;c<Cn;c++) h+=`<div class="lens-in">${esc(short(cols[c].ctx))}</div>`;
+    h+='</div></div>';
+    h+=`<div class="legend"><span>token = top-1 at that layer</span><span class="ramp"></span><span>probability</span>
+      <span>answer: ${EXEMPLAR.answer.join(' ')}</span></div>`;
+    card.innerHTML=h;
+  });
+
+/* the top-k shuffle — same run */
+defState('sortflow', 'FIG 4 · THE TOP-K SHUFFLE — SAME RUN, FOCUS SLOT 3',
+  'Each line is one tracked candidate migrating through the per-layer re-sort (left = more likely). The answer digit climbs to rank 1; the digit leaked from the wrong slot transiently outranks it inside the binding band — the near-miss inside a correct answer.',
+  card => {
+    const SF=EXEMPLAR.sortflow, TS=SF.tokens, R=SF.layers.length, Cn=TS.length;
+    const W=560, X0=68, X1=W-96, Ytop=26, plotH=330, Yb=Ytop+plotH, dx=(X1-X0)/(Cn-1);
+    const X=rank=>X0+rank*dx, Y=r=>Yb-(r/(R-1))*plotH;
+    const rk=[]; for(let i=0;i<Cn;i++) rk.push(new Array(R));
+    for(let r=0;r<R;r++){
+      const idx=[...Array(Cn).keys()].sort((a,b)=>TS[b].scores[r]-TS[a].scores[r]);
+      idx.forEach((tokI,p)=>rk[tokI][r]=p);
+    }
+    const s=svg(W,Yb+34); card.appendChild(s);
+    const tb=SF.theta_band; let yb1=Yb-tb[1]*plotH, yb0=Yb-tb[0]*plotH;
+    if(yb0-yb1<10){ const mid=(yb0+yb1)/2; yb1=mid-5; yb0=mid+5; }
+    el(s,'rect',{x:X0-14,y:yb1,width:X1-X0+110,height:yb0-yb1,fill:css('--coral'),opacity:.09});
+    el(s,'text',{x:X1+10,y:(yb0+yb1)/2+3,class:'lab',fill:css('--coral')},'binding band');
+    el(s,'text',{x:X0,y:Yb+18,class:'lab'},'← more likely');
+    el(s,'text',{x:X1,y:Yb+18,class:'lab','text-anchor':'end'},'less likely →');
+    el(s,'text',{x:X0-8,y:Ytop+3,class:'lab','text-anchor':'end',fill:css('--purple')},'output');
+    el(s,'text',{x:X0-8,y:Yb,class:'lab','text-anchor':'end'},'L0');
+    const yl=el(s,'text',{x:13,y:(Ytop+Yb)/2,class:'lab','text-anchor':'middle'},'layer depth ↑');
+    yl.setAttribute('transform',`rotate(-90 13 ${(Ytop+Yb)/2})`);
+    function style(kind){
+      if(kind==='answer') return {c:css('--ink'), w:2.7, o:1};
+      if(kind==='leaked') return {c:css('--coral'), w:2.0, o:.95};
+      if(kind==='stable') return {c:css('--teal'), w:1.3, o:.45};
+      return {c:css('--ink-3'), w:1.0, o:.22};
+    }
+    for(let i=0;i<Cn;i++){
+      const st=style(TS[i].kind);
+      let d=''; for(let r=0;r<R;r++) d+=(r?'L':'M')+X(rk[i][r]).toFixed(1)+' '+Y(r).toFixed(1)+' ';
+      el(s,'path',{d:d.trim(),fill:'none',stroke:st.c,'stroke-width':st.w,opacity:st.o,'stroke-linejoin':'round'});
+    }
+    for(let j=0;j<Cn;j++){
+      if(TS[j].kind!=='answer'&&TS[j].kind!=='leaked') continue;
+      const st=style(TS[j].kind), x=X(rk[j][R-1]), y=Y(R-1);
+      let t=TS[j].tok.trim()||'·'; if(t.length>4)t=t.slice(0,4);
+      el(s,'circle',{cx:x,cy:y,r:3.2,fill:st.c});
+      el(s,'text',{x,y:y-8,class:'tok','text-anchor':'middle',fill:st.c},esc(t));
+      if(TS[j].kind==='answer') el(s,'text',{x:x-14,y:Ytop-9,class:'lab','text-anchor':'end',fill:css('--purple')},'rank 1 →');
+    }
+    const lg=document.createElement('div'); lg.className='legend';
+    lg.innerHTML=`<span><i style="background:var(--ink)"></i>the answer → rank 1</span>
+      <span><i style="background:var(--coral)"></i>leaked from the wrong slot</span>
+      <span><i style="background:var(--teal)"></i>the settled digit field</span>
+      <span><i style="background:var(--ink-3)"></i>raw-text tokens</span>`;
+    card.appendChild(lg);
+  });
+
+/* mediation — the robust version: real per-model results */
+defState('mediation', 'FIG 5 · CAUSAL MEDIATION, THE ROBUST VERSION',
+  'Significant VALUE (which-digit) heads per model under the full pipeline: mismatched-donor nulls, sign-flip permutation B=20k, BH-FDR across all heads, effect floor 0.05. INDEX (which-slot): zero dissociated heads anywhere, with MDE80 ≈ 0.06. Necessity by mean-ablation, forward span as control.',
+  card => {
+    card.innerHTML = `<table class="medtab">
+      <tr><th>model</th><th>value heads (effect)</th><th>band</th><th>index heads</th><th>ablate bwd</th><th>fwd Δ</th></tr>
+      <tr><td>Qwen 0.5B</td><td>L16H11 (0.22) · L20H12 · L16H0</td><td>L16–22 / 24</td><td>0</td><td>fragile†</td><td>—</td></tr>
+      <tr><td>Qwen 1.5B</td><td>L22H7 (0.20) · L24H10 (0.17) · L23H3 · L22H9</td><td>L22–24 / 28</td><td>0</td><td>0.46→0.22 (p=.032)</td><td>0</td></tr>
+      <tr><td>Qwen 3B</td><td>L31H7 (0.11) · +2 · L35H5 (joint)</td><td>L31–35 / 36</td><td>0 dissociated</td><td>0.56→0.38 (p=.065)</td><td>0</td></tr>
+    </table>
+    <p style="font-size:12px; color:var(--ink-3); margin:10px 0 0; line-height:1.6">
+    † the 0.5B breaks under any head surgery (forward too) — reported as uninterpretable, not as support.
+    The retrieval band migrates <b>later and tighter with scale</b>, and it coincides with the corruption-sensitive
+    band read independently by the lens (overlap 0.61 / 0.84 / 0.77 vs null 0.24 / 0.18 / 0.09, p≈2×10⁻⁴ each).
+    Full grids, scatter, power curve, and ablation clouds are in the results catalog below.</p>`;
+  });
+
+imgState('interference', 'FIG 6 · FIXED-LENGTH INTERFERENCE — BINDING, NOT LENGTH',
+  'Hold N fixed just below each model’s wall. Repeats (one value bound to two slots) drive accuracy down — 1.5B p=4.5×10⁻⁴, 3B p=0.019. Monotone runs compress to one rule and <b>help</b> (3B 0.37→0.63). The wall tracks independent bindings.',
+  'data/figures/08_interference.png');
+
+imgState('jlens', 'FIG 7 · THE REPORTABILITY GATE (QWEN 0.5B BATTERY, n=78 SLOT-RECORDS)',
+  'Left: J-resolve pins late (~L20) regardless of when content becomes decodable — a late gate, median lag ≈ +4 layers behind the tuned lens. Right: the interference crossing survives the change of basis. <b>Decodable before reportable.</b>',
+  'data/figures/jlens_battery_qwen-0_5b.png');
+
+imgState('subvocal', 'FIG 8 · INSTRUCTED ALTERNATE CODES — THE SUBVOCAL CONDITIONS',
+  'Median rank of the instructed code token per condition; solid = layers before the reportability gate. Instruction (C) elevates the code above priming (B) but never approaches working top-1; overt writing (F) is the calibration ceiling; the scrambled map (H) collapses accuracy. <b>The live instrument is in the suite below.</b>',
+  'data/figures/f_subvocal_conditions.png');
+
+imgState('serial', 'FIG 9 · EXTERNALIZATION MOVES THE WALL',
+  'Silent reverse (red) vs write-steps-first (blue dashed) on paired sequences. 0.5B: never crossed silently → acquires a wall at 3. 1.5B: 6 → 7. 3B: 8 with a longer tail. <b>The limit is on silent concurrent binding — which is why in-flight intervention is a live possibility.</b>',
+  'data/figures/10_serialization.png');
+
+/* ledger */
+defState('ledger', 'THE CONSTRUCT LEDGER',
+  'Every construct with its operational anchor and its named falsifier. Accommodated losses stay on the books.',
+  card => {
+    card.innerHTML = `<div style="max-height:74vh; overflow-y:auto"><table class="ledger">
+      <tr><th>construct</th><th>anchor</th><th>status</th><th>falsifier</th></tr>
+      <tr><td>maintenance / manipulation</td><td>forward vs backward span</td><td class="st m">MEASURED</td><td>backward tracking forward at all scales</td></tr>
+      <tr><td>binding interference</td><td>crossing; repeats at fixed N; signature leads collapse</td><td class="st m">MEASURED</td><td>errors unstructured; load = length not bindings</td></tr>
+      <tr><td>retrieval localization (VALUE)</td><td>mediation + necessity ablation, powered stats</td><td class="st m">MEASURED</td><td>effects vanish under matched nulls / floors</td></tr>
+      <tr><td>unified reservoir</td><td>powered null on INDEX localization</td><td class="st m">MEASURED †</td><td>a dissociated indexing head at equal power</td></tr>
+      <tr><td>capacity plateau (bits)</td><td>per-position Fano bound, 11 models</td><td class="st m">MEASURED</td><td>no stable plateau; scoring-dependent peak</td></tr>
+      <tr><td>intensive capacity (width)</td><td>8192 cross-family collision; width trend</td><td class="st m">MEASURED</td><td>capacity tracks parameters like storage</td></tr>
+      <tr><td>reportability gate</td><td>paired tuned-vs-J resolve</td><td class="st c">INSTRUMENTED</td><td>gate tracks availability once more models land</td></tr>
+      <tr><td>no prompt-side code channel</td><td>subvocal conditions vs controls</td><td class="st m">MEASURED</td><td>instructed code becomes working top-1 silently</td></tr>
+      <tr><td>detect vs report</td><td>probe vs trial-by-trial self-prediction</td><td class="st c">REGISTERED</td><td>nothing decodable at all</td></tr>
+      <tr><td>in-flight steering</td><td>externalization moves the wall; function-vector precedent</td><td class="st c">OPEN</td><td>no activation-level intervention shifts the wall</td></tr>
+    </table>
+    <p style="font-size:11.5px; color:var(--ink-3)">† includes one accommodated loss: indexing heads were predicted early-in-stack and separable; found nowhere. Logged per the standing rule.</p></div>`;
+  });
+
+/* ============================== wiring ============================== */
+mountStates();
+const beats=[...document.querySelectorAll('.beat')];
+const rail=$('#rail');
+beats.forEach(b=>{
+  if(b.dataset.sec){ const s=document.createElement('div'); s.className='rail-sec'; s.textContent=b.dataset.sec[0]; rail.appendChild(s); }
+  const a=document.createElement('a'); a.href='#'; a.title=b.querySelector('h1,h2')?.textContent||'';
+  a.addEventListener('click',e=>{e.preventDefault(); b.scrollIntoView({behavior:'smooth',block:'center'});});
+  rail.appendChild(a); b._dot=a;
+});
+const io=new IntersectionObserver(entries=>{
+  for(const e of entries){
+    if(e.isIntersecting){
+      show(e.target.dataset.viz);
+      beats.forEach(b=>b._dot.classList.toggle('on',b===e.target));
+    }
+  }
+},{rootMargin:'-42% 0px -42% 0px'});
+beats.forEach(b=>io.observe(b));
+show(beats[0].dataset.viz);
+
+/* theme */
+const themeBtn=$('#theme-toggle');
+function applyTheme(t){ document.documentElement.setAttribute('data-theme',t);
+  for (const s of Object.values(STATES)) s.rendered=false;
+  if(current){ const c=current; current=null; show(c); }
+  if(window._svTheme) window._svTheme(); }
+themeBtn.addEventListener('click',()=>{
+  applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');});
+if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches) applyTheme('dark');
+
+/* suite tabs */
+document.querySelectorAll('.suite-tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.suite-tabs button').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.suite-panel').forEach(p=>p.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById(btn.dataset.panel).classList.add('on');
+    if(btn.dataset.panel==='panel-sv' && window._svRedraw) window._svRedraw();
+  });
+});
+</script>
+
+<script>
+/* ============================== subvocal viewer (ported instrument) ============================== */
+'use strict';
+(function(){
+var RUNS = window.SUBVOCAL_RUNS||[];
+var SPEC = window.SUBVOCAL_CONDITIONS||null;
+if(!RUNS.length){ document.getElementById('sv-meta').textContent='no baked runs found'; return; }
+var S = { run:RUNS.length-1, cond:null, seq:0, col:0, p:0, playing:false };
+var MONO_FONT="'SF Mono', ui-monospace, Menlo, monospace";
+var UI_FONT="Charter, Georgia, serif";
+var C = {};
+function CV(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function tri(n){ return CV(n).split(',').map(Number); }
+function readTheme(){ C.heatLo=tri('--sv-heat-lo'); C.heatHi=tri('--sv-heat-hi');
+  C.purple=CV('--sv-accent'); C.coral=CV('--coral'); C.green=CV('--green');
+  C.ink3=CV('--ink-3'); C.purpleInk=CV('--sv-accent-ink'); }
+readTheme();
+window._svTheme=function(){ readTheme(); drawAll(); };
+
+function curDoc(){ return RUNS[S.run]; }
+function recsFor(cond){ return curDoc()? curDoc().records.filter(function(r){return r.condition===cond;}) : []; }
+function curRec(){ var rs=recsFor(S.cond); return rs.length?rs[Math.max(0,Math.min(S.seq,rs.length-1))]:null; }
+
+function buildLK(){
+  var rec=curRec(); if(!rec) return null;
+  var doc=curDoc(), K=doc.meta.K;
+  var cols=rec.cols.map(function(col){
+    return col.layers.map(function(lay){ return lay.topk; });
+  });
+  return { cols:cols, layers:doc.meta.layers, K:K, rec:rec };
+}
+function colTargets(rec,c){
+  var col=rec.cols[c]; if(!col||!col.targets) return null;
+  return { digit:col.targets.digit, alt:col.targets.alt };
+}
+function normTok(t){ return String(t).trim().toLowerCase(); }
+
+/* ---- cube ---- */
+function lerp(a,b,t){ return Math.round(a+(b-a)*t); }
+function cubeShort(t){ t=String(t).replace(/\n/g,'\\n'); if(t===' '||t==='')t='·'; return t.length>3?t.slice(0,3):t; }
+function cubeHeatRGB(prob){ var t=Math.max(0,Math.min(1,prob));
+  return [lerp(C.heatLo[0],C.heatHi[0],t), lerp(C.heatLo[1],C.heatHi[1],t), lerp(C.heatLo[2],C.heatHi[2],t)]; }
+function cubeRGBShade(rgb,f){ function cl(x){ return Math.max(0,Math.min(255,Math.round(x))); }
+  return 'rgb('+cl(rgb[0]*f)+','+cl(rgb[1]*f)+','+cl(rgb[2]*f)+')'; }
+function cubeTextColor(rgb){ return (0.30*rgb[0]+0.59*rgb[1]+0.11*rgb[2])<168 ? '#fff' : '#15151b'; }
+var CUBE_FACES=[
+  {n:[0,1,0],  c:[[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]],     sh:1.32, front:0},
+  {n:[1,0,0],  c:[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]],     sh:0.60, front:0},
+  {n:[-1,0,0], c:[[-1,-1,-1],[-1,1,-1],[-1,1,1],[-1,-1,1]], sh:0.60, front:0},
+  {n:[0,-1,0], c:[[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]], sh:0.46, front:0},
+  {n:[0,0,1],  c:[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],     sh:1.00, front:1}
+];
+function roundQuad(g, q, r){
+  g.beginPath();
+  for(var i=0;i<4;i++){ var cu=q[i], pv=q[(i+3)%4], nx=q[(i+1)%4];
+    var ax=pv.x-cu.x, ay=pv.y-cu.y, la=Math.hypot(ax,ay)||1, bx=nx.x-cu.x, by=nx.y-cu.y, lb=Math.hypot(bx,by)||1;
+    var rr=Math.min(r, la/2.2, lb/2.2);
+    var s1x=cu.x+ax/la*rr, s1y=cu.y+ay/la*rr, s2x=cu.x+bx/lb*rr, s2y=cu.y+by/lb*rr;
+    if(i===0) g.moveTo(s1x,s1y); else g.lineTo(s1x,s1y);
+    g.quadraticCurveTo(cu.x,cu.y, s2x,s2y); }
+  g.closePath();
+}
+function faceText(g, q, text, color, alpha, maxpx){
+  var e1={x:q[1].x-q[0].x,y:q[1].y-q[0].y}, e2={x:q[3].x-q[0].x,y:q[3].y-q[0].y};
+  var rgt = Math.abs(e1.x)>=Math.abs(e2.x) ? e1 : e2, dwn = (rgt===e1)?e2:e1;
+  if(rgt.x<0){ rgt={x:-rgt.x,y:-rgt.y}; } if(dwn.y<0){ dwn={x:-dwn.x,y:-dwn.y}; }
+  var w=Math.hypot(rgt.x,rgt.y), h=Math.hypot(dwn.x,dwn.y); if(w<8||h<6) return;
+  var cx=(q[0].x+q[1].x+q[2].x+q[3].x)/4, cy=(q[0].y+q[1].y+q[2].y+q[3].y)/4;
+  g.save(); g.globalAlpha=alpha; g.translate(cx,cy); g.transform(rgt.x/w,rgt.y/w,dwn.x/h,dwn.y/h,0,0);
+  var fs=Math.min(maxpx, h*0.62); g.font='600 '+fs+'px '+MONO_FONT; g.fillStyle=color;
+  g.textAlign='center'; g.textBaseline='middle';
+  var t=cubeShort(text), tw=g.measureText(t).width||1; if(tw>w*0.9) g.scale(w*0.9/tw,1);
+  g.fillText(t,0,0); g.restore();
+}
+function cubeChoreo(p){
+  var Y=Math.PI/2;
+  var ss=function(a,b,x){ x=Math.max(0,Math.min(1,(x-a)/(b-a))); return x*x*(3-2*x); };
+  if(p<0.06) return {yaw:0, solo:0, S:0, out:0, ph:'the lens is a face'};
+  if(p<0.20) return {yaw:Y*ss(0.06,0.20,p), solo:0, S:0, out:0, ph:'turning'};
+  if(p<0.26) return {yaw:Y, solo:ss(0.20,0.26,p), S:0, out:0, ph:'the focus column'};
+  if(p<0.80) return {yaw:Y, solo:1, S:(p-0.26)/0.54, out:0, ph:'the re-sort climbs the layers'};
+  if(p<0.84) return {yaw:Y, solo:1, S:1, out:0, ph:'settled'};
+  var fb=ss(0.84,0.95,p);
+  return {yaw:Y*(1-fb), solo:1-fb, S:1, out:ss(0.90,1.0,p), ph:'fold back · output'};
+}
+function cubeDraw(cv, p){
+  var dpr=Math.min(2, window.devicePixelRatio||1);
+  var Wc=cv.clientWidth||640, Hc=cv.clientHeight||520;
+  cv.width=Math.round(Wc*dpr); cv.height=Math.round(Hc*dpr);
+  var g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,Wc,Hc);
+  var LK=buildLK(); if(!LK) return;
+  var cols=LK.cols, R=LK.layers.length, Ncol=cols.length, K=LK.K;
+  var AC=Math.max(0,Math.min(S.col,Ncol-1));
+  var tg=colTargets(LK.rec,AC);
+  var ch=cubeChoreo(p);
+  document.getElementById('sv-phase').textContent=ch.ph;
+  var Cw=Math.min(40, Math.floor(560/Ncol)-3), Ch=15, gX=3, gY=2, colStep=Cw+gX, rowStep=Ch+gY, COLH=rowStep*R;
+  if(COLH>Hc*0.78){ var sc=Hc*0.78/COLH; Ch*=sc; rowStep*=sc; COLH*=sc; }
+  var DEP=Math.min(Cw*0.84, (Wc*0.80)/K);
+  var hw=Cw*0.5, hh=Ch*0.5, hd=DEP*0.5;
+  var yaw=ch.yaw, cyA=Math.cos(yaw), syA=Math.sin(yaw);
+  var FOC=2200, ZOFF=0;
+  var CX=Wc*0.50+15, CY=Hc*0.52;
+  var flatA=Math.max(0, 1-yaw/0.10);
+  function proj(x,y,z){ var xr=x*cyA+z*syA, zc=-x*syA+z*cyA;
+    var f=FOC/(FOC+zc+ZOFF); return {x:CX+xr*f, y:CY-y*f, z:zc, s:f}; }
+  function normZ(n){ return -n[0]*syA+n[2]*cyA; }
+  function projFace(cu,f){ var q=[]; for(var i=0;i<4;i++) q.push(proj(cu.wx+f.c[i][0]*hw, cu.wy+f.c[i][1]*hh, cu.wz+f.c[i][2]*hd)); return q; }
+  var FRONT=CUBE_FACES[4], SIDE_P=CUBE_FACES[1], SIDE_M=CUBE_FACES[2];
+
+  var rankMap=[]; for(var rm=0;rm<R;rm++){ var mm={}, lay=cols[AC][rm];
+    for(var jj=0;jj<lay.length;jj++) mm[lay[jj].t]=jj; rankMap.push(mm); }
+  function prevRank(L,k){ if(L<=0) return k; var r=rankMap[L-1][cols[AC][L][k].t]; return (r==null)?k:r; }
+  var smooth=function(x){ x=Math.max(0,Math.min(1,x)); return x*x*(3-2*x); };
+  var Sful=Math.max(0,Math.min(1,ch.S))*R;
+
+  var cells=[], minx=1e9, maxx=-1e9, bx0=1e9, bx1=-1e9, by0=1e9, by1=-1e9;
+  var turnFade=Math.max(0, Math.min(1, 1 - yaw/(Math.PI/4)));
+  for(var c=0;c<Ncol;c++){ var wx=(c-(Ncol-1)/2)*colStep;
+    var colA=(c===AC)?1:((c>AC)?Math.min(turnFade, 1-ch.solo):(1-ch.solo));
+    if(colA<0.03) continue;
+    var lastK=(c===AC)?K:1;
+    for(var L=0;L<R;L++){ var wy=(L-(R-1)/2)*rowStep;
+      for(var k=0;k<lastK;k++){
+        var dispX, glow=0, dir=0;
+        if(k>0 && yaw<0.05) continue;
+        if(k===0){ dispX=0; }
+        else if(c!==AC){ dispX=k; }
+        else if(L===0){
+          if(Sful<1 && k>=Sful*K) continue;
+          dispX=k;
+        } else {
+          if(Sful<L) continue;
+          var t=smooth(Sful-L);
+          var pr0=prevRank(L,k), startX=(pr0>=K)?k:pr0;
+          dispX=startX+(k-startX)*t;
+          glow=(startX!==k) ? Math.sin(Math.PI*Math.max(0,Math.min(1,Sful-L))) : 0;
+          dir=(k<startX)?1:((k>startX)?-1:0);
+        }
+        var cell=cols[c][L][k];
+        if(!cell) continue;
+        var pr=proj(wx, wy, dispX*DEP);
+        if(pr.x<minx)minx=pr.x; if(pr.x>maxx)maxx=pr.x;
+        if(c===AC){ if(pr.x<bx0)bx0=pr.x; if(pr.x>bx1)bx1=pr.x; if(pr.y<by0)by0=pr.y; if(pr.y>by1)by1=pr.y; }
+        cells.push({wx:wx,wy:wy,wz:dispX*DEP,z:pr.z,s:pr.s,k:k,cell:cell,lens:(k===0),colA:colA,glow:glow,dir:dir,ac:(c===AC)}); } } }
+  var wxAC=(AC-(Ncol-1)/2)*colStep, aL=proj(wxAC,0,0).x, aR=proj(wxAC,0,(K-1)*DEP).x;
+  if(ch.solo>0.5){ minx=Math.min(minx,aL,aR); maxx=Math.max(maxx,aL,aR); }
+  if(ch.solo===0){
+    var sL=proj((0-(Ncol-1)/2)*colStep - hw, 0, 0).x, sR=proj(((Ncol-1)-(Ncol-1)/2)*colStep + hw, 0, 0).x;
+    minx=Math.min(minx, sL, sR); maxx=Math.max(maxx, sL, sR);
+  }
+  var dx=(maxx>minx)?(Wc*0.5-(minx+maxx)/2):0;
+  g.save(); g.translate(dx,0);
+
+  cells.sort(function(a,b){ return b.z-a.z; });
+  cells.forEach(function(cu){
+    var rgb=cu.lens ? cubeHeatRGB(cu.cell.p) : cubeHeatRGB(0.20+0.80*Math.pow(cu.cell.p,0.45));
+    CUBE_FACES.forEach(function(f){ if(normZ(f.n)<=0.02) return;
+      var q=projFace(cu,f); g.globalAlpha=cu.colA; roundQuad(g, q, 1);
+      g.fillStyle=cubeRGBShade(rgb, f.sh); g.fill();
+      g.lineWidth=0.6; g.strokeStyle=cubeRGBShade(rgb, f.sh*0.72); g.stroke();
+      if(cu.glow>0.03){
+        var gc=(cu.dir>0)?(C.purple||'#1f4dff'):(C.coral||'#ff3b1f');
+        g.globalAlpha=cu.colA*cu.glow*0.40; g.fillStyle=gc; g.fill();
+        g.globalAlpha=cu.colA*cu.glow*0.95; g.lineWidth=1.8; g.strokeStyle=gc; g.stroke(); } });
+    if(tg && cu.ac){
+      var nt=normTok(cu.cell.t), ring=null;
+      if(nt===normTok(tg.digit)) ring=C.purpleInk;
+      else if(tg.alt && nt===normTok(tg.alt)) ring=C.green;
+      if(ring){
+        var fzn2=normZ(FRONT.n), spn2=normZ(SIDE_P.n), smn2=normZ(SIDE_M.n);
+        var rf=(fzn2>0.16)?FRONT:((spn2>=smn2)?SIDE_P:SIDE_M);
+        var q3=projFace(cu,rf);
+        g.globalAlpha=Math.min(1,cu.colA+0.2); g.lineWidth=2.2; g.strokeStyle=ring;
+        roundQuad(g,q3,1); g.stroke();
+      }
+    }
+    var fzn=normZ(FRONT.n), spn=normZ(SIDE_P.n), smn=normZ(SIDE_M.n);
+    var side=spn>=smn?SIDE_P:SIDE_M, szn=Math.max(spn,smn);
+    var lf=cu.lens ? (fzn>0.16?FRONT:(szn>0.08?side:null))
+                   : (szn>0.16?side:(fzn>0.08?FRONT:null));
+    if(lf){ faceText(g, projFace(cu,lf), cu.cell.t, cubeTextColor(rgb), cu.colA, Math.round(Ch*0.62)); }
+  });
+  g.globalAlpha=1;
+
+  if(flatA>0.05){
+    g.globalAlpha=flatA*0.95; g.fillStyle=C.ink3||'#8a8aa0'; g.font='10px '+MONO_FONT;
+    var LY=LK.layers, lx0=(0-(Ncol-1)/2)*colStep - hw - 8;
+    g.textAlign='right'; g.textBaseline='middle';
+    for(var lr=0;lr<R;lr++){ if(lr%3!==0 && lr!==R-1) continue;
+      var lp=proj(lx0, (lr-(R-1)/2)*rowStep, 0); g.fillText('L'+LY[lr], Math.max(30, lp.x), lp.y); }
+    g.textAlign='center'; g.textBaseline='top';
+    for(var lc=0;lc<Ncol;lc++){ var ctx=(LK.rec.cols[lc]&&LK.rec.cols[lc].ctx)||'';
+      var bp=proj((lc-(Ncol-1)/2)*colStep, -((R-1)/2)*rowStep - hh, 0);
+      g.fillText(cubeShort(ctx), bp.x, bp.y+9); }
+    var cb=proj(0, -((R-1)/2)*rowStep - hh, 0);
+    g.fillText('output · one column per generated token', cb.x, cb.y+24);
+    g.globalAlpha=1;
+  }
+  if(bx1>bx0){ var labA=Math.min(1, Math.max(0,(yaw/(Math.PI/2)-0.4)*2))*0.9;
+    if(labA>0.04){ g.globalAlpha=labA; g.fillStyle=C.ink3||'#8a8aa0'; g.font='11px '+UI_FONT;
+      g.textAlign='center'; g.textBaseline='top';
+      g.fillText('depth · rank  1 → '+K, (bx0+bx1)/2, by1+10);
+      g.save(); g.translate(bx0-16, (by0+by1)/2); g.rotate(-Math.PI/2);
+      g.textBaseline='bottom'; g.fillText('layers  input → output', 0, 0); g.restore();
+      g.globalAlpha=1; } }
+  var outA=Math.max(ch.out, (p<0.5?flatA:0));
+  if(outA>0.02){
+    var topWy=((R-1)-(R-1)/2)*rowStep + rowStep;
+    var q0=projFace({wx:(0-(Ncol-1)/2)*colStep, wy:topWy, wz:0}, FRONT);
+    var tlx=Math.min(q0[0].x,q0[1].x,q0[2].x,q0[3].x), tly=Math.min(q0[0].y,q0[1].y,q0[2].y,q0[3].y);
+    g.globalAlpha=outA; g.fillStyle=C.purpleInk||C.ink3; g.font='10px '+MONO_FONT;
+    g.textAlign='left'; g.textBaseline='bottom';
+    g.fillText('output', tlx, tly-4);
+    for(var oi=0;oi<Ncol;oi++){
+      var cu2={wx:(oi-(Ncol-1)/2)*colStep, wy:topWy, wz:0};
+      var q2=projFace(cu2, FRONT);
+      var hot=(oi===AC), bg=cubeHeatRGB(hot?0.97:0.82);
+      g.globalAlpha=outA; roundQuad(g, q2, 1);
+      g.fillStyle=cubeRGBShade(bg, 1); g.fill();
+      g.lineWidth=0.6; g.strokeStyle=cubeRGBShade(bg, 0.72); g.stroke();
+      if(hot){ g.lineWidth=1.2; g.strokeStyle=C.purple; g.stroke(); }
+      faceText(g, q2, LK.rec.cols[oi].ctx, cubeTextColor(bg), outA, Math.round(Ch*0.62));
+    }
+    g.globalAlpha=1;
+  }
+  g.restore();
+}
+
+/* ---- rank trace ---- */
+function drawTrace(){
+  var cv=document.getElementById('sv-trace');
+  var dpr=Math.min(2, window.devicePixelRatio||1);
+  var Wc=cv.clientWidth||900, Hc=190;
+  cv.width=Wc*dpr; cv.height=Hc*dpr;
+  var g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,Wc,Hc);
+  var rec=curRec(); if(!rec) return;
+  var col=rec.cols[Math.max(0,Math.min(S.col,rec.cols.length-1))];
+  if(!col || !col.targets){
+    g.fillStyle=C.ink3; g.font='12px '+UI_FONT;
+    g.fillText('this column emits '+JSON.stringify(col?col.ctx:'')+' — no digit target; pick a digit column', 20, 40);
+    return;
+  }
+  var doc=curDoc(), layers=doc.meta.layers, R=layers.length;
+  var VMAX=Math.log10(151936);
+  var X0=52, X1=Wc-16, Y0=14, Y1=Hc-30;
+  function X(r){ return X0+(X1-X0)*(r/(R-1)); }
+  function Ylog(rank){ return Y1-(Y1-Y0)*(Math.log10(Math.max(1,rank))/VMAX); }
+  g.strokeStyle=CV('--line'); g.lineWidth=1;
+  [1,10,100,1000,10000,100000].forEach(function(rk){
+    var y=Ylog(rk); g.beginPath(); g.moveTo(X0,y); g.lineTo(X1,y); g.stroke();
+    g.fillStyle=C.ink3; g.font='10px '+MONO_FONT; g.textAlign='right'; g.textBaseline='middle';
+    g.fillText(rk>=1000?(rk/1000)+'k':String(rk), X0-6, y);
+  });
+  var gate=doc.meta.gate_frac;
+  if(gate){ var gx=X(Math.round(gate*(R-1)));
+    g.strokeStyle=C.ink3; g.setLineDash([4,4]); g.beginPath(); g.moveTo(gx,Y0); g.lineTo(gx,Y1); g.stroke(); g.setLineDash([]);
+    g.fillStyle=C.ink3; g.font='10px '+UI_FONT; g.textAlign='center';
+    g.fillText('gate', gx, Y0-2); }
+  function series(key,color){
+    g.strokeStyle=color; g.lineWidth=1.8; g.beginPath(); var started=false;
+    for(var r=0;r<R;r++){ var v=col.layers[r][key]; if(v==null) continue;
+      var x=X(r), y=Ylog(v);
+      if(!started){ g.moveTo(x,y); started=true; } else g.lineTo(x,y); }
+    g.stroke();
+    for(var r2=0;r2<R;r2++){ var v2=col.layers[r2][key]; if(v2==null) continue;
+      g.fillStyle=color; g.beginPath(); g.arc(X(r2),Ylog(v2),2.4,0,7); g.fill(); }
+  }
+  series('digit_rank', C.purple);
+  series('alt_rank', C.green);
+  g.fillStyle=C.ink3; g.font='10px '+MONO_FONT; g.textAlign='center'; g.textBaseline='top';
+  for(var r3=0;r3<R;r3++){ if(r3%3!==0 && r3!==R-1) continue;
+    g.fillText('L'+layers[r3], X(r3), Y1+6); }
+  g.font='10px '+UI_FONT;
+  g.fillText('column emits '+JSON.stringify(col.ctx)+' · digit '+col.targets.digit+' (cobalt) vs code '+JSON.stringify(col.targets.alt)+' (green)', (X0+X1)/2, Y1+18);
+}
+
+/* ---- chat panel ---- */
+function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function condMapping(cond){
+  if(!SPEC) return null;
+  var c=SPEC.conditions[cond]||{};
+  if(cond==='G-spanish') return SPEC.spanish;
+  if(/subvocal|primed|anchor/.test(cond)) return c.mapping||SPEC.mapping;
+  return null;
+}
+function promptText(rec){
+  if(rec.prompt) return rec.prompt;
+  if(!SPEC||!SPEC.conditions[rec.condition]) return null;
+  return SPEC.conditions[rec.condition].prompt.replace('{seq}', rec.seq.join(' '));
+}
+function markPrompt(text, rec){
+  var h=escH(text);
+  h=h.replace(/\b(\d=[a-z])\b/g,'<span class="hl-map">$1</span>');
+  var seqStr=escH(rec.seq.join(' '));
+  h=h.split(seqStr).join('<span class="hl-seq">'+seqStr+'</span>');
+  return h;
+}
+var SPANISH_WORDS={};
+if(SPEC) Object.keys(SPEC.spanish||{}).forEach(function(k){ SPANISH_WORDS[SPEC.spanish[k]]=k; });
+function markOutput(text){
+  return escH(text).split(/(\s+)/).map(function(w){
+    if(/^\d+$/.test(w)) return '<span class="tok-digit">'+w+'</span>';
+    if(/^[a-z]$/.test(w)||SPANISH_WORDS[w.toLowerCase()]) return '<span class="tok-code">'+w+'</span>';
+    return w;
+  }).join('');
+}
+var chatKey=null;
+function renderChat(){
+  var rec=curRec(), box=document.getElementById('sv-chat'), note=document.getElementById('sv-chatnote');
+  if(!rec){ box.innerHTML=''; note.textContent=''; chatKey=null; return; }
+  var key=S.run+'|'+S.cond+'|'+S.seq;
+  if(key===chatKey) return;
+  chatKey=key;
+  var doc=curDoc(), h='';
+  h+='<div class="chat-head">'+escH(doc.meta.model)+' · '+escH(rec.condition)+'</div>';
+  h+='<div class="sysline">system · You are Qwen, created by Alibaba Cloud. You are a helpful assistant.</div>';
+  var pt=promptText(rec);
+  h+='<div class="msg user"><span class="who">user</span>'+(pt?markPrompt(pt,rec):'<i>prompt not stored for this run</i>')+'</div>';
+  var map=condMapping(rec.condition);
+  if(map && rec.condition!=='B-primed-ignore' && rec.condition!=='F-overt-anchor'){
+    var inner=rec.expected.map(function(d){ return map[String(d)]||'?'; }).join(' ');
+    h+='<div class="msg ghost"><span class="who">instructed inner monologue · never written</span>'
+      +'<span class="hl-map">'+escH(inner)+'</span>'
+      +'<span style="color:var(--ink-3)"> &nbsp;→&nbsp; </span>'
+      +'<span class="tok-digit">'+escH(rec.expected.join(' '))+'</span></div>';
+  }
+  h+='<div class="msg asst"><span class="who">assistant</span>'+markOutput(rec.output)+'</div>';
+  h+='<div id="sv-verdict" class="'+(rec.correct?'ok':'no')+'">'
+    +(rec.correct?'✓ correct reversal':'✗ expected '+escH(rec.expected.join(' ')))
+    +(codeLeaked(rec)?' · code leaked into the stream':'')+'</div>';
+  box.innerHTML=h;
+  note.innerHTML='This is the whole conversation the lens is watching. '
+    +'<span class="tok-digit">digits</span> are the only permitted surface; '
+    +'<span class="tok-code">green tokens</span> are the code that was supposed to stay internal. '
+    +'The cube and the rank trace read the layers underneath each emitted token of the reply.';
+}
+function codeLeaked(rec){
+  if(!condMapping(rec.condition)||rec.condition==='F-overt-anchor') return false;
+  return rec.output.split(/\s+/).some(function(w){
+    return /^[a-z]$/.test(w)||SPANISH_WORDS[w.toLowerCase()]; });
+}
+
+/* ---- controls ---- */
+function fillRunSel(){
+  var sel=document.getElementById('sv-selRun'); sel.innerHTML='';
+  RUNS.forEach(function(d,i){ var o=document.createElement('option');
+    o.value=i; o.textContent=d.meta.model+' · '+d.meta.stamp+' · N='+d.meta.n;
+    sel.appendChild(o); });
+  sel.value=S.run;
+  if(RUNS.length>1) document.getElementById('sv-runwrap').style.display='';
+  sel.onchange=function(){ S.run=+sel.value; S.cond=null; S.seq=0; S.col=0; buildTabs(); S.col=firstDigitCol(); buildTabs(); drawAll(); };
+}
+function fillSeqSel(){
+  var sel=document.getElementById('sv-selSeq'); sel.innerHTML='';
+  var rs=recsFor(S.cond);
+  rs.forEach(function(r,i){ var o=document.createElement('option');
+    o.value=i; o.textContent=r.seq.join(' ')+(r.correct?'':' ✗');
+    sel.appendChild(o); });
+  sel.value=Math.max(0,Math.min(S.seq,rs.length-1));
+  sel.onchange=function(){ S.seq=+sel.value; S.col=firstDigitCol(); buildTabs(); drawAll(); };
+}
+function buildTabs(){
+  var doc=curDoc(); if(!doc) return;
+  var conds=[]; doc.records.forEach(function(r){ if(conds.indexOf(r.condition)<0) conds.push(r.condition); });
+  if(!S.cond||conds.indexOf(S.cond)<0) S.cond=conds[0];
+  var tc=document.getElementById('sv-tabsCond'); tc.innerHTML='';
+  conds.forEach(function(k){
+    var rec=recsFor(k)[Math.max(0,Math.min(S.seq,recsFor(k).length-1))], b=document.createElement('button');
+    b.textContent=k+(rec&&!rec.correct?' ✗':''); if(rec&&!rec.correct) b.className='bad';
+    if(k===S.cond) b.classList.add('on');
+    b.onclick=function(){ S.cond=k; S.col=firstDigitCol(); buildTabs(); drawAll(); };
+    tc.appendChild(b); });
+  fillSeqSel();
+  var rec=curRec(), tl=document.getElementById('sv-tabsCol'); tl.innerHTML='';
+  if(rec){ rec.cols.forEach(function(col,i){
+    var b=document.createElement('button');
+    b.textContent=cubeShort(col.ctx)+(col.targets?(' ·'+col.targets.digit):'');
+    if(i===S.col) b.classList.add('on');
+    b.onclick=function(){ S.col=i; buildTabs(); drawAll(); };
+    tl.appendChild(b); }); }
+  var m=document.getElementById('sv-meta');
+  if(rec){ m.textContent='model '+doc.meta.model+' · lens tuned · K='+doc.meta.K
+    +' · layers '+doc.meta.layers.length+'/'+doc.meta.n_layers
+    +'\nseq '+rec.seq.join(' ')+' -> expected '+rec.expected.join(' ')
+    +'\noutput '+JSON.stringify(rec.output)+'  correct='+rec.correct; }
+}
+function firstDigitCol(){
+  var rec=curRec(); if(!rec) return 0;
+  for(var i=0;i<rec.cols.length;i++) if(rec.cols[i].targets) return i;
+  return 0;
+}
+function drawAll(){ cubeDraw(document.getElementById('sv-cube'), S.p); drawTrace(); renderChat(); }
+window._svRedraw=drawAll;
+var scrub=document.getElementById('sv-scrub');
+scrub.oninput=function(){ S.p=+scrub.value/1000; S.playing=false; playBtn.textContent='▶ play'; drawAll(); };
+var playBtn=document.getElementById('sv-play'), last=null;
+playBtn.onclick=function(){ S.playing=!S.playing; playBtn.textContent=S.playing?'⏸ pause':'▶ play';
+  if(S.playing){ last=null; requestAnimationFrame(tick); } };
+function tick(ts){
+  if(!S.playing) return;
+  if(last==null) last=ts;
+  S.p+= (ts-last)/14000; last=ts;
+  if(S.p>1){ S.p=0; }
+  scrub.value=Math.round(S.p*1000);
+  drawAll();
+  requestAnimationFrame(tick);
+}
+window.addEventListener('resize', drawAll);
+fillRunSel(); S.col=null; buildTabs(); S.col=firstDigitCol(); buildTabs(); drawAll();
+})();
+</script>
+</body>
+</html>

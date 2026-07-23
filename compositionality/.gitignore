@@ -1,0 +1,15 @@
+# Per-user experiment-record store (local aggregation; lib/store.py).
+# NEVER commit these — significance accrues locally per visitor. The committed
+# offline default the page renders from lives in var/baked/ (KEEP that committed).
+var/runs/
+
+# Trained tuned-lens weights (tools/train_tuned_lens.py). Large (~600MB for 3B) and
+# regenerable; the baked lens NUMBERS they produce live committed in var/baked/regimes/.
+var/lenses/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
