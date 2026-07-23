@@ -13,3 +13,8 @@ __pycache__/
 
 # macOS
 .DS_Store
+
+# Protected-page sources (bundle+encrypt via build-protected.sh; commit ONLY index.html)
+index.src.html
+live-lens.html
+build-protected.sh
