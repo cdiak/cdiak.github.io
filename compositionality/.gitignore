@@ -18,3 +18,4 @@ __pycache__/
 index.src.html
 live-lens.html
 build-protected.sh
+gate-template.html
