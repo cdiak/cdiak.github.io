@@ -1,0 +1,11 @@
+# Protected-page sources. The page is bundled (scripts inlined, figures
+# base64'd) and encrypted by build-protected.sh; committing the plaintext source
+# would defeat the gate. Commit ONLY index.html.
+index.src.html
+build-protected.sh
+gate-template.html
+.staticrypt.json
+figures/
+
+# macOS
+.DS_Store
