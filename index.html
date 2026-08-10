@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chris Diak</title>
-  <meta name="description" content="Chris Diak — model behavior researcher. The archive and its kinships.">
+  <title>Christopher James Diak</title>
+  <meta name="description" content="Christopher James Diak — researcher and writer.">
 
   <!-- Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-RG58M47TX9"></script>
@@ -15,875 +15,303 @@
     gtag('config', 'G-RG58M47TX9');
   </script>
 
-  <!-- Set theme before first paint to prevent flash -->
-  <script>
-    (function () {
-      var theme = localStorage.getItem("theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      document.documentElement.setAttribute("data-theme", theme);
-    })();
-  </script>
-
   <style>
-    /* ============================================================
-       PRINCIPIA — one leaf, three pinned panes.
-       The frame holds still: archive, plate, and index are fixed
-       to the viewport; only the text column scrolls. The archive,
-       longer than the page, scrolls quietly within its own pane.
-    ============================================================ */
-
-    :root {
-      color-scheme: light;
-      --paper: #f7f1e3;
-      --ink:   #211c14;
-      --muted: #7c7263;
-      --faint: #ddd3bd;
-
-      /* the rainbow, held in reserve for tracing */
-      --g-research: hsl(28, 85%, 42%);
-      --g-software: hsl(46, 90%, 38%);
-      --g-writing:  hsl(142, 55%, 34%);
-      --g-design:   hsl(210, 70%, 42%);
-      --g-media:    hsl(268, 55%, 48%);
-      --g-context:  hsl(248, 45%, 50%);
-
-      /* the old semantic palette, for the names in the text */
-      --b-harvard:    #A51C30;
-      --b-dartmouth:  #12312b;
-      --b-chernik:    #567482;
-      --b-penn:       #011F5B;
-      --b-openai:     #660066;
-      --b-greene:     #ba6100;
-      --b-middlebury: #0D395F;
-      --b-tom:        #630cb8;
-      --b-linda:      #7e6ed4;
-
-      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
-      --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    /* Anziano Pro loads if licensed files exist in /fonts; Iowan is the silent fallback */
+    @font-face {
+      font-family: "Anziano Pro";
+      src: url("fonts/anziano-pro.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
     }
-    [data-theme="dark"] {
-      color-scheme: dark;
-      --paper: #16130d;
-      --ink:   #e9e2d0;
-      --muted: #93897a;
-      --faint: #322c20;
-
-      --g-research: hsl(28, 90%, 62%);
-      --g-software: hsl(46, 90%, 58%);
-      --g-writing:  hsl(142, 58%, 58%);
-      --g-design:   hsl(210, 80%, 66%);
-      --g-media:    hsl(268, 70%, 72%);
-      --g-context:  hsl(248, 56%, 70%);
-
-      /* dark-mode tunings of the old palette */
-      --b-harvard:    #ff4d6d;
-      --b-dartmouth:  #4a8a7b;
-      --b-chernik:    #8aaebf;
-      --b-penn:       #4d8aff;
-      --b-openai:     #d94dd9;
-      --b-middlebury: #4d94ff;
-      --b-tom:        #9e5cff;
-      --b-linda:      #a394ff;
-    }
-
-    * { box-sizing: border-box; }
-    html { background: var(--paper); color: var(--ink); }
-    body {
-      margin: 0;
-      font-family: var(--serif);
-      font-size: 18px;
-      line-height: 1.58;
-      max-width: 1560px;
-      margin-inline: auto;
-      padding: 0 2.2rem;
-      /* the frame holds still; only the text column scrolls */
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* no scrollbars, anywhere — the panes scroll silently by wheel and touch */
-    .treenav, main, .figcol, .key {
-      scrollbar-width: none;        /* Firefox */
-      -ms-overflow-style: none;     /* old Edge */
-    }
-    .treenav::-webkit-scrollbar, main::-webkit-scrollbar, .figcol::-webkit-scrollbar, .key::-webkit-scrollbar {
-      display: none;                /* WebKit */
-    }
-
-    /* ---------- head of the page ---------- */
-    header {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      padding: 1.1rem 0 0.1rem;
-      flex-shrink: 0;
-    }
-    .signature { width: 106px; mix-blend-mode: multiply; justify-self: start; }
-    [data-theme="dark"] .signature { filter: invert(1); mix-blend-mode: screen; }
-    .running-head {
-      font-size: 0.74rem;
-      letter-spacing: 0.42em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-align: center;
-    }
-    #theme-toggle {
-      all: unset;
-      position: fixed;
-      top: 1.2rem; right: 1.3rem;
-      z-index: 10;
-      cursor: pointer;
-      color: var(--muted);
-      font-size: 1.05rem;
-      padding: 0.25rem;
-    }
-    #theme-toggle:hover { color: var(--ink); }
-
-    /* ---------- the leaf: three pinned panes ---------- */
-    .leaf {
-      display: grid;
-      grid-template-columns: 252px minmax(0, 600px) minmax(380px, 1fr);
-      gap: 2.6rem;
-      margin-top: 0.7rem;
-      flex: 1;
-      min-height: 0;     /* lets the panes scroll instead of the page */
-    }
-
-    /* the repo diagram: pinned, scrolling within its own pane */
-    .treenav {
-      font-family: var(--mono);
-      font-size: 0.67rem;
-      line-height: 1.85;
-      color: var(--muted);
-      white-space: pre;
-      overflow-y: auto;
-      overflow-x: hidden;
-      min-height: 0;
-      padding-bottom: 2rem;
-    }
-    .treenav .crown {
-      font-family: var(--serif);
-      font-size: 0.66rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.9rem;
-      white-space: normal;
-    }
-    .treenav a { color: var(--muted); text-decoration: none; transition: color .15s; }
-    .treenav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
-    .treenav .dir { color: var(--ink); }
-    .treenav [data-grp]:hover, .treenav [data-lt]:hover { cursor: pointer; }
-
-    /* ---------- chapter ---------- */
-    .chapter { text-align: center; margin-bottom: 1.5rem; }
-    .chapter .orn { color: var(--muted); font-size: 0.85rem; letter-spacing: 0.6em; margin-bottom: 0.6rem; }
-    .chapter h4 {
+    @font-face {
+      font-family: "Anziano Pro";
+      src: url("fonts/anziano-pro-italic.woff2") format("woff2");
       font-weight: 400;
       font-style: italic;
-      font-size: 1.05rem;
-      color: var(--muted);
+      font-display: swap;
+    }
+
+    :root {
+      --bg: #23282d;
+      --ink: #c8ccd0;
+      --bright: #e2e5e8;
+      --muted: #8b9197;
+      --rule: #3b4149;
+      --line: #5c646c;
+      --link: #8ab4e8;
+      --visited: #b49ae0;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Anziano Pro", "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
+      font-size: 17px;
+      line-height: 1.55;
       margin: 0;
+      overflow: hidden;
     }
+    a { color: var(--link); }
+    a:visited { color: var(--visited); }
 
-    /* ---------- body text: the one pane that scrolls ---------- */
-    main {
-      overflow-y: auto;
-      min-height: 0;
-      padding-right: 0.8rem;
-      padding-bottom: 1rem;
-    }
-    main p {
-      margin: 0 0 1.15rem;
-      text-align: justify;
-      hyphens: auto;
-      -webkit-hyphens: auto;
-    }
-    main ul { margin: 0 0 1.15rem; padding-left: 1.5rem; }
-    main li { margin-bottom: 0.3rem; }
-    a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-    a:hover { text-decoration-thickness: 2px; }
-
-    /* ---------- the illumination ----------
-       Once the plate has drawn itself, the names in the text
-       take back their old colours. */
-    main a { transition: color 1.2s ease; }
-    .illuminated main a[href*="mindbrain"]      { color: var(--b-dartmouth); }
-    .illuminated main a[href*="chernik"]        { color: var(--b-chernik); }
-    .illuminated main a[href*="rapoport"],
-    .illuminated main a[href*="harbus"]         { color: var(--b-harvard); }
-    .illuminated main a[href*="upenn"]          { color: var(--b-penn); }
-    .illuminated main a[href*="joshua-greene"]  { color: var(--b-greene); }
-    .illuminated main a[href*="openai"]         { color: var(--b-openai); }
-    .illuminated main a[href*="middlebury"],
-    .illuminated main a[href*="rachelaurora"]   { color: var(--b-middlebury); }
-    .illuminated main a[href*="dyakcraft"]      { color: var(--b-tom); }
-    .illuminated main a[href*="lindadiak"]      { color: var(--b-linda); }
-
-    /* ---------- the plate: pinned for good ----------
-       The plate and caption never move; on short windows the plate
-       shrinks to fit, and only the index beneath it scrolls, its
-       entries slipping away under the caption's line. */
-    .figcol { min-width: 0; min-height: 0; }
-    .figcol .stick {
+    .page {
       height: 100%;
+      max-width: 1250px;
+      margin: 0 auto;
+      padding: 2rem 2.5rem 1.5rem;
       display: flex;
       flex-direction: column;
-      padding-bottom: 1rem;
-    }
-    figure.plate { margin: 0; text-align: center; flex-shrink: 0; }
-    .plate svg {
-      width: 100%;
-      max-width: 590px;
-      max-height: min(62vh, 531px);
-      height: auto;
-      display: block;
-      margin: 0 auto;
     }
 
-    .plate .ring     { fill: none; stroke: var(--ink); stroke-width: 1.4; }
-    .plate .constr   { fill: none; stroke: var(--muted); stroke-width: 0.8; stroke-dasharray: 2 5; }
-    .plate .crossln  { stroke: var(--ink); stroke-width: 1; }
-    .plate .chord    { fill: none; stroke: var(--ink); stroke-width: 1.05; transition: opacity .25s, stroke-width .25s, stroke .25s; }
-    .plate .chord.faintlink { stroke: var(--muted); stroke-width: 0.85; stroke-dasharray: 3 4; }
-    .plate .node     { fill: var(--ink); transition: opacity .25s, fill .25s; }
-    .plate .sig      { font-family: var(--serif); font-size: 21px;
-                       fill: var(--ink); transition: opacity .25s, fill .25s; }
-    .plate .hit      { fill: transparent; cursor: pointer; }
-    .plate .grp      { font-family: var(--serif); font-size: 12.5px; letter-spacing: 0.32em;
-                       fill: var(--muted); text-transform: uppercase; }
-    .plate .cee      { font-family: var(--serif); font-style: italic; font-size: 15px; fill: var(--muted); }
-    .spin-arrow      { fill: var(--muted); }
-
-    .plate.tracing .chord:not(.lit),
-    .plate.tracing .node:not(.lit),
-    .plate.tracing .sig:not(.lit) { opacity: 0.13; }
-    .plate.tracing .chord.lit { stroke: var(--hl, var(--ink)); stroke-width: 1.7; }
-    .plate.tracing .node.lit  { fill: var(--hl, var(--ink)); }
-    .plate.tracing .sig.lit   { fill: var(--hl, var(--ink)); }
-
-    figcaption {
-      margin-top: 0.7rem;
-      font-style: italic;
-      font-size: 0.88rem;
-      color: var(--ink);
-    }
-    figcaption .figno { font-style: normal; font-variant: small-caps; letter-spacing: 0.08em; }
-
-    /* the index, under the plate — the one part of the column that scrolls */
-    .key {
-      margin: 1rem auto 0;
-      width: 100%;
-      max-width: 590px;
-      flex: 1;
+    /* ---------- the derivation, on top ---------- */
+    .grammar {
+      flex: 1 1 auto;
       min-height: 0;
-      overflow-y: auto;
-      padding-top: 0.9rem;
-      border-top: 1px solid var(--faint);
-      columns: 2;
-      column-gap: 1.8rem;
-      font-size: 0.72rem;
-      line-height: 1.5;
-      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .key div { break-inside: avoid; margin-bottom: 0.22rem; transition: opacity .25s; }
-    .key i.lt { font-style: normal; display: inline-block; min-width: 1.35em; transition: color .25s; }
-    .key a { text-decoration: none; }
-    .key a:hover { text-decoration: underline; }
-    .key.tracing div:not(.lit) { opacity: 0.25; }
-    .key div.lit i.lt { color: var(--hl, var(--ink)); }
+    .grammar svg { width: 100%; height: 100%; }
+    .grammar text {
+      font-family: "Anziano Pro", "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
+    }
+    .grammar .root { fill: var(--bright); font-size: 20px; font-style: italic; }
+    .rootmark { cursor: default; }
+    .rootmark image {
+      filter: invert(1);
+      mix-blend-mode: screen;
+      opacity: 1;
+      transition: opacity .35s ease;
+    }
+    .rootmark text {
+      opacity: 0;
+      transition: opacity .35s ease;
+    }
+    .rootmark:hover image { opacity: 0; }
+    .rootmark:hover text { opacity: 1; }
+    .grammar .cat  { fill: var(--bright); font-size: 16px; font-style: italic; }
+    .grammar .leaf text { fill: var(--link); font-size: 14px; }
+    .grammar .leaf:hover text { text-decoration: underline; }
+    .grammar line, .grammar path {
+      stroke: var(--line);
+      stroke-width: 1;
+      fill: none;
+    }
 
-    /* ---------- colophon, at the end of the text ---------- */
+    /* ---------- bio, beneath the full width of the tree ---------- */
+    .bio { margin-top: 1.2rem; }
+    .bio p { margin: 0 0 0.8rem; }
+    .bio ul { margin: 0 0 0.8rem; padding-left: 1.4rem; }
+    .bio li { margin-bottom: 0.2rem; }
     footer {
-      margin-top: 3rem;
-      text-align: center;
-      font-size: 0.85rem;
+      margin-top: auto;
+      border-top: 1px solid var(--rule);
+      padding-top: 0.7rem;
       color: var(--muted);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
-    footer .orn { letter-spacing: 0.6em; margin-bottom: 0.9rem; font-size: 0.8rem; }
+    .social { display: flex; gap: 1rem; }
+    .social a { color: var(--muted); display: flex; }
+    .social a:hover { color: var(--bright); }
+    .social svg { width: 17px; height: 17px; fill: currentColor; }
 
-    @media (max-width: 1280px) {
-      /* release the frame: back to ordinary page scroll */
-      body { height: auto; overflow: visible; display: block; padding-bottom: 2.5rem; }
-      .leaf { grid-template-columns: 220px minmax(0, 1fr); }
-      .treenav, main, .figcol, .key { overflow: visible; }
-      .figcol { grid-column: 2; }
-      .figcol .stick { max-width: 640px; margin: 1rem auto 0; height: auto; display: block; }
-      .plate svg { max-height: none; }
-      .key { flex: none; }
-    }
-    @media (max-width: 920px) {
-      body { padding: 0 1.25rem 2.5rem; font-size: 17px; }
-      .leaf { grid-template-columns: 1fr; gap: 1.5rem; }
-      .treenav { display: none; }
-      .figcol { grid-column: 1; }
-      .key { columns: 1; }
-      .plate svg { touch-action: pan-y; }
+    /* ---------- small screens: let it scroll ---------- */
+    @media (max-width: 1000px) {
+      body { overflow: auto; font-size: 18px; }
+      .page { display: block; height: auto; padding: 2rem 1.25rem; }
+      .grammar svg { height: auto; }
+      .bio { margin-top: 2rem; }
+      footer { margin-top: 2rem; }
     }
   </style>
 </head>
 
 <body>
+  <div class="page">
 
-  <header>
-    <a href="/" aria-label="Home"><img src="signature.png" class="signature" alt="Chris Diak"></a>
-    <div class="running-head">Chris Diak</div>
-    <span></span>
-  </header>
-  <button id="theme-toggle" aria-label="Toggle dark mode">◐</button>
+    <!-- ============ the portfolio, as a derivation ============ -->
+    <section class="grammar" aria-label="Portfolio">
+      <svg viewBox="0 0 1165 666" role="img" aria-label="Intellectual biography arranged as a syntax tree">
 
-  <div class="leaf">
+        <!-- root: the signature, fading to the name on hover -->
+        <g class="rootmark">
+          <image href="signature.png" x="407" y="0" width="326" height="106"
+                 preserveAspectRatio="xMidYMid meet"/>
+          <text class="root" x="570" y="58" text-anchor="middle">Christopher James Diak</text>
+        </g>
+        <line x1="570" y1="140" x2="286" y2="197"/>
+        <line x1="570" y1="140" x2="854" y2="197"/>
 
-    <!-- ============ the margin: a repo diagram ============ -->
-    <nav class="treenav" aria-label="Archive">
-      <div>
-<div class="crown">The Archive</div>
-<span class="dir">chris-diak/</span>
-├─ <span class="dir" data-grp="research">research/</span>
-│ ├─ <span class="dir" data-grp="research">cases/</span>
-│ │ ├─ <a data-lt="A" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63522" target="_blank" rel="noreferrer">honesty-and-self-interest</a>
-│ │ ├─ <a data-lt="B" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63822" target="_blank" rel="noreferrer">hidden-costs-of-layoffs</a>
-│ │ ├─ <a data-lt="C" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63273" target="_blank" rel="noreferrer">esg-in-investment-strategy</a>
-│ │ ├─ <a data-grp="research" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=62339" target="_blank" rel="noreferrer">nestle-and-ukraine</a>
-│ │ ├─ <a data-grp="research" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=62125" target="_blank" rel="noreferrer">bribery-and-corruption</a>
-│ │ ├─ <a data-grp="research" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=61599" target="_blank" rel="noreferrer">well-being-and-rights</a>
-│ │ ├─ <a data-grp="research" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=62865" target="_blank" rel="noreferrer">rooted-in-roxbury</a>
-│ │ └─ <a data-grp="research" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63152" target="_blank" rel="noreferrer">managing-pain</a>
-│ ├─ <span class="dir" data-grp="research">publications/</span>
-│ │ ├─ <a data-lt="D" href="http://frontiersin.org/articles/10.3389/fsufs.2022.983398/full" target="_blank" rel="noreferrer">perennial-agriculture</a>
-│ │ └─ <span data-grp="research">book-chapter (2025)</span>
-│ ├─ <span class="dir" data-grp="research">posters/</span>
-│ │ ├─ <a data-lt="E" href="https://docs.google.com/presentation/d/13X8xXwQZdn7PFDeh3I9I723fIJGdsMoyotY7mEvP9ac/edit?usp=sharing" target="_blank" rel="noreferrer">auditory-cognition</a>
-│ │ ├─ <a data-lt="G" href="https://docs.google.com/presentation/d/0B8Rq-WknD7znRkdzYXhzU011WDQ/edit?usp=sharing&ouid=115403073159516519139&resourcekey=0-QW7HCnWRhCYztQ3WszLchw&rtpof=true&sd=true" target="_blank" rel="noreferrer">ubiquitin-proteasome</a>
-│ │ ├─ <a data-lt="F" href="https://docs.google.com/presentation/d/1Ix0DjkwXkBMejfJzMAefRH7acB_4ZJy3LtAPpwAloco/edit?usp=sharing" target="_blank" rel="noreferrer">metaphor-metamorphosis</a>
-│ │ └─ <a data-lt="Q" href="https://docs.google.com/presentation/d/1DIXna_3GXRhIA9hLtRerGsXTSJjpbkJJSwvuAH-dews/edit?usp=sharing" target="_blank" rel="noreferrer">form-and-content</a>
-│ └─ <span class="dir" data-grp="research">methods/</span>
-│     └─ <a data-lt="H" href="https://docs.google.com/document/d/1AwEiIFhFIY8yoZu0_Cic1uC3yspFYWsiCWjQkbkOmbU/edit?usp=sharing" target="_blank" rel="noreferrer">research-objectives</a>
-├─ <span class="dir" data-grp="software">software/</span>
-│ ├─ <a data-lt="I" href="https://aligning.app" target="_blank" rel="noreferrer">alignment/</a>
-│ ├─ <a data-lt="J" href="https://twinkle.ml" target="_blank" rel="noreferrer">twinkle-ml/</a>
-│ ├─ <a data-lt="K" href="https://github.com/cdiak/local-whisper" target="_blank" rel="noreferrer">local-whisper</a>
-│ ├─ <a data-lt="TT" href="https://github.com/cdiak/slash-tts" target="_blank" rel="noreferrer">slash-tts</a>
-│ └─ <a data-lt="L" href="https://github.com/cdiak/intro-to-programming" target="_blank" rel="noreferrer">intro-to-programming</a>
-├─ <span class="dir" data-grp="writing">writing/</span>
-│ ├─ <a data-lt="M" href="https://tm4m.net/" target="_blank" rel="noreferrer">substack/</a>
-│ ├─ <span class="dir" data-grp="writing">essays/</span>
-│ │ ├─ <a data-lt="O" href="https://drive.google.com/file/d/1XDOyXFIqiXrkY5jZ3_k43V8UyBIm6efh/view?usp=sharing" target="_blank" rel="noreferrer">capitalists-dilemma-rl</a>
-│ │ ├─ <a data-lt="N" href="https://drive.google.com/file/d/1_K2BUgRDf6EIh6nahiYdxSpLpZQceWNK/view?usp=sharing" target="_blank" rel="noreferrer">transcendental-grammar</a>
-│ │ ├─ <a data-lt="P" href="https://drive.google.com/file/d/1C6RhpurhtEwVzEmhNBJbdHxO0qF6SjJf/view?usp=sharing" target="_blank" rel="noreferrer">kaivalyam-and-samadhi</a>
-│ │ └─ <a data-lt="Q" href="https://drive.google.com/file/d/1hDDRSaJlDZccJnLGPBtefHnVJKp6GSss/view?usp=sharing" target="_blank" rel="noreferrer">form-and-content</a>
-│ └─ <span class="dir" data-grp="writing">notebooks/</span>
-│     ├─ <a data-lt="R" href="https://docs.google.com/document/d/1PSXBU1Zrq6xTupULBSANysaMaV9Dm4DBUoEfuH7D3oU/edit?usp=sharing" target="_blank" rel="noreferrer">women-and-the-sacred</a>
-│     ├─ <a data-lt="R" href="https://docs.google.com/document/d/14y9nH-RU_UV0fo6bhS2Wm6qXTBTfbv7LVvFRew2wP9Y/edit?usp=sharing" target="_blank" rel="noreferrer">concepts</a>
-│     ├─ <a data-lt="R" href="https://docs.google.com/document/d/1yYW8tWpBnzeRq4A58vbuZHzxX1-56AZK/edit?usp=sharing&ouid=115403073159516519139&rtpof=true&sd=true" target="_blank" rel="noreferrer">philosophy-of-mind</a>
-│     ├─ <a data-lt="R" href="https://docs.google.com/document/d/1UC9lUUJirCZ66WErpn_FORltwn9ECCfUf0iqQWPWpqI/edit?usp=sharing" target="_blank" rel="noreferrer">self-and-subjectivity</a>
-│     ├─ <a data-lt="R" href="https://docs.google.com/document/d/1XxATL-AEDCxg-8ODUnXz20KYOdKFJiFCVpIiNWelg84/edit?usp=sharing" target="_blank" rel="noreferrer">religion-and-semantics</a>
-│     ├─ <a data-lt="R" href="https://docs.google.com/document/d/1sw2cUWL257GyIi27Xa6IdWG9A7w4YL7ZQD9nNRmGjCE/edit?usp=sharing" target="_blank" rel="noreferrer">mindfulness</a>
-│     └─ <a data-lt="R" href="https://docs.google.com/document/d/1AY4V4IfpYhaUESgpZGRSSt4HyQVwk_vexHlkJlG4uVs/edit?usp=sharing" target="_blank" rel="noreferrer">systems-neuroscience</a>
-├─ <span class="dir" data-grp="design">design/</span>
-│ └─ <span class="dir" data-grp="design">websites/</span>
-│     ├─ <a data-lt="S" href="https://web.archive.org/web/20230329215209/http://www.hbsforum.org/" target="_blank" rel="noreferrer">hbsforum.org</a>
-│     └─ <a data-lt="S" href="https://web.archive.org/web/20210108143506/https://www.hbs.edu/forum-for-growth-and-innovation/resources/Pages/default.aspx" target="_blank" rel="noreferrer">hbs-forum-resources</a>
-├─ <span class="dir" data-grp="media">media/</span>
-│ ├─ <span class="dir" data-grp="media">podcasts/</span>
-│ │ ├─ <a data-lt="T" href="https://thedisruptivevoice.libsyn.com/choosing-college-bob-moesta-and-michael-horn-on-why-we-hire-education" target="_blank" rel="noreferrer">choosing-college</a>
-│ │ ├─ <a data-lt="T" href="https://thedisruptivevoice.libsyn.com/disruption-and-the-democratization-of-k-12-education-a-conversation-with-thomas-arnett" target="_blank" rel="noreferrer">democratizing-k-12</a>
-│ │ ├─ <a data-lt="T" href="https://thedisruptivevoice.libsyn.com/62-covid-19-and-the-educators-dilemma-a-conversation-with-michael-horn" target="_blank" rel="noreferrer">educators-dilemma</a>
-│ │ ├─ <a data-lt="T" href="https://thedisruptivevoice.libsyn.com/64-your-best-friends-voice-amelia-lin-16-founder-and-ceo-of-saga" target="_blank" rel="noreferrer">your-best-friends-voice</a>
-│ │ └─ <a data-lt="T" href="https://thedisruptivevoice.libsyn.com/71-leading-the-artling-through-the-covid-19-crisis-a-conversation-with-talenia-phua-gajardo" target="_blank" rel="noreferrer">leading-the-artling</a>
-│ ├─ <span class="dir" data-grp="media">video/</span>
-│ │ ├─ <a data-lt="V" href="https://vimeo.com/273354833" target="_blank" rel="noreferrer">spiritual-at-middlebury</a>
-│ │ ├─ <a data-lt="U" href="https://www.youtube.com/watch?v=FR2GbcPWbzA" target="_blank" rel="noreferrer">majnun</a>
-│ │ └─ <a data-grp="media" href="https://www.youtube.com/watch?v=XI0Zayk_irU" target="_blank" rel="noreferrer">spiritual-lives-of-leaders</a>
-│ └─ <span class="dir" data-grp="media">audio/</span>
-│     └─ <a data-lt="W" href="https://suno.com/playlist/b09d65c7-08f3-4145-ab4f-539e2fe98694" target="_blank" rel="noreferrer">ftx-the-musical</a>
-└─ <span class="dir" data-grp="context">context/</span>
-    ├─ <a data-lt="X" href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">mind-brain-computation</a>
-    ├─ <a data-lt="Z" href="https://chernikgroup.com/" target="_blank" rel="noreferrer">the-chernik-group</a>
-    ├─ <a data-lt="Y" href="https://web.archive.org/web/20231118054111/https://openai.com/careers/model-teacher-contract" target="_blank" rel="noreferrer">openai-model-teacher</a>
-    ├─ <a data-lt="G" href="https://rapoport.hms.harvard.edu/" target="_blank" rel="noreferrer">rapoport-laboratory</a>
-    ├─ <a data-lt="F" href="https://neuroaesthetics.med.upenn.edu/chatlab.html" target="_blank" rel="noreferrer">chatlab</a>
-    ├─ <a data-lt="E" href="https://www.joshua-greene.net/lab" target="_blank" rel="noreferrer">joshua-greene-lab</a>
-    └─ <a data-grp="context" href="https://www.linkedin.com/in/cdiak" target="_blank" rel="noreferrer">linkedin</a>
-      </div>
-    </nav>
+        <!-- level 1 -->
+        <text class="cat" x="286" y="210" text-anchor="middle">Wordcel</text>
+        <text class="cat" x="854" y="210" text-anchor="middle">Shape Rotator</text>
+        <line x1="286" y1="218" x2="138" y2="285"/>
+        <line x1="286" y1="218" x2="434" y2="285"/>
+        <line x1="854" y1="218" x2="704" y2="285"/>
+        <line x1="854" y1="218" x2="1003" y2="285"/>
 
-    <!-- ============ the text ============ -->
-    <main>
+        <!-- level 2 -->
+        <text class="cat" x="138" y="298" text-anchor="middle">Thinking</text>
+        <text class="cat" x="434" y="298" text-anchor="middle">Writing</text>
+        <text class="cat" x="704" y="298" text-anchor="middle">Minds</text>
+        <text class="cat" x="1003" y="298" text-anchor="middle">Machines</text>
+        <line x1="138" y1="306" x2="64" y2="373"/>
+        <line x1="138" y1="306" x2="211" y2="373"/>
+        <line x1="434" y1="306" x2="361" y2="373"/>
+        <line x1="434" y1="306" x2="507" y2="373"/>
+        <line x1="704" y1="306" x2="652" y2="373"/>
+        <line x1="704" y1="306" x2="755" y2="373"/>
+        <line x1="1003" y1="306" x2="912" y2="373"/>
+        <line x1="1003" y1="306" x2="1094" y2="373"/>
 
-      <div class="chapter">
-        <div class="orn">❧</div>
-        <h4>About Me</h4>
-      </div>
+        <!-- level 3 -->
+        <text class="cat" x="64" y="386" text-anchor="middle">Markets</text>
+        <text class="cat" x="211" y="386" text-anchor="middle">Meaning</text>
+        <text class="cat" x="361" y="386" text-anchor="middle">Scholarly</text>
+        <text class="cat" x="507" y="386" text-anchor="middle">Professional</text>
+        <text class="cat" x="652" y="386" text-anchor="middle">Ancient</text>
+        <text class="cat" x="755" y="386" text-anchor="middle">Modern</text>
+        <text class="cat" x="912" y="386" text-anchor="middle">Parts</text>
+        <text class="cat" x="1094" y="386" text-anchor="middle">Wholes</text>
+        <line x1="912" y1="394" x2="859" y2="461"/>
+        <line x1="912" y1="394" x2="966" y2="461"/>
+
+        <!-- level 4 -->
+        <text class="cat" x="859" y="474" text-anchor="middle">Tools</text>
+        <text class="cat" x="966" y="474" text-anchor="middle">Toolboxes</text>
+
+        <!-- stems down to the terminal baseline -->
+        <line x1="64" y1="394" x2="64" y2="500"/>
+        <line x1="211" y1="394" x2="211" y2="500"/>
+        <line x1="361" y1="394" x2="361" y2="500"/>
+        <line x1="507" y1="394" x2="507" y2="500"/>
+        <line x1="652" y1="394" x2="652" y2="500"/>
+        <line x1="755" y1="394" x2="755" y2="500"/>
+        <line x1="1094" y1="394" x2="1094" y2="500"/>
+        <line x1="859" y1="482" x2="859" y2="500"/>
+        <line x1="966" y1="482" x2="966" y2="500"/>
+
+        <!-- triangles: constituents not yet derived -->
+        <path d="M 64 500 L 36 528 L 92 528 Z"/>
+        <path d="M 211 500 L 183 528 L 239 528 Z"/>
+        <path d="M 361 500 L 333 528 L 389 528 Z"/>
+        <path d="M 507 500 L 479 528 L 535 528 Z"/>
+        <path d="M 652 500 L 624 528 L 680 528 Z"/>
+        <path d="M 755 500 L 727 528 L 783 528 Z"/>
+        <path d="M 859 500 L 831 528 L 887 528 Z"/>
+        <path d="M 966 500 L 938 528 L 994 528 Z"/>
+        <path d="M 1094 500 L 1066 528 L 1122 528 Z"/>
+
+        <!-- Markets -->
+        <a class="leaf" href="/margin-of-safety/"><text x="36" y="550">margin of safety</text></a>
+        <a class="leaf" href="https://drive.google.com/file/d/1XDOyXFIqiXrkY5jZ3_k43V8UyBIm6efh/view?usp=sharing" target="_blank" rel="noreferrer"><text x="36" y="574">capitalist's dilemma</text></a>
+        <a class="leaf" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63273" target="_blank" rel="noreferrer"><text x="36" y="598">esg</text></a>
+        <a class="leaf" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=62865" target="_blank" rel="noreferrer"><text x="36" y="622">cannabis</text></a>
+        <a class="leaf" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63152" target="_blank" rel="noreferrer"><text x="36" y="646">opioids</text></a>
+
+        <!-- Meaning -->
+        <a class="leaf" href="http://tm4m.net/" target="_blank" rel="noreferrer"><text x="183" y="550">market for meaning</text></a>
+        <a class="leaf" href="https://colab.research.google.com/drive/1BVfLQoMnibbAywvjdCpBcVh0zAwYpzlY" target="_blank" rel="noreferrer"><text x="183" y="574">prompting is work</text></a>
+        <a class="leaf" href="https://drive.google.com/file/d/1qp23JthCggDm5ZVjXst9u1TDL74q7nfJ/view?usp=sharing" target="_blank" rel="noreferrer"><text x="183" y="598">is tcs possible?</text></a>
+        <a class="leaf" href="https://drive.google.com/file/d/1hDDRSaJlDZccJnLGPBtefHnVJKp6GSss/view?usp=sharing" target="_blank" rel="noreferrer"><text x="183" y="622">form &amp; content</text></a>
+        <a class="leaf" href="https://docs.google.com/document/d/1XxATL-AEDCxg-8ODUnXz20KYOdKFJiFCVpIiNWelg84/edit?usp=sharing" target="_blank" rel="noreferrer"><text x="183" y="646">religion &amp; semantics</text></a>
+
+        <!-- Scholarly -->
+        <a class="leaf" href="https://drive.google.com/file/d/1_K2BUgRDf6EIh6nahiYdxSpLpZQceWNK/view?usp=sharing" target="_blank" rel="noreferrer"><text x="333" y="550">transc. grammar</text></a>
+        <a class="leaf" href="http://frontiersin.org/articles/10.3389/fsufs.2022.983398/full" target="_blank" rel="noreferrer"><text x="333" y="574">perennial ag.</text></a>
+        <a class="leaf" href="https://escholarship.org/uc/item/28m3k4g4" target="_blank" rel="noreferrer"><text x="333" y="598">backward digit span</text></a>
+
+        <!-- Professional -->
+        <a class="leaf" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63522" target="_blank" rel="noreferrer"><text x="479" y="550">honesty</text></a>
+        <a class="leaf" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=63822" target="_blank" rel="noreferrer"><text x="479" y="574">layoffs</text></a>
+        <a class="leaf" href="https://www.hbs.edu/faculty/Pages/item.aspx?num=62339" target="_blank" rel="noreferrer"><text x="479" y="598">nestlé</text></a>
+        <a class="leaf" href="https://www.library.hbs.edu/working-knowledge/the-war-in-ukraine-and-nestles-moral-dilemma-stay-or-leave-russia" target="_blank" rel="noreferrer"><text x="479" y="622">stay or leave russia</text></a>
+
+        <!-- Ancient -->
+        <a class="leaf" href="https://drive.google.com/file/d/1C6RhpurhtEwVzEmhNBJbdHxO0qF6SjJf/view?usp=sharing" target="_blank" rel="noreferrer"><text x="624" y="550">kaivalyam</text></a>
+        <a class="leaf" href="https://docs.google.com/document/d/1Q2kYb7DWO2YmFrL1Ruc0QhRnMwU-IibsEjNQuGOgQiQ/edit?usp=sharing" target="_blank" rel="noreferrer"><text x="624" y="574">brahmametat</text></a>
+
+        <!-- Modern -->
+        <a class="leaf" href="https://docs.google.com/presentation/d/13X8xXwQZdn7PFDeh3I9I723fIJGdsMoyotY7mEvP9ac/edit?usp=sharing" target="_blank" rel="noreferrer"><text x="727" y="550">auditory cog.</text></a>
+        <a class="leaf" href="https://docs.google.com/presentation/d/1Ix0DjkwXkBMejfJzMAefRH7acB_4ZJy3LtAPpwAloco/edit?usp=sharing" target="_blank" rel="noreferrer"><text x="727" y="574">metaphor</text></a>
+        <a class="leaf" href="https://docs.google.com/document/d/1AwEiIFhFIY8yoZu0_Cic1uC3yspFYWsiCWjQkbkOmbU/edit?usp=sharing" target="_blank" rel="noreferrer"><text x="727" y="598">objectives</text></a>
+
+        <!-- Tools -->
+        <a class="leaf" href="https://github.com/cdiak/slash-tts" target="_blank" rel="noreferrer"><text x="831" y="550">slash-tts</text></a>
+        <a class="leaf" href="https://github.com/cdiak/slash-sicp" target="_blank" rel="noreferrer"><text x="831" y="574">slash-sicp</text></a>
+        <a class="leaf" href="https://github.com/cdiak/slash-fd" target="_blank" rel="noreferrer"><text x="831" y="598">slash-fd</text></a>
+        <a class="leaf" href="https://github.com/cdiak/local-whisper" target="_blank" rel="noreferrer"><text x="831" y="622">local-whisper</text></a>
+        <a class="leaf" href="https://github.com/cdiak/everywhisper" target="_blank" rel="noreferrer"><text x="831" y="646">everywhisper</text></a>
+
+        <!-- Toolboxes -->
+        <a class="leaf" href="/compositionality/"><text x="938" y="550">hold that thought</text></a>
+        <a class="leaf" href="https://github.com/cdiak/inkling-cli" target="_blank" rel="noreferrer"><text x="938" y="574">inkling cli</text></a>
+
+        <!-- Wholes -->
+        <a class="leaf" href="/afterslop/"><text x="1066" y="550">afterslop</text></a>
+        <a class="leaf" href="https://aligning.app" target="_blank" rel="noreferrer"><text x="1066" y="574">alignment</text></a>
+        <a class="leaf" href="https://twinkle.ml" target="_blank" rel="noreferrer"><text x="1066" y="598">twinkle-ml</text></a>
+
+      </svg>
+    </section>
+
+    <!-- ============ biography, the terminals fleshed out ============ -->
+    <section class="bio">
 
       <p>
-        I work on model behavior as a researcher in the
-        <a href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">Lab for Mind, Brain, and Computation</a>
-        at Dartmouth College and as a model behavior tutor with xAI.
+        I'm a researcher, tinkerer, and writer working in the field of model behavior––a nascent
+        discipline concerned with predicting, shaping, and designing the behavior of AI systems.
+        I'm particularly interested in reasoning, working memory, and model epistemics.
       </p>
 
       <p>
-        Drawing on literature from cognitive science, organizational behavior, and deep reinforcement learning,
-        my research studies how mental representations are composed and the limits of reasoning, executive function,
-        and working memory under capacity constraints. I often wonder:
-        "How do the strategies we use to think shape what can be thought?"
-      </p>
-
-      <p>
-        At xAI, I focus on
-        <a href="https://job-boards.greenhouse.io/xai/jobs/5017518007" target="_blank" rel="noreferrer">Epistemic Rigor &amp; Truthfulness</a>.
-        We're always seeking exceptional tutors! If you're interested in joining xAI, please reach out.
-      </p>
-
-      <p>
-        Previously, I was an associate with
-        <a href="https://chernikgroup.com/" target="_blank" rel="noreferrer">The Chernik Group</a>
-        specializing in executive functioning, metacognition, and habit formation.
-      </p>
-
-      <p>
-        As a student at Middlebury and Harvard, I was fortunate to work with some of the world's great laboratories
-        in biology, neuroscience, psychology, and artificial intelligence:
-      </p>
-
-      <ul>
-        <li><a href="https://rapoport.hms.harvard.edu/" target="_blank" rel="noreferrer">Rapoport Laboratory</a>, Harvard Medical School</li>
-        <li><a href="https://neuroaesthetics.med.upenn.edu/chatlab.html" target="_blank" rel="noreferrer">ChatLab</a>, Center for Cognitive Neuroscience, University of Pennsylvania</li>
-        <li><a href="https://www.joshua-greene.net/lab" target="_blank" rel="noreferrer">Joshua Greene Laboratory</a>, Harvard University</li>
-        <li>Model Behavior Team at <a href="https://www.openai.com" target="_blank" rel="noreferrer">OpenAI</a></li>
-      </ul>
-
-      <p>
-        While at Harvard, I worked for five years as a program manager for
-        <a href="https://www.harbus.org/post/are-you-living-the-life-you-are-meant-to-1" target="_blank" rel="noreferrer">The Spiritual Lives of Leaders</a>
+        Currently, I'm researching and shaping model behaviors at
+        <a href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">Dartmouth</a>
         and
-        <a href="https://www.linkedin.com/groups/8663529/" target="_blank" rel="noreferrer">The Forum for Growth &amp; Innovation</a>
-        at Harvard Business School, and as a research associate in the General Management and Finance Units.
-      </p>
-
-      <p>
-        I grew up on a sheep farm in Grafton, Vermont, as the eldest son of artisans
-        <a href="https://www.dyakcraft.com/our-story" target="_blank" rel="noreferrer">Tom</a> and
-        <a href="https://www.lindadiakquilts.com/" target="_blank" rel="noreferrer">Linda Diak</a>, and was the first member of my family to go to college.
-        My wife, <a href="https://www.rachelaurora.com/" target="_blank" rel="noreferrer">Rachel Aurora</a>,
-        is a studio artist working in paint, ceramics, and herbal medicines.
+        <a href="https://x.ai/" target="_blank" rel="noreferrer">SpaceXAI</a>,
+        respectively. Previously, I tutored human beings with
+        <a href="https://chernikgroup.com/" target="_blank" rel="noreferrer">The Chernik Group</a>
+        and large language models with
+        <a href="https://www.openai.com/" target="_blank" rel="noreferrer">OpenAI</a>
+        after spending five years working on the roles of meaning, purpose, and spirituality
+        in the workplace at Harvard Business School. I began my career in Professor Clay Christensen's
+        <a href="https://x.com/HBS_Forum" target="_blank" rel="noreferrer">Forum for Growth &amp; Innovation</a>.
       </p>
 
       <p>
         I hold an MDiv from Harvard Divinity School and a BA from Middlebury College.
       </p>
 
-      <footer>
-        <div class="orn">❦</div>
-        © Chris Diak. This archive is a living document.<br>
+    </section>
+
+    <footer>
+      <span>
+        © Christopher James Diak ·
         christopher (dot) diak (at) alumni (dot) harvard (dot) edu
-      </footer>
-
-    </main>
-
-    <!-- ============ the plate and its index, sticky ============ -->
-    <div class="figcol">
-      <div class="stick">
-        <figure class="plate" id="plate">
-          <svg id="fig" viewBox="0 0 900 810" role="img" aria-label="The archive and its kinships"></svg>
-          <figcaption><span class="figno">Fig. I.</span> — The archive and its kinships.</figcaption>
-        </figure>
-        <div class="key" id="key"></div>
-      </div>
-    </div>
+      </span>
+      <span class="social">
+        <a href="https://github.com/cdiak/" target="_blank" rel="noreferrer" aria-label="GitHub">
+          <svg viewBox="0 0 16 16" role="img"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a>
+        <a href="https://x.com/ChristopherDiak" target="_blank" rel="noreferrer" aria-label="X">
+          <svg viewBox="0 0 24 24" role="img"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="https://substack.com/@christopherdiak" target="_blank" rel="noreferrer" aria-label="Substack">
+          <svg viewBox="0 0 24 24" role="img"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/in/cdiak/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" role="img"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+      </span>
+    </footer>
 
   </div>
-
-  <script>
-    /* ---------- theme ---------- */
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-      const root = document.documentElement;
-      const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-      root.setAttribute("data-theme", next);
-      localStorage.setItem("theme", next);
-    });
-
-    /* ============================================================
-       FIG. I — the archive as a chord diagram
-       Each artifact bears a sigil, assigned by its nature. The
-       figure draws itself in ink; tracing — from the plate, the
-       index, or the repo diagram in the margin — lights relations
-       in the colour of the kind. Hovering a folder lights its
-       whole constellation.
-    ============================================================ */
-
-    const ARTIFACTS = [
-      { lt:"A", sym:"⚖︎", grp:"research", label:"Ethical Analysis: Honesty and Self-Interest", note:"HBS Publishing, 2023", url:"https://www.hbs.edu/faculty/Pages/item.aspx?num=63522" },
-      { lt:"B", sym:"♄",       grp:"research", label:"The Hidden Costs of Layoffs", note:"HBS Publishing, 2023", url:"https://www.hbs.edu/faculty/Pages/item.aspx?num=63822" },
-      { lt:"C", sym:"♃",       grp:"research", label:"The Role of ESG in Investment Strategy", note:"HBS Publishing, 2022", url:"https://www.hbs.edu/faculty/Pages/item.aspx?num=63273" },
-      { lt:"D", sym:"♁",       grp:"research", label:"Policy Pathways for Perennial Agriculture", note:"Scott et al., 2022", url:"http://frontiersin.org/articles/10.3389/fsufs.2022.983398/full" },
-      { lt:"E", sym:"♬",       grp:"research", label:"Auditory Compositional Cognition", note:"Greene Laboratory, 2020", url:"https://docs.google.com/presentation/d/13X8xXwQZdn7PFDeh3I9I723fIJGdsMoyotY7mEvP9ac/edit?usp=sharing" },
-      { lt:"F", sym:"☿",       grp:"research", label:"Metaphor as Metamorphosis of the Mental Lexicon", note:"Penn, 2017", url:"https://docs.google.com/presentation/d/1Ix0DjkwXkBMejfJzMAefRH7acB_4ZJy3LtAPpwAloco/edit?usp=sharing" },
-      { lt:"G", sym:"⚗︎", grp:"research", label:"Protein Engineering in the Ubiquitin Proteasome System", note:"Rapoport Laboratory, 2017", url:"https://docs.google.com/presentation/d/0B8Rq-WknD7znRkdzYXhzU011WDQ/edit?usp=sharing&ouid=115403073159516519139&resourcekey=0-QW7HCnWRhCYztQ3WszLchw&rtpof=true&sd=true" },
-      { lt:"H", sym:"☉",       grp:"research", label:"Research Objectives", note:"Dartmouth, ongoing", url:"https://docs.google.com/document/d/1AwEiIFhFIY8yoZu0_Cic1uC3yspFYWsiCWjQkbkOmbU/edit?usp=sharing" },
-      { lt:"I", sym:"☊",       grp:"software", label:"alignment", note:"aligning.app", url:"https://aligning.app" },
-      { lt:"J", sym:"✶",       grp:"software", label:"twinkle-ml", note:"twinkle.ml", url:"https://twinkle.ml" },
-      { lt:"K", sym:"≈",       grp:"software", label:"local-whisper", note:"GitHub", url:"https://github.com/cdiak/local-whisper" },
-      { lt:"TT", sym:"心",     grp:"software", label:"/tts", note:"local Kokoro speech for Grok Build", url:"https://github.com/cdiak/slash-tts" },
-      { lt:"L", sym:"λ",       grp:"software", label:"intro-to-programming", note:"GitHub", url:"https://github.com/cdiak/intro-to-programming" },
-      { lt:"M", sym:"∞",       grp:"writing", label:"Estranged Loops", note:"Substack, 2025", url:"https://www.tm4m.net/p/estranged-loops" },
-      { lt:"N", sym:"ॐ",       grp:"writing", label:"Transcendental Grammar: Chomsky and Bhartṛhari in Dialogue", note:"Honors Thesis, 2019", url:"https://drive.google.com/file/d/1_K2BUgRDf6EIh6nahiYdxSpLpZQceWNK/view?usp=sharing" },
-      { lt:"O", sym:"¤",       grp:"writing", label:"Modeling the Capitalist's Dilemma Using Multiple RL Systems", note:"HBS, 2021", url:"https://drive.google.com/file/d/1XDOyXFIqiXrkY5jZ3_k43V8UyBIm6efh/view?usp=sharing" },
-      { lt:"P", sym:"☽",       grp:"writing", label:"Is kaivalyam a state of samadhi?", note:"Yoga Sutras, 2024", url:"https://drive.google.com/file/d/1C6RhpurhtEwVzEmhNBJbdHxO0qF6SjJf/view?usp=sharing" },
-      { lt:"Q", sym:"☯︎", grp:"writing", label:"Form and Content: Dualism and Nondualism in the Study of Concepts", note:"Middlebury, 2017", url:"https://drive.google.com/file/d/1hDDRSaJlDZccJnLGPBtefHnVJKp6GSss/view?usp=sharing" },
-      { lt:"R", sym:"✎",       grp:"writing", label:"Course Notebooks", note:"Middlebury, 2015–19", url:"https://docs.google.com/document/d/14y9nH-RU_UV0fo6bhS2Wm6qXTBTfbv7LVvFRew2wP9Y/edit?usp=sharing" },
-      { lt:"S", sym:"❖",       grp:"design", label:"hbsforum.org", note:"archived", url:"https://web.archive.org/web/20230329215209/http://www.hbsforum.org/" },
-      { lt:"T", sym:"♪",       grp:"media", label:"The Disruptive Voice", note:"Managing Editor, ep. 35–71", url:"https://thedisruptivevoice.libsyn.com/choosing-college-bob-moesta-and-michael-horn-on-why-we-hire-education" },
-      { lt:"U", sym:"♡",       grp:"media", label:"Majnun", note:"short film", url:"https://www.youtube.com/watch?v=FR2GbcPWbzA" },
-      { lt:"V", sym:"✦",       grp:"media", label:"Exploring the Spiritual at Middlebury", note:"interview", url:"https://vimeo.com/273354833" },
-      { lt:"W", sym:"♇",       grp:"media", label:"FTX: The Musical", note:"Suno", url:"https://suno.com/playlist/b09d65c7-08f3-4145-ab4f-539e2fe98694" },
-      { lt:"X", sym:"Ψ",       grp:"context", label:"Lab for Mind, Brain, and Computation", note:"Dartmouth", url:"https://www.mindbraincomputationlab.com/" },
-      { lt:"Y", sym:"⚙︎", grp:"context", label:"Model Behavior Team", note:"OpenAI", url:"https://www.openai.com" },
-      { lt:"Z", sym:"☤",       grp:"context", label:"The Chernik Group", note:"associate", url:"https://chernikgroup.com/" },
-    ];
-
-    const KINSHIPS = [
-      ["N","M",1], ["N","F",1], ["N","Q",1], ["N","E",1],
-      ["E","F",1], ["E","X",1], ["E","G",0],
-      ["M","P",1], ["M","Y",1], ["M","W",0],
-      ["P","V",1], ["Q","F",0],
-      ["A","B",1], ["B","C",1], ["A","C",0], ["A","Y",1],
-      ["B","Z",1], ["B","O",1], ["O","T",1], ["D","C",1],
-      ["I","J",1], ["K","L",1], ["K","E",0], ["I","M",0],
-      ["TT","K",1], ["TT","E",0], ["TT","T",0],
-      ["S","T",1], ["U","W",1], ["U","V",0],
-      ["X","Y",1], ["Z","Y",0], ["H","N",1], ["H","X",1],
-    ];
-
-    const SVG = document.getElementById("fig");
-    const NS  = "http://www.w3.org/2000/svg";
-    const CX = 450, CY = 395, R = 290;
-    const GAP = 9;
-    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const el = (n, at) => {
-      const e = document.createElementNS(NS, n);
-      for (const k in at) e.setAttribute(k, at[k]);
-      return e;
-    };
-    const pol = (deg, r) => {
-      const a = deg * Math.PI / 180;
-      return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
-    };
-
-    // construction: dotted outer circle, centre cross, dotted radius
-    SVG.appendChild(el("circle", { cx: CX, cy: CY, r: R + 34, class: "constr" }));
-    SVG.appendChild(el("line", { x1: CX - 6, y1: CY, x2: CX + 6, y2: CY, class: "crossln" }));
-    SVG.appendChild(el("line", { x1: CX, y1: CY - 6, x2: CX, y2: CY + 6, class: "crossln" }));
-    const cee = el("text", { x: CX + 10, y: CY + 18, class: "cee" });
-    cee.textContent = "C";
-    SVG.appendChild(cee);
-
-    // everything that revolves (the mobile spin) rides on the wheel
-    const WHEEL = el("g", {});
-    const uprights = [];   // texts counter-rotated to stay upright
-
-    // place nodes: groups in arcs, in order
-    const groups = ["research","software","writing","design","media","context"];
-    const arcTotal = 360 - GAP * groups.length;
-    const perNode = arcTotal / ARTIFACTS.length;
-
-    let angle = -90;
-    const nodes = {};
-    groups.forEach(g => {
-      const start = angle;
-      ARTIFACTS.filter(a => a.grp === g).forEach(a => {
-        nodes[a.lt] = { ...a, deg: angle + perNode / 2 };
-        angle += perNode;
-      });
-      const mid = (start + angle) / 2;
-      // side labels anchor outward so they never reach back over the sigils
-      const c = Math.cos(mid * Math.PI / 180);
-      const anchor = c > 0.35 ? "start" : c < -0.35 ? "end" : "middle";
-      const [gx, gy] = pol(mid, anchor === "middle" ? R + 72 : R + 52);
-      const t = el("text", { x: gx, y: gy + 4, class: "grp", "text-anchor": anchor });
-      t.textContent = g;
-      WHEEL.appendChild(t);
-      uprights.push({ el: t, x: gx, y: gy + 4 });
-      angle += GAP;
-    });
-
-    const [ax, ay] = pol(nodes["A"].deg, R);
-    WHEEL.appendChild(el("line", { x1: CX, y1: CY, x2: ax, y2: ay, class: "constr" }));
-
-    const ring = el("circle", { cx: CX, cy: CY, r: R, class: "ring", pathLength: 1 });
-    WHEEL.appendChild(ring);
-
-    // chords
-    const adj = {};
-    const chordEls = [];
-    KINSHIPS.forEach(([a, b, primary]) => {
-      const na = nodes[a], nb = nodes[b];
-      const [x0, y0] = pol(na.deg, R), [x1, y1] = pol(nb.deg, R);
-      const mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
-      const span = Math.abs(na.deg - nb.deg);
-      const dAng = Math.min(span, 360 - span);
-      const k = 0.12 + 0.62 * Math.pow(dAng / 180, 1.25);
-      const cx = mx + (CX - mx) * k, cy = my + (CY - my) * k;
-      const p = el("path", {
-        d: `M ${x0} ${y0} Q ${cx} ${cy} ${x1} ${y1}`,
-        class: "chord" + (primary ? "" : " faintlink"),
-        pathLength: 1,
-      });
-      WHEEL.appendChild(p);
-      chordEls.push([p, a, b]);
-      (adj[a] = adj[a] || new Set()).add(b);
-      (adj[b] = adj[b] || new Set()).add(a);
-    });
-
-    // nodes + sigils (+ generous invisible hit areas)
-    const nodeEls = {}, sigEls = {};
-    Object.values(nodes).forEach(n => {
-      const [x, y] = pol(n.deg, R);
-      const dot = el("circle", { cx: x, cy: y, r: 3.6, class: "node" });
-      const [sx, sy] = pol(n.deg, R + 22);
-      const sig = el("text", { x: sx, y: sy + 7, class: "sig", "text-anchor": "middle" });
-      sig.textContent = n.sym;
-      WHEEL.appendChild(dot); WHEEL.appendChild(sig);
-      uprights.push({ el: sig, x: sx, y: sy + 7 });
-      // one big transparent target covering dot and sigil
-      const [hx, hy] = pol(n.deg, R + 11);
-      const hit = el("circle", { cx: hx, cy: hy, r: 17, class: "hit" });
-      hit.addEventListener("mouseenter", () => trace(n.lt));
-      hit.addEventListener("mouseleave", untrace);
-      hit.addEventListener("click", () => window.open(n.url, "_blank"));
-      WHEEL.appendChild(hit);
-      nodeEls[n.lt] = dot; sigEls[n.lt] = sig;
-    });
-    SVG.appendChild(WHEEL);
-
-    // the index, under the plate
-    const KEY = document.getElementById("key");
-    const keyEls = {};
-    ARTIFACTS.forEach(a => {
-      const d = document.createElement("div");
-      d.innerHTML = `<i class="lt">${a.sym}</i> <a href="${a.url}" target="_blank" rel="noreferrer">${a.label}</a> <span style="color:var(--muted)">— ${a.note}.</span>`;
-      d.addEventListener("mouseenter", () => trace(a.lt));
-      d.addEventListener("mouseleave", untrace);
-      KEY.appendChild(d);
-      keyEls[a.lt] = d;
-    });
-
-    /* ---------- tracing: the rainbow, held until touched ---------- */
-    const PLATE = document.getElementById("plate");
-    const groupColor = grp =>
-      getComputedStyle(document.documentElement).getPropertyValue("--g-" + grp).trim();
-
-    function setTraceState(color, litChord, litNode) {
-      finishInk();   // a trace always beats the opening animation
-      PLATE.style.setProperty("--hl", color);
-      KEY.style.setProperty("--hl", color);
-      PLATE.classList.add("tracing");
-      KEY.classList.add("tracing");
-      chordEls.forEach(([p, a, b]) => p.classList.toggle("lit", litChord(a, b)));
-      Object.keys(nodeEls).forEach(l => {
-        const on = litNode(l);
-        nodeEls[l].classList.toggle("lit", on);
-        sigEls[l].classList.toggle("lit", on);
-        keyEls[l].classList.toggle("lit", on);
-      });
-    }
-
-    function trace(lt) {
-      const kin = adj[lt] || new Set();
-      setTraceState(
-        groupColor(nodes[lt].grp),
-        (a, b) => a === lt || b === lt,
-        l => l === lt || kin.has(l)
-      );
-    }
-
-    function traceGroup(grp) {
-      const members = new Set(ARTIFACTS.filter(a => a.grp === grp).map(a => a.lt));
-      setTraceState(
-        groupColor(grp),
-        (a, b) => members.has(a) || members.has(b),
-        l => members.has(l)
-      );
-    }
-
-    function untrace() {
-      PLATE.classList.remove("tracing");
-      KEY.classList.remove("tracing");
-      document.querySelectorAll(".lit").forEach(e => e.classList.remove("lit"));
-    }
-
-    // the repo diagram in the margin traces the plate:
-    // files light their artifact; folders light their constellation
-    document.querySelectorAll(".treenav [data-lt], .treenav [data-grp]").forEach(t => {
-      const lt = t.getAttribute("data-lt");
-      const grp = lt ? nodes[lt].grp : t.getAttribute("data-grp");
-      t.addEventListener("mouseenter", () => {
-        lt ? trace(lt) : traceGroup(grp);
-        t.style.color = groupColor(grp);
-      });
-      t.addEventListener("mouseleave", () => {
-        untrace();
-        t.style.color = "";
-      });
-    });
-
-    /* ---------- the figure draws itself, as if by pen ---------- */
-    let inkDone = reduceMotion;
-    let inked = [];
-    if (reduceMotion) document.body.classList.add("illuminated");
-    function finishInk() {
-      if (inkDone) return;
-      inkDone = true;
-      document.body.classList.add("illuminated");
-      inked.forEach(e => {
-        e.style.strokeDasharray = ""; e.style.strokeDashoffset = "";
-        e.style.opacity = ""; e.style.transition = "";
-      });
-    }
-
-    if (!reduceMotion) {
-      const drawables = [[ring, 2.2, 0]];
-      const faders = [];
-      chordEls.forEach(([p], i) => {
-        if (p.classList.contains("faintlink")) faders.push(p);
-        else drawables.push([p, 1.1, 0.5 + i * 0.07]);
-      });
-      faders.forEach((e, i) => {
-        e.style.opacity = "0";
-        e.style.transition = `opacity .8s ease ${1.6 + i * 0.08}s`;
-      });
-      drawables.forEach(([e, dur, delay]) => {
-        e.style.strokeDasharray = "1";
-        e.style.strokeDashoffset = "1";
-        e.style.transition = `stroke-dashoffset ${dur}s ease ${delay}s`;
-      });
-      [...Object.values(nodeEls), ...Object.values(sigEls)].forEach((e, i) => {
-        e.style.opacity = "0";
-        e.style.transition = `opacity .6s ease ${1.2 + i * 0.02}s`;
-      });
-      inked = [...drawables.map(d => d[0]), ...faders,
-               ...Object.values(nodeEls), ...Object.values(sigEls)];
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        drawables.forEach(([e]) => { e.style.strokeDashoffset = "0"; });
-        faders.forEach(e => { e.style.opacity = "1"; });
-        [...Object.values(nodeEls), ...Object.values(sigEls)].forEach(e => { e.style.opacity = "1"; });
-        setTimeout(finishInk, 4500);   // hand control back once the ink is dry
-      }));
-    }
-
-    /* ============================================================
-       THE WHEEL — on a touch screen there is no hover, so the
-       plate spins. Drag it round; the artifact that clicks into
-       place at the pointer (three o'clock) lights, with its kin.
-       Desktop is untouched; add ?spin to the URL to try it there.
-    ============================================================ */
-    const spinMode = (matchMedia("(pointer: coarse)").matches &&
-                      matchMedia("(max-width: 920px)").matches) ||
-                     location.search.includes("spin");
-    if (spinMode) {
-      // the pointer at three o'clock
-      SVG.appendChild(el("path", {
-        d: `M ${CX + R + 36} ${CY} l 15 -9 v 18 z`,
-        class: "spin-arrow",
-      }));
-
-      const norm = d => ((d % 360) + 360) % 360;
-      let theta = 0, current = null, raf = null;
-
-      function setRotation(t) {
-        theta = t;
-        WHEEL.setAttribute("transform", `rotate(${t} ${CX} ${CY})`);
-        uprights.forEach(u =>
-          u.el.setAttribute("transform", `rotate(${-t} ${u.x} ${u.y})`));
-      }
-      function nearest() {
-        let best = null, bd = 1e9;
-        Object.values(nodes).forEach(n => {
-          const a = norm(n.deg + theta);
-          const d = Math.min(a, 360 - a);
-          if (d < bd) { bd = d; best = n; }
-        });
-        return best;
-      }
-      function highlight() {
-        const n = nearest();
-        if (n && n.lt !== current) { current = n.lt; trace(n.lt); }
-      }
-
-      const angleAt = ev => {
-        const r = SVG.getBoundingClientRect();
-        const x = r.left + r.width * (CX / 900);
-        const y = r.top + r.height * (CY / 810);
-        return Math.atan2(ev.clientY - y, ev.clientX - x) * 180 / Math.PI;
-      };
-
-      let dragging = false, lastA = 0, lastT = 0, vel = 0, moved = 0;
-      SVG.addEventListener("pointerdown", ev => {
-        dragging = true; moved = 0;
-        cancelAnimationFrame(raf);
-        lastA = angleAt(ev); lastT = ev.timeStamp; vel = 0;
-      });
-      SVG.addEventListener("pointermove", ev => {
-        if (!dragging) return;
-        const a = angleAt(ev);
-        let d = a - lastA;
-        if (d > 180) d -= 360; else if (d < -180) d += 360;
-        moved += Math.abs(d);
-        const dt = Math.max(ev.timeStamp - lastT, 1);
-        vel = 0.8 * vel + 0.2 * (d / dt);
-        setRotation(theta + d);
-        highlight();
-        lastA = a; lastT = ev.timeStamp;
-      });
-      // a real drag must not fire a node's link as the thumb lifts
-      SVG.addEventListener("click", ev => {
-        if (moved > 3) { ev.stopPropagation(); ev.preventDefault(); }
-      }, true);
-
-      function release() {
-        if (!dragging) return;
-        dragging = false;
-        if (reduceMotion) {
-          const n = nearest();
-          if (n) { setRotation(norm(-n.deg + 180) - 180); current = n.lt; trace(n.lt); }
-          return;
-        }
-        coast();
-      }
-      SVG.addEventListener("pointerup", release);
-      SVG.addEventListener("pointercancel", release);
-      SVG.addEventListener("pointerleave", release);
-
-      function coast() {
-        let prev = performance.now();
-        const step = now => {
-          const dt = now - prev; prev = now;
-          setRotation(theta + vel * dt);
-          vel *= Math.pow(0.994, dt);
-          highlight();
-          if (Math.abs(vel) > 0.02) raf = requestAnimationFrame(step);
-          else snap();
-        };
-        raf = requestAnimationFrame(step);
-      }
-      function snap() {
-        const n = nearest();
-        if (!n) return;
-        const d = norm(-n.deg - theta + 180) - 180;   // shortest way round
-        const from = theta, t0 = performance.now(), DUR = 260;
-        const step = now => {
-          const p = Math.min((now - t0) / DUR, 1);
-          const e = 1 - Math.pow(1 - p, 3);
-          setRotation(from + d * e);
-          if (p < 1) raf = requestAnimationFrame(step);
-          else { current = n.lt; trace(n.lt); }
-        };
-        raf = requestAnimationFrame(step);
-      }
-    }
-  </script>
 </body>
 </html>
