@@ -3,3 +3,10 @@
 _src/
 .env
 .DS_Store
+
+# /wc build inputs — plaintext page and the access code live here.
+# Only the encrypted wc/index.html may ever be committed.
+wc/index.src.html
+wc/build-protected.sh
+wc/gate-template.html
+wc/_gen/
