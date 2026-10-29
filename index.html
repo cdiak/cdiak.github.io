@@ -40,7 +40,6 @@
       --rule: #3b4149;
       --line: #5c646c;
       --link: #8ab4e8;
-      --visited: #b49ae0;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -54,7 +53,7 @@
       overflow: hidden;
     }
     a { color: var(--link); }
-    a:visited { color: var(--visited); }
+    a:visited { color: var(--link); }
 
     .page {
       height: 100%;
@@ -73,7 +72,7 @@
       align-items: center;
       justify-content: center;
     }
-    .grammar svg { width: 100%; height: 100%; }
+    .grammar svg { display: block; width: 100%; height: 100%; }
     .grammar text {
       font-family: "Anziano Pro", "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
     }
@@ -138,13 +137,13 @@
 
     <!-- ============ the portfolio, as a derivation ============ -->
     <section class="grammar" aria-label="Portfolio">
-      <svg viewBox="0 0 1165 666" role="img" aria-label="Intellectual biography arranged as a syntax tree">
+      <svg viewBox="0 0 1165 666" preserveAspectRatio="none" role="img" aria-label="Intellectual biography arranged as a syntax tree">
 
         <!-- root: the signature, fading to the name on hover -->
         <g class="rootmark">
-          <image href="signature.png" x="407" y="0" width="326" height="106"
+          <image href="signature.png" x="407" y="20" width="326" height="106"
                  preserveAspectRatio="xMidYMid meet"/>
-          <text class="root" x="570" y="58" text-anchor="middle">Christopher James Diak</text>
+          <text class="root" x="570" y="118" text-anchor="middle">Christopher James Diak</text>
         </g>
         <line x1="570" y1="140" x2="286" y2="197"/>
         <line x1="570" y1="140" x2="854" y2="197"/>
@@ -266,22 +265,36 @@
     <section class="bio">
 
       <p>
-        I'm a researcher, tinkerer, and writer working in the field of model behavior––a nascent
-        discipline concerned with predicting, shaping, and designing the behavior of AI systems.
-        I'm particularly interested in reasoning, working memory, and model epistemics.
+        I'm a researcher, tinkerer, and field strategist working at
+        <a href="https://atlasignota.org/" target="_blank" rel="noreferrer">Atlas Ignota</a>
+        and the
+        <a href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">Lab for Mind, Brain, and Computation at Dartmouth College</a>.
+        A cognitive scientist by trade, my work focuses on cognitive security at Atlas Ignota
+        and cognitive architecture at Dartmouth. In essence, I study the structure of the mind,
+        the structure of thought, and the ways our technologies can be used to restructure thought.
       </p>
 
       <p>
-        Currently, I'm working on behaviors at
-        <a href="https://www.mindbraincomputationlab.com/" target="_blank" rel="noreferrer">Dartmouth</a>
-        and
-        <a href="https://x.ai/" target="_blank" rel="noreferrer">SpaceXAI</a>. Previously, I tutored human beings with
+        Previously, I restructured the thoughts of human beings at
         <a href="https://chernikgroup.com/" target="_blank" rel="noreferrer">The Chernik Group</a>
-        and large language models with
-        <a href="https://www.openai.com/" target="_blank" rel="noreferrer">OpenAI</a>
-        after spending five years working on the roles of meaning, purpose, and spirituality
-        in the workplace at Harvard Business School. I began my career in Professor Clay Christensen's
-        <a href="https://x.com/HBS_Forum" target="_blank" rel="noreferrer">Forum for Growth &amp; Innovation</a>.
+        and language models at
+        <a href="https://x.ai/" target="_blank" rel="noreferrer">xAI</a> and
+        <a href="https://www.openai.com/" target="_blank" rel="noreferrer">OpenAI</a>.
+        Prior to that, I spent five years at Harvard Business School studying organizational behavior,
+        management theory, and business ethics.
+      </p>
+
+      <p>
+        I began my career in Professor Clay Christensen's
+        <a href="https://x.com/HBS_Forum" target="_blank" rel="noreferrer">Forum for Growth &amp; Innovation</a>
+        and have contributed to research projects at
+        <a href="https://rapoport.hms.harvard.edu/" target="_blank" rel="noreferrer">Harvard Medical School</a>, the
+        <a href="https://neuroaesthetics.med.upenn.edu/chatlab.html" target="_blank" rel="noreferrer">Center for Cognitive Neuroscience</a> at the University of Pennsylvania, the
+        <a href="https://www.joshua-greene.net/" target="_blank" rel="noreferrer">Joshua Greene Lab</a>, the
+        <a href="https://www.frontiersin.org/journals/sustainable-food-systems/articles/10.3389/fsufs.2022.983398/full" target="_blank" rel="noreferrer">Radcliffe Institute for Advanced Study</a>,
+        <a href="https://cyber.harvard.edu/" target="_blank" rel="noreferrer">Berkman Klein Center for Internet and Society</a>,
+        and the
+        <a href="https://ethics.harvard.edu/JHD-impact-initiative" target="_blank" rel="noreferrer">Edmond and Lily Safra Center for Ethics</a> at Harvard University.
       </p>
 
       <p>
@@ -312,5 +325,23 @@
     </footer>
 
   </div>
+  <script>
+    // Spread branches across the available width without widening the lettering.
+    const tree = document.querySelector('.grammar > svg');
+    const labels = [...tree.querySelectorAll('text, image')].map(element => ({
+      element,
+      anchor: Number(element.getAttribute('x')) +
+        (element.tagName === 'image' ? Number(element.getAttribute('width')) / 2 : 0)
+    }));
+    new ResizeObserver(() => {
+      const { width, height } = tree.getBoundingClientRect();
+      if (!width || !height) return;
+      const correction = (height / 666) / (width / 1165);
+      for (const { element, anchor } of labels) {
+        element.setAttribute('transform',
+          `translate(${anchor} 0) scale(${correction} 1) translate(${-anchor} 0)`);
+      }
+    }).observe(tree);
+  </script>
 </body>
 </html>
