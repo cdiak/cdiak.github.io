@@ -1,0 +1,265 @@
+WEBVTT
+
+00:00:00.900 --> 00:00:04.359
+Is recursive self-improvement a computational process?
+
+00:00:04.858 --> 00:00:14.798
+A machine redesigns itself. The new machine does the same. We can draw the arrow from each to the next. The question is which way it points.
+
+00:00:16.598 --> 00:00:20.540
+Start small, with an old procedure for the square root of two.
+
+00:00:21.040 --> 00:00:24.755
+Treat your guess as one side of a rectangle of area two.
+
+00:00:25.255 --> 00:00:28.979
+Average the two sides, and divide the area by the result.
+
+00:00:30.179 --> 00:00:30.780
+Again.
+
+00:00:33.479 --> 00:00:37.449
+And again. The rectangle is now very nearly a square.
+
+00:00:38.549 --> 00:00:44.250
+But what entitles us to call each guess better than the last? The arithmetic does not say.
+
+00:00:44.750 --> 00:00:55.406
+Here, a proof does. Each new guess must land between the root and the old one. The arithmetic takes the step. The proof says which way is forward.
+
+00:00:56.806 --> 00:01:01.709
+Now replace the instruction to average with an instruction to build a better machine.
+
+00:01:02.209 --> 00:01:07.409
+The sides of the rectangle told us which guess was better. What does that work here?
+
+00:01:09.409 --> 00:01:14.235
+First, a distinction from Structure and Interpretation of Computer Programs.
+
+00:01:14.735 --> 00:01:20.037
+Two procedures for adding three and four. Each is written with a call to itself.
+
+00:01:21.087 --> 00:01:24.812
+Run the first. Increments pile up, waiting.
+
+00:01:25.312 --> 00:01:27.479
+Then it unwinds, to seven.
+
+00:01:29.712 --> 00:01:35.952
+Run the second. It moves one unit across at each call, and nothing is left waiting.
+
+00:01:36.452 --> 00:01:39.908
+Stop it anywhere, and two numbers are enough to resume.
+
+00:01:40.408 --> 00:01:44.469
+Both procedures are recursive. Only the first process is.
+
+00:01:46.069 --> 00:01:50.791
+The difference can be expensive. This procedure fits on an index card.
+
+00:01:51.291 --> 00:01:59.524
+Watch the process it generates. Dark circles are new questions. Pale ones are the same questions, computed again.
+
+00:02:00.024 --> 00:02:08.179
+Forty-one calls, for eight distinct questions. The size of a procedure tells us little about the time its process will take.
+
+00:02:09.829 --> 00:02:16.244
+Now, a machine that revises itself. What must you save, to stop it and start it again?
+
+00:02:16.744 --> 00:02:22.711
+The model, the editor, the selection rule, the data. Call the whole package p.
+
+00:02:23.211 --> 00:02:30.738
+One round of revision is a single step, from one package to the next. The editor is part of what it rewrites.
+
+00:02:31.238 --> 00:02:33.221
+Run it again, and again.
+
+00:02:33.721 --> 00:02:37.095
+The whole run, however long, is one program.
+
+00:02:37.595 --> 00:02:40.349
+Recursive: the product goes back in.
+
+00:02:40.849 --> 00:02:43.334
+Self: what the editor edits.
+
+00:02:43.834 --> 00:02:51.517
+Improvement needs a comparison, and the step contains none. The loop can run before anyone says what better means.
+
+00:02:53.367 --> 00:02:58.866
+Can a machine improve itself, and prove it? Under a fixed standard, yes.
+
+00:02:59.366 --> 00:03:05.477
+Pay it the integer it returns. The first machine erases its input, and returns zero.
+
+00:03:06.377 --> 00:03:11.657
+The editor keeps that program, and appends one instruction: add one.
+
+00:03:12.157 --> 00:03:14.020
+The new machine returns one.
+
+00:03:14.520 --> 00:03:19.847
+Let the editor work on its own product. Two. Three. Four.
+
+00:03:20.777 --> 00:03:25.479
+On every input, the machine at round n returns exactly n.
+
+00:03:25.979 --> 00:03:30.955
+So each successor earns strictly more than the last. That is a theorem.
+
+00:03:31.905 --> 00:03:35.033
+The proof can travel on the same disk as the editor.
+
+00:03:38.405 --> 00:03:40.662
+Our editor's machine came with a proof.
+
+00:03:41.162 --> 00:03:46.508
+Keep the standard exactly as it is. Now a stranger hands in a program.
+
+00:03:47.008 --> 00:03:52.284
+Will it return more than six on every input? Same question, different source.
+
+00:03:52.784 --> 00:03:59.527
+The inspector may read it, run it, or search for a proof. It must finish, with yes or no.
+
+00:04:01.327 --> 00:04:07.241
+No such inspector exists. Take any inspector, and write a program with it in hand.
+
+00:04:07.741 --> 00:04:12.378
+The program runs the inspector on its own text, and then does the opposite.
+
+00:04:13.228 --> 00:04:19.116
+If the verdict is yes, it behaves like a program that fails. The yes was a mistake.
+
+00:04:20.366 --> 00:04:26.198
+If the verdict is no, it behaves like a program that passes. The no was a mistake.
+
+00:04:26.697 --> 00:04:31.177
+Any inspector that always answers is wrong about some program.
+
+00:04:32.827 --> 00:04:39.947
+So be more generous. Let the inspector publish a verdict every morning, and take it back whenever it likes.
+
+00:04:40.897 --> 00:04:46.166
+It need only settle, some day, on the right answer. This program defeats it.
+
+00:04:46.666 --> 00:04:53.899
+On input x, it waits for a no, on day x or later. Then it answers as a good program would.
+
+00:04:54.649 --> 00:04:57.060
+Suppose the verdicts settle on yes.
+
+00:04:57.561 --> 00:05:00.841
+Input zero finds a no at once, and answers.
+
+00:05:01.341 --> 00:05:04.649
+Inputs one and two find the no at day two.
+
+00:05:05.149 --> 00:05:11.786
+But input three starts after the last no. It reads yes, and yes, and never stops.
+
+00:05:12.286 --> 00:05:14.246
+So does every later input.
+
+00:05:14.746 --> 00:05:19.670
+Finitely many answers cannot meet the standard. So yes is wrong.
+
+00:05:20.720 --> 00:05:22.854
+Now suppose they settle on no.
+
+00:05:23.354 --> 00:05:27.292
+Then every input finds one, and every input is answered.
+
+00:05:27.792 --> 00:05:32.832
+The program behaves exactly like the good one. So no is wrong.
+
+00:05:33.782 --> 00:05:37.011
+And never settling breaks the inspector's one promise.
+
+00:05:38.511 --> 00:05:45.468
+One standard, two results. Along the editor's path, every successor passes, with proof.
+
+00:05:45.968 --> 00:05:51.168
+Across all programs, no computable inspector can settle the question.
+
+00:05:51.668 --> 00:05:57.264
+Not by deciding. Not by confirming, or refuting. Not even in the limit.
+
+00:05:57.764 --> 00:06:00.939
+The work is done by one word: all.
+
+00:06:02.789 --> 00:06:08.333
+Could we avoid choosing a standard, and ask for a successor at least as good on every task?
+
+00:06:08.833 --> 00:06:15.580
+One task pays a point for agreeing with the incumbent. Any successor that differs loses a point somewhere.
+
+00:06:16.080 --> 00:06:19.887
+So at least as good on everything means the same behavior.
+
+00:06:21.537 --> 00:06:25.482
+Better, then, needs weights. Here the successor leads.
+
+00:06:25.982 --> 00:06:29.604
+Add one task with enough weight, and the ranking reverses.
+
+00:06:30.104 --> 00:06:33.520
+Composing the suite decides what the competition is for.
+
+00:06:35.370 --> 00:06:41.526
+One more machine. It certifies true claims that a program never halts on its own text.
+
+00:06:42.026 --> 00:06:47.859
+A sound certifier always misses one true claim: the claim about itself.
+
+00:06:48.358 --> 00:06:51.083
+So a successor can add it, automatically.
+
+00:06:51.583 --> 00:06:55.110
+Round after round, the books gain a true certificate.
+
+00:06:56.783 --> 00:06:59.821
+Now gather every round into one certifier.
+
+00:07:00.321 --> 00:07:08.257
+It misses its own claim too. Strict improvement, forever, and one truth the whole path never reaches.
+
+00:07:09.357 --> 00:07:17.277
+Seen from above, the same instruction comes round. Seen from the side, it is a spiral, and it rises.
+
+00:07:17.777 --> 00:07:21.212
+Here, we can name the coordinate along which it rises.
+
+00:07:23.112 --> 00:07:27.344
+A laboratory reports a score that rises, round after round.
+
+00:07:27.844 --> 00:07:32.570
+Four histories fit that curve. A cheaper way to the same performance.
+
+00:07:33.070 --> 00:07:34.604
+A test that was learned.
+
+00:07:35.104 --> 00:07:37.466
+An examiner that changed with the candidate.
+
+00:07:37.966 --> 00:07:40.606
+Or evidence that came in from outside.
+
+00:07:42.356 --> 00:07:48.127
+To test the word recursive, compare an early editor with a late one, on equal terms.
+
+00:07:48.626 --> 00:07:52.377
+Does the later editor buy more improvement for the same search?
+
+00:07:53.997 --> 00:07:55.528
+What will be held fixed?
+
+00:07:56.028 --> 00:07:58.368
+What should a later generation do better?
+
+00:07:58.868 --> 00:08:01.270
+What finding would show it had done worse?
+
+00:08:01.770 --> 00:08:07.686
+Until then, we know how to set the machine going. We still have the surveyor's question to answer.
